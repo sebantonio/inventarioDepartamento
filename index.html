@@ -246,11 +246,12 @@ select:focus,.fi:focus{border-color:var(--accent)}
 .vbtn{background:none;border:none;padding:5px 10px;border-radius:6px;color:var(--muted);cursor:pointer;font-size:14px;transition:all .15s}
 .vbtn.on{background:var(--white);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
-.tw{width:100%;background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow-x:auto;box-shadow:var(--sh);scrollbar-width:thin}
-.tw::-webkit-scrollbar{height:8px}
-.tw::-webkit-scrollbar-track{background:var(--surface2);border-radius:4px}
-.tw::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-table{width:max-content;min-width:1100px;border-collapse:collapse}
+.tw{width:100%;background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.tw-scroll{overflow-x:auto;width:100%;scrollbar-width:thin}
+.tw-scroll::-webkit-scrollbar{height:8px}
+.tw-scroll::-webkit-scrollbar-track{background:var(--surface2)}
+.tw-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+table{min-width:1100px;width:max-content;border-collapse:collapse}
 thead{background:var(--surface2)}
 th{padding:11px 13px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);text-align:left;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:color .15s}
 th:hover{color:var(--text)}
@@ -1135,7 +1136,7 @@ function renderInv(){
 function th2(k,l){const i=k===sk?(sa?'▲':'▼'):'↕';return`<th onclick="sort('${k}')" class="${k===sk?'srt':''}">${l} <span style="font-size:9px;opacity:.6">${i}</span></th>`}
 
 function rTable(data,mc){
-  mc.innerHTML=`<div class="tw"><table>
+  mc.innerHTML=`<div class="tw"><div class="tw-scroll"><table>
     <thead><tr>${th2('ref','Ref.')}${th2('aula','Aula')}${th2('item','Ítem')}${th2('qty','Cant.')}<th>Mín.</th>${th2('cat','Categoría')}${th2('loc','Ubicación')}${th2('est','Estado')}${th2('util','Utilidad')}<th>Acc.</th></tr></thead>
     <tbody>${data.map(x=>{
       const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros'],ec=ESTC[x.est]||'#6b7280';
@@ -1158,7 +1159,7 @@ function rTable(data,mc){
         </div></td>
       </tr>`;
     }).join('')}</tbody>
-  </table></div>`;
+  </table></div></div>`;
 }
 
 function rCards(data,mc){
