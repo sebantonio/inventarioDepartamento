@@ -8,12 +8,28 @@ const SHEET_USUARIOS   = 'Usuarios';
 const SHEET_PROFESORES = 'Profesores';
 const SHEET_PRESTAMOS  = 'Prestamos';
 const SHEET_AULAS      = 'Aulas';
+const SHEET_CATS       = 'Categorias';
 
 const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','obs'];
 const HEADERS_USR   = ['usuario','password','nombre','rol'];
 const HEADERS_PROF  = ['id','nombre','departamento','email'];
 const HEADERS_PRES  = ['id','itemId','itemNombre','cantidad','aulaOrigen','aulaDestino','profesorId','profesorNombre','gestionadoPor','fechaPrestamo','fechaPrevista','fechaDevolucion','cantidadDevuelta','estado','obs'];
 const HEADERS_AULAS = ['id','name','icon','desc','th','orden'];
+const HEADERS_CATS  = ['name','c','bg','i','orden'];
+
+const CATS_DEFAULT = [
+  ['Componentes electrónicos','#2563eb','#eff6ff','⚡',1],
+  ['Herramientas','#d97706','#fffbeb','🔨',2],
+  ['Equipos de medida','#0891b2','#ecfeff','📊',3],
+  ['Consumibles','#7c3aed','#f5f3ff','📦',4],
+  ['Fibra óptica','#059669','#ecfdf5','💡',5],
+  ['Telecomunicaciones','#ea580c','#fff7ed','📡',6],
+  ['Material eléctrico','#db2777','#fdf2f8','🔌',7],
+  ['Redes','#0e7490','#f0fdfa','🌐',8],
+  ['Domótica','#7e22ce','#faf5ff','🏠',9],
+  ['Ordenadores','#1d4ed8','#eff6ff','💻',10],
+  ['Otros','#6b7280','#f9fafb','🔧',11],
+];
 
 const AULAS_DEFAULT = [
   ['aula35','Aula 35','🔧','Mantenimiento Electrónico','th-blue',1],
@@ -99,14 +115,21 @@ function doGet(e) {
     const profesores = rowsToObjects(ss.getSheetByName(SHEET_PROFESORES), HEADERS_PROF);
     const prestamos  = rowsToObjects(ss.getSheetByName(SHEET_PRESTAMOS), HEADERS_PRES);
     let aulas        = rowsToObjects(ss.getSheetByName(SHEET_AULAS), HEADERS_AULAS);
-    
+    let cats         = rowsToObjects(ss.getSheetByName(SHEET_CATS), HEADERS_CATS);
+
     // Si no hay aulas configuradas, devolver las por defecto
     if (!aulas.length) {
       aulas = AULAS_DEFAULT.map(a => ({id:a[0],name:a[1],icon:a[2],desc:a[3],th:a[4],orden:a[5]}));
     }
     aulas.sort((a,b)=>(Number(a.orden)||0)-(Number(b.orden)||0));
 
-    return json({ ok: true, items, profesores, prestamos, aulas, user });
+    // Si no hay categorías configuradas, devolver las por defecto
+    if (!cats.length) {
+      cats = CATS_DEFAULT.map(c => ({name:c[0],c:c[1],bg:c[2],i:c[3],orden:c[4]}));
+    }
+    cats.sort((a,b)=>(Number(a.orden)||0)-(Number(b.orden)||0));
+
+    return json({ ok: true, items, profesores, prestamos, aulas, cats, user });
   } catch (err) {
     return json({ ok: false, error: err.toString() });
   }
@@ -207,6 +230,20 @@ function doPost(e) {
         sheet.appendRow([a.id, a.name, a.icon, a.desc, a.th, i+1]);
       });
       return json({ ok: true, aulas });
+    }
+
+    // ─── CATEGORÍAS (sync completo) ─────────────────────────────
+    if (action === 'catsSync') {
+      const sheet = ss.getSheetByName(SHEET_CATS) || ss.insertSheet(SHEET_CATS);
+      const cats = body.cats || [];
+      sheet.clear();
+      sheet.appendRow(HEADERS_CATS);
+      sheet.getRange(1, 1, 1, HEADERS_CATS.length).setFontWeight('bold').setBackground('#fef9c3');
+      sheet.setFrozenRows(1);
+      cats.forEach(c => {
+        sheet.appendRow([c.name, c.c, c.bg, c.i, c.orden]);
+      });
+      return json({ ok: true, cats });
     }
 
     // ─── PRESTAMOS ──────────────────────────────────────────────

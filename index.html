@@ -355,6 +355,20 @@ textarea.fi-w{resize:vertical;min-height:60px}
 .add-aula-btn{background:var(--accent-l);border:1px dashed var(--accent);color:var(--accent);padding:9px;border-radius:9px;font-weight:600;cursor:pointer;width:100%;font-family:var(--font);font-size:13px;transition:all .15s}
 .add-aula-btn:hover{background:var(--accent);color:#fff}
 
+/* CATS LIST IN MODAL */
+.cats-list{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;margin-bottom:14px}
+.cat-row{display:flex;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 10px}
+.cat-row .icon-pick{width:42px;height:36px;background:var(--white);border:1px solid var(--border);border-radius:7px;font-size:18px;text-align:center;outline:none}
+.cat-row .name-input{flex:2;min-width:120px}
+.cat-row input.fi-w{padding:7px 10px;font-size:12px}
+.cat-row .color-pick{width:40px;height:30px;padding:2px 3px;border-radius:7px;border:1px solid var(--border);cursor:pointer;outline:none;background:var(--white)}
+.cat-row .color-col{display:flex;flex-direction:column;gap:2px;align-items:center}
+.cat-row .color-col span{font-size:9px;color:var(--muted);line-height:1}
+.cat-row .del-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:6px 8px;border-radius:6px;transition:background .15s}
+.cat-row .del-btn:hover{background:var(--red-l)}
+.add-cat-btn{background:var(--accent-l);border:1px dashed var(--accent);color:var(--accent);padding:9px;border-radius:9px;font-weight:600;cursor:pointer;width:100%;font-family:var(--font);font-size:13px;transition:all .15s}
+.add-cat-btn:hover{background:var(--accent);color:#fff}
+
 .cbox{background:var(--white);border-radius:16px;border:1px solid var(--border);padding:26px;width:min(360px,100%);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.18);transform:translateY(16px) scale(.98);transition:transform .25s cubic-bezier(.34,1.4,.64,1)}
 .mbg.open .cbox{transform:none}
 
@@ -440,7 +454,12 @@ textarea.fi-w{resize:vertical;min-height:60px}
       <button class="mini-btn" onclick="openAulasModal()">⚙️ Gestionar aulas</button>
     </div>
     <div class="choice-grid" id="gAulas"></div>
-    <div style="height:32px"></div>
+    <div style="height:20px"></div>
+    <div class="sec-label">
+      Categorías
+      <button class="mini-btn" onclick="openCatsModal()">⚙️ Gestionar categorías</button>
+    </div>
+    <div style="height:20px"></div>
     <div class="sec-label">Por ciclo formativo</div>
     <div class="choice-grid" id="gCiclos"></div>
   </div>
@@ -492,7 +511,10 @@ textarea.fi-w{resize:vertical;min-height:60px}
     <div class="stats-strip" id="sStats"></div>
     <div class="toolbar">
       <div class="sbox"><span class="si">🔍</span><input type="text" id="srch" placeholder="Buscar ítem, referencia..." oninput="renderInv()"></div>
-      <select id="fCat" onchange="renderInv()"><option value="">Todas las categorías</option></select>
+      <div style="display:flex;gap:4px;align-items:center">
+        <select id="fCat" onchange="renderInv()"><option value="">Todas las categorías</option></select>
+        <button class="mini-btn" onclick="openCatsModal()" title="Gestionar categorías">⚙️</button>
+      </div>
       <select id="fEst" onchange="renderInv()"><option value="">Todos los estados</option><option>Bueno</option><option>Deteriorado</option><option>Avería</option><option>Baja</option></select>
       <div class="vtog">
         <button class="vbtn on" id="vT" onclick="sv('table')" title="Tabla">☰</button>
@@ -518,13 +540,7 @@ textarea.fi-w{resize:vertical;min-height:60px}
       <div><label class="fl">Cantidad</label><input class="fi-w" id="f_qty" type="number" min="0" value="1"></div>
       <div><label class="fl">Stock mínimo</label><input class="fi-w" id="f_min" type="number" min="0" value="5"></div>
       <div><label class="fl">Categoría</label>
-        <select class="fi-w" id="f_cat">
-          <option>Componentes electrónicos</option><option>Herramientas</option>
-          <option>Equipos de medida</option><option>Consumibles</option>
-          <option>Fibra óptica</option><option>Telecomunicaciones</option>
-          <option>Material eléctrico</option><option>Redes</option>
-          <option>Domótica</option><option>Ordenadores</option><option>Otros</option>
-        </select>
+        <select class="fi-w" id="f_cat"></select>
       </div>
       <div><label class="fl">Ciclo</label>
         <select class="fi-w" id="f_ciclo" onchange="updateModSelect()">
@@ -704,6 +720,30 @@ textarea.fi-w{resize:vertical;min-height:60px}
       <div class="mf-right">
         <button class="btn" onclick="closeAulasModal()">Cancelar</button>
         <button class="btn btn-p" onclick="saveAulas()">💾 Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GESTIÓN DE CATEGORÍAS -->
+<div class="mbg" id="mCats" onclick="if(event.target===this)closeCatsModal()">
+  <div class="modal">
+    <div class="mh"><div class="mt">Gestionar categorías</div><button class="mx" onclick="closeCatsModal()">✕</button></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Añade, edita o elimina categorías. El icono, nombre y colores son personalizables.</p>
+    <div style="display:flex;gap:8px;font-size:11px;color:var(--muted);padding:0 2px;margin-bottom:6px">
+      <div style="width:42px;text-align:center">Icono</div>
+      <div style="flex:2">Nombre</div>
+      <div style="width:52px;text-align:center">Texto</div>
+      <div style="width:52px;text-align:center">Fondo</div>
+      <div style="width:32px"></div>
+    </div>
+    <div class="cats-list" id="catsList"></div>
+    <button class="add-cat-btn" onclick="addCatRow()">＋ Añadir categoría</button>
+    <div class="mf" style="margin-top:18px">
+      <div></div>
+      <div class="mf-right">
+        <button class="btn" onclick="closeCatsModal()">Cancelar</button>
+        <button class="btn btn-p" onclick="saveCats()">💾 Guardar cambios</button>
       </div>
     </div>
   </div>
@@ -909,7 +949,7 @@ function findModulo(modId){
 // ═════════════════════════════════════════════════════════
 // CATEGORÍAS Y ESTADOS
 // ═════════════════════════════════════════════════════════
-const CATS={
+const CATS_DEFAULT={
   'Componentes electrónicos':{c:'#2563eb',bg:'#eff6ff',i:'⚡'},
   'Herramientas':            {c:'#d97706',bg:'#fffbeb',i:'🔨'},
   'Equipos de medida':       {c:'#0891b2',bg:'#ecfeff',i:'📊'},
@@ -922,6 +962,7 @@ const CATS={
   'Ordenadores':             {c:'#1d4ed8',bg:'#eff6ff',i:'💻'},
   'Otros':                   {c:'#6b7280',bg:'#f9fafb',i:'🔧'},
 };
+let CATS = Object.assign({}, CATS_DEFAULT);
 const ESTC={'Bueno':'#059669','Deteriorado':'#d97706','Avería':'#dc2626','Baja':'#9ca3af'};
 
 // ═════════════════════════════════════════════════════════
@@ -1073,6 +1114,7 @@ async function loadData(){
     profesores = res.profesores || [];
     prestamos = res.prestamos || [];
     if(res.aulas && res.aulas.length) AULAS = res.aulas;
+    if(res.cats && res.cats.length) CATS = Object.fromEntries(res.cats.sort((a,b)=>a.orden-b.orden).map(c=>[c.name,{c:c.c,bg:c.bg,i:c.i}]));
     setConn('ok',`${items.length} ítems · sincronizado`);
     document.getElementById('btnN').style.display='flex';
     document.getElementById('btnPres').style.display='flex';
@@ -1260,7 +1302,7 @@ function rTable(data,mc){
   mc.innerHTML=`<div class="tw"><div class="tw-scroll"><table>
     <thead><tr>${th2('ref','Ref.')}${th2('aula','Aula')}${th2('item','Ítem')}${th2('qty','Cant.')}<th>Mín.</th>${th2('cat','Categoría')}${th2('loc','Ubicación')}${th2('est','Estado')}${th2('util','Utilidad')}<th>Acc.</th></tr></thead>
     <tbody>${data.map(x=>{
-      const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros'],ec=ESTC[x.est]||'#6b7280';
+      const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280';
       return`<tr>
         <td><span class="rbadge">${x.ref||'—'}</span></td>
         <td style="font-size:12px;color:var(--muted)">${AULAS.find(a=>a.id===x.aula)?.name||x.aula}</td>
@@ -1285,7 +1327,7 @@ function rTable(data,mc){
 
 function rCards(data,mc){
   mc.innerHTML=`<div class="cgrid">${data.map(x=>{
-    const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros'],ec=ESTC[x.est]||'#6b7280';
+    const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280';
     return`<div class="icard${low?' low':''}">
       <div class="ch">
         <div><div class="cname">${x.item}</div><div class="cref">${x.ref||''}</div></div>
@@ -1322,6 +1364,7 @@ function sort(k){if(sk===k)sa=!sa;else{sk=k;sa=true}renderInv()}
 function fillModalSelects(){
   document.getElementById('f_aula').innerHTML=AULAS.map(a=>`<option value="${a.id}">${a.name} — ${a.desc}</option>`).join('');
   document.getElementById('f_ciclo').innerHTML='<option value="">Sin asignar</option>'+CICLOS.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+  document.getElementById('f_cat').innerHTML=Object.keys(CATS).map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
 function updateModSelect(){
@@ -1341,7 +1384,7 @@ function openModal(id=null){
   document.getElementById('f_item').value=m?.item||'';
   document.getElementById('f_qty').value=m?.qty??1;
   document.getElementById('f_min').value=m?.min??5;
-  document.getElementById('f_cat').value=m?.cat||'Componentes electrónicos';
+  document.getElementById('f_cat').value=m?.cat||Object.keys(CATS)[0]||'Componentes electrónicos';
   // ciclo y módulo
   const itemCiclo = m?.mod ? m.mod.split('__')[0] : (cf?.type==='mod' ? cf.ciclo.id : '');
   document.getElementById('f_ciclo').value = itemCiclo;
@@ -1448,6 +1491,69 @@ async function saveAulas(){
     closeAulasModal();
     renderHome();
     toast('Aulas guardadas y sincronizadas','ok');
+  } catch(err) {
+    toast('Error al sincronizar: '+err.message,'err');
+  }
+}
+
+// ═════════════════════════════════════════════════════════
+// MODAL GESTIÓN DE CATEGORÍAS
+// ═════════════════════════════════════════════════════════
+let catsEditing = [];
+
+function openCatsModal(){
+  catsEditing = Object.entries(CATS).map(([name,v])=>({name, c:v.c, bg:v.bg, i:v.i}));
+  renderCatsList();
+  document.getElementById('mCats').classList.add('open');
+}
+function closeCatsModal(){document.getElementById('mCats').classList.remove('open')}
+
+function renderCatsList(){
+  document.getElementById('catsList').innerHTML = catsEditing.map((cat,i)=>`
+    <div class="cat-row">
+      <input class="icon-pick" value="${cat.i}" onchange="catsEditing[${i}].i=this.value" maxlength="2" title="Icono emoji">
+      <input class="fi-w name-input" value="${cat.name.replace(/"/g,'&quot;')}" onchange="catsEditing[${i}].name=this.value" placeholder="Nombre categoría">
+      <div class="color-col">
+        <input type="color" class="color-pick" value="${cat.c}" onchange="catsEditing[${i}].c=this.value" title="Color del texto">
+        <span>texto</span>
+      </div>
+      <div class="color-col">
+        <input type="color" class="color-pick" value="${cat.bg}" onchange="catsEditing[${i}].bg=this.value" title="Color de fondo">
+        <span>fondo</span>
+      </div>
+      <button class="del-btn" onclick="removeCatRow(${i})" title="Eliminar">🗑</button>
+    </div>
+  `).join('');
+}
+
+function addCatRow(){
+  catsEditing.push({name:'Nueva categoría', i:'🏷️', c:'#6b7280', bg:'#f9fafb'});
+  renderCatsList();
+}
+
+function removeCatRow(idx){
+  const cat = catsEditing[idx];
+  const usados = items.filter(x=>x.cat===cat.name).length;
+  if(usados > 0){
+    if(!confirm(`Esta categoría tiene ${usados} ítem(s) asignados. Si la eliminas, esos ítems conservarán el nombre de categoría anterior. ¿Continuar?`)) return;
+  }
+  catsEditing.splice(idx,1);
+  renderCatsList();
+}
+
+async function saveCats(){
+  for(const cat of catsEditing){
+    if(!cat.name.trim()){toast('Hay categorías sin nombre','err');return}
+  }
+  const names = catsEditing.map(c=>c.name.trim());
+  if(new Set(names).size !== names.length){toast('Hay nombres de categoría duplicados','err');return}
+  const payload = catsEditing.map((c,i)=>({name:c.name.trim(), c:c.c, bg:c.bg, i:c.i, orden:i+1}));
+  try {
+    const res = await apiPost({action:'catsSync', cats:payload});
+    if(!res.ok) throw new Error(res.error);
+    CATS = Object.fromEntries(catsEditing.map(c=>[c.name.trim(), {c:c.c, bg:c.bg, i:c.i}]));
+    closeCatsModal();
+    toast('Categorías guardadas y sincronizadas','ok');
   } catch(err) {
     toast('Error al sincronizar: '+err.message,'err');
   }
@@ -1868,7 +1974,7 @@ const IMP_FIELDS = [
 ];
 const IMP_REQUIRED = ['item'];
 const ESTADOS_VALIDOS = ['Bueno','Deteriorado','Avería','Baja'];
-const CATEGORIAS_VALIDAS = Object.keys(CATS);
+const CATEGORIAS_VALIDAS = () => Object.keys(CATS);
 
 function openImportModal(){
   if(!SESSION){toast('Inicia sesión primero','err');return}
@@ -2030,7 +2136,7 @@ function impRenderPreview(){
         item.est = match || (val ? 'Bueno' : '');
       } else if(f.k === 'cat'){
         const nv = normalize(val);
-        const match = CATEGORIAS_VALIDAS.find(c => normalize(c) === nv);
+        const match = CATEGORIAS_VALIDAS().find(c => normalize(c) === nv);
         item.cat = match || (val || 'Otros');
       } else if(f.k === 'fecha'){
         // Aceptar yyyy-mm-dd o dd/mm/yyyy
