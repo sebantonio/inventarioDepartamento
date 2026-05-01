@@ -1,0 +1,280 @@
+// ═══════════════════════════════════════════════════════════════
+// INVENTARIO TALLER FP — Backend completo
+// Login + Inventario + Aulas + Profesores + Préstamos
+// ═══════════════════════════════════════════════════════════════
+
+const SHEET_INVENTARIO = 'Inventario';
+const SHEET_USUARIOS   = 'Usuarios';
+const SHEET_PROFESORES = 'Profesores';
+const SHEET_PRESTAMOS  = 'Prestamos';
+const SHEET_AULAS      = 'Aulas';
+
+const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','obs'];
+const HEADERS_USR   = ['usuario','password','nombre','rol'];
+const HEADERS_PROF  = ['id','nombre','departamento','email'];
+const HEADERS_PRES  = ['id','itemId','itemNombre','cantidad','aulaOrigen','aulaDestino','profesorId','profesorNombre','gestionadoPor','fechaPrestamo','fechaPrevista','fechaDevolucion','cantidadDevuelta','estado','obs'];
+const HEADERS_AULAS = ['id','name','icon','desc','th','orden'];
+
+const AULAS_DEFAULT = [
+  ['aula35','Aula 35','🔧','Mantenimiento Electrónico','th-blue',1],
+  ['aula36','Aula 36','⚡','Electrónica','th-purple',2],
+  ['aula38','Aula 38','💡','Electricidad','th-amber',3],
+  ['aula39','Aula 39','🔌','Electricidad','th-orange',4],
+  ['aula40','Aula 40','📡','Electrónica','th-teal',5],
+  ['aula41','Aula 41','🛠️','Electrónica','th-green',6],
+];
+
+// ─── AUTH ────────────────────────────────────────────────────────
+function verificarLogin(usuario, password) {
+  if (!usuario || !password) return null;
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(SHEET_USUARIOS);
+  if (!sheet) return null;
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    const u = String(data[i][0] || '').trim();
+    const p = String(data[i][1] || '').trim();
+    if (u && p && u === String(usuario).trim() && p === String(password)) {
+      return { usuario: u, nombre: data[i][2] || u, rol: data[i][3] || 'profesor' };
+    }
+  }
+  return null;
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────
+function rowsToObjects(sheet, headers) {
+  if (!sheet) return [];
+  const data = sheet.getDataRange().getValues();
+  const out = [];
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (!row[0] && !row[1]) continue;
+    const obj = {};
+    headers.forEach((h, idx) => {
+      let v = row[idx];
+      if (h === 'id' || h === 'qty' || h === 'min' || h === 'cantidad' || h === 'cantidadDevuelta' || h === 'itemId' || h === 'profesorId' || h === 'orden') {
+        v = (v === '' || v == null) ? (h === 'id' ? '' : 0) : (Number(v) || 0);
+      }
+      if (v instanceof Date) v = Utilities.formatDate(v, 'GMT', 'yyyy-MM-dd');
+      obj[h] = v == null ? '' : v;
+    });
+    out.push(obj);
+  }
+  return out;
+}
+
+function nextId(sheet) {
+  const data = sheet.getDataRange().getValues();
+  let maxId = 0;
+  for (let i = 1; i < data.length; i++) if (Number(data[i][0]) > maxId) maxId = Number(data[i][0]);
+  return maxId + 1;
+}
+
+function findRowById(sheet, id) {
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(id)) return i + 1;
+  }
+  return -1;
+}
+
+// ─── GET ─────────────────────────────────────────────────────────
+function doGet(e) {
+  try {
+    const u = e.parameter.u || '';
+    const p = e.parameter.p || '';
+    const action = e.parameter.action || 'list';
+
+    if (action === 'login') {
+      const user = verificarLogin(u, p);
+      if (!user) return json({ ok: false, error: 'Credenciales incorrectas' });
+      return json({ ok: true, user });
+    }
+
+    const user = verificarLogin(u, p);
+    if (!user) return json({ ok: false, error: 'No autorizado' });
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const items      = rowsToObjects(ss.getSheetByName(SHEET_INVENTARIO), HEADERS_INV);
+    const profesores = rowsToObjects(ss.getSheetByName(SHEET_PROFESORES), HEADERS_PROF);
+    const prestamos  = rowsToObjects(ss.getSheetByName(SHEET_PRESTAMOS), HEADERS_PRES);
+    let aulas        = rowsToObjects(ss.getSheetByName(SHEET_AULAS), HEADERS_AULAS);
+    
+    // Si no hay aulas configuradas, devolver las por defecto
+    if (!aulas.length) {
+      aulas = AULAS_DEFAULT.map(a => ({id:a[0],name:a[1],icon:a[2],desc:a[3],th:a[4],orden:a[5]}));
+    }
+    aulas.sort((a,b)=>(Number(a.orden)||0)-(Number(b.orden)||0));
+
+    return json({ ok: true, items, profesores, prestamos, aulas, user });
+  } catch (err) {
+    return json({ ok: false, error: err.toString() });
+  }
+}
+
+// ─── POST ────────────────────────────────────────────────────────
+function doPost(e) {
+  try {
+    const body = JSON.parse(e.postData.contents);
+    const user = verificarLogin(body.u, body.p);
+    if (!user) return json({ ok: false, error: 'No autorizado' });
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const action = body.action;
+
+    // ─── ITEMS ──────────────────────────────────────────────────
+    if (action === 'add') {
+      const sheet = ss.getSheetByName(SHEET_INVENTARIO);
+      const it = body.item;
+      it.id = nextId(sheet);
+      sheet.appendRow(HEADERS_INV.map(h => it[h] != null ? it[h] : ''));
+      return json({ ok: true, item: it });
+    }
+    if (action === 'update') {
+      const sheet = ss.getSheetByName(SHEET_INVENTARIO);
+      const it = body.item;
+      const r = findRowById(sheet, it.id);
+      if (r < 0) return json({ ok: false, error: 'No encontrado' });
+      sheet.getRange(r, 1, 1, HEADERS_INV.length).setValues([HEADERS_INV.map(h => it[h] != null ? it[h] : '')]);
+      return json({ ok: true, item: it });
+    }
+    if (action === 'delete') {
+      const sheet = ss.getSheetByName(SHEET_INVENTARIO);
+      const r = findRowById(sheet, body.id);
+      if (r < 0) return json({ ok: false, error: 'No encontrado' });
+      sheet.deleteRow(r);
+      return json({ ok: true });
+    }
+
+    // ─── PROFESORES ─────────────────────────────────────────────
+    if (action === 'profAdd') {
+      const sheet = ss.getSheetByName(SHEET_PROFESORES);
+      const pr = body.profesor;
+      pr.id = nextId(sheet);
+      sheet.appendRow(HEADERS_PROF.map(h => pr[h] != null ? pr[h] : ''));
+      return json({ ok: true, profesor: pr });
+    }
+    if (action === 'profUpdate') {
+      const sheet = ss.getSheetByName(SHEET_PROFESORES);
+      const pr = body.profesor;
+      const r = findRowById(sheet, pr.id);
+      if (r < 0) return json({ ok: false, error: 'No encontrado' });
+      sheet.getRange(r, 1, 1, HEADERS_PROF.length).setValues([HEADERS_PROF.map(h => pr[h] != null ? pr[h] : '')]);
+      return json({ ok: true, profesor: pr });
+    }
+    if (action === 'profDelete') {
+      const sheet = ss.getSheetByName(SHEET_PROFESORES);
+      const r = findRowById(sheet, body.id);
+      if (r < 0) return json({ ok: false, error: 'No encontrado' });
+      sheet.deleteRow(r);
+      return json({ ok: true });
+    }
+
+    // ─── AULAS (sync completo) ──────────────────────────────────
+    if (action === 'aulasSync') {
+      const sheet = ss.getSheetByName(SHEET_AULAS) || ss.insertSheet(SHEET_AULAS);
+      const aulas = body.aulas || [];
+      // Borrar todo y reescribir
+      sheet.clear();
+      sheet.appendRow(HEADERS_AULAS);
+      sheet.getRange(1, 1, 1, HEADERS_AULAS.length).setFontWeight('bold').setBackground('#cffafe');
+      sheet.setFrozenRows(1);
+      aulas.forEach((a, i) => {
+        sheet.appendRow([a.id, a.name, a.icon, a.desc, a.th, i+1]);
+      });
+      return json({ ok: true, aulas });
+    }
+
+    // ─── PRESTAMOS ──────────────────────────────────────────────
+    if (action === 'prestar') {
+      const invSheet = ss.getSheetByName(SHEET_INVENTARIO);
+      const presSheet = ss.getSheetByName(SHEET_PRESTAMOS);
+      const pres = body.prestamo;
+
+      const r = findRowById(invSheet, pres.itemId);
+      if (r < 0) return json({ ok: false, error: 'Ítem no encontrado' });
+      const itemRow = invSheet.getRange(r, 1, 1, HEADERS_INV.length).getValues()[0];
+      const stockActual = Number(itemRow[5]) || 0;
+      const cant = Number(pres.cantidad) || 0;
+      if (cant <= 0) return json({ ok: false, error: 'Cantidad inválida' });
+      if (cant > stockActual) return json({ ok: false, error: `Stock insuficiente (disponible: ${stockActual})` });
+
+      invSheet.getRange(r, 6).setValue(stockActual - cant);
+
+      pres.id = nextId(presSheet);
+      pres.gestionadoPor = user.nombre;
+      pres.fechaPrestamo = Utilities.formatDate(new Date(), 'GMT', 'yyyy-MM-dd');
+      pres.fechaDevolucion = '';
+      pres.cantidadDevuelta = 0;
+      pres.estado = 'Activo';
+      presSheet.appendRow(HEADERS_PRES.map(h => pres[h] != null ? pres[h] : ''));
+      return json({ ok: true, prestamo: pres });
+    }
+
+    if (action === 'devolver') {
+      const invSheet = ss.getSheetByName(SHEET_INVENTARIO);
+      const presSheet = ss.getSheetByName(SHEET_PRESTAMOS);
+      const presId = body.id;
+      const cantDev = Number(body.cantidadDevuelta) || 0;
+
+      const rPres = findRowById(presSheet, presId);
+      if (rPres < 0) return json({ ok: false, error: 'Préstamo no encontrado' });
+      const presRow = presSheet.getRange(rPres, 1, 1, HEADERS_PRES.length).getValues()[0];
+      const cantPrestada = Number(presRow[3]) || 0;
+      const yaDevuelta = Number(presRow[12]) || 0;
+      const pendiente = cantPrestada - yaDevuelta;
+
+      if (cantDev <= 0 || cantDev > pendiente) {
+        return json({ ok: false, error: `Cantidad inválida (pendiente: ${pendiente})` });
+      }
+
+      const itemId = Number(presRow[1]);
+      const rInv = findRowById(invSheet, itemId);
+      if (rInv >= 0) {
+        const stockActual = Number(invSheet.getRange(rInv, 6).getValue()) || 0;
+        invSheet.getRange(rInv, 6).setValue(stockActual + cantDev);
+      }
+
+      const nuevaDevuelta = yaDevuelta + cantDev;
+      presSheet.getRange(rPres, 13).setValue(nuevaDevuelta);
+      if (nuevaDevuelta >= cantPrestada) {
+        presSheet.getRange(rPres, 12).setValue(Utilities.formatDate(new Date(), 'GMT', 'yyyy-MM-dd'));
+        presSheet.getRange(rPres, 14).setValue('Devuelto');
+      } else {
+        presSheet.getRange(rPres, 14).setValue('Parcial');
+      }
+      return json({ ok: true });
+    }
+
+    return json({ ok: false, error: 'Acción desconocida' });
+  } catch (err) {
+    return json({ ok: false, error: err.toString() });
+  }
+}
+
+function json(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+function initSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const def = [
+    [SHEET_INVENTARIO, HEADERS_INV,   '#e2e6f0', null],
+    [SHEET_USUARIOS,   HEADERS_USR,   '#fef3c7', [['admin','cambiar123','Administrador','admin']]],
+    [SHEET_PROFESORES, HEADERS_PROF,  '#dcfce7', null],
+    [SHEET_PRESTAMOS,  HEADERS_PRES,  '#fce7f3', null],
+    [SHEET_AULAS,      HEADERS_AULAS, '#cffafe', AULAS_DEFAULT],
+  ];
+  for (const [name, headers, color, rows] of def) {
+    let s = ss.getSheetByName(name);
+    if (!s) s = ss.insertSheet(name);
+    if (s.getLastRow() === 0) {
+      s.appendRow(headers);
+      s.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground(color);
+      s.setFrozenRows(1);
+      if (rows) rows.forEach(r => s.appendRow(r));
+    }
+  }
+}
