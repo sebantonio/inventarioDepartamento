@@ -247,7 +247,7 @@ select:focus,.fi:focus{border-color:var(--accent)}
 .vbtn.on{background:var(--white);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
 .tw{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow-x:auto;box-shadow:var(--sh)}
-table{width:max-content;min-width:100%;border-collapse:collapse}
+table{width:100%;border-collapse:collapse;min-width:900px}
 thead{background:var(--surface2)}
 th{padding:11px 13px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);text-align:left;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:color .15s}
 th:hover{color:var(--text)}
@@ -478,7 +478,7 @@ textarea.fi-w{resize:vertical;min-height:60px}
           <option>Equipos de medida</option><option>Consumibles</option>
           <option>Fibra óptica</option><option>Telecomunicaciones</option>
           <option>Material eléctrico</option><option>Redes</option>
-          <option>Domótica</option><option>Otros</option>
+          <option>Domótica</option><option>Ordenadores</option><option>Otros</option>
         </select>
       </div>
       <div><label class="fl">Ciclo</label>
@@ -794,6 +794,7 @@ const CATS={
   'Material eléctrico':      {c:'#db2777',bg:'#fdf2f8',i:'🔌'},
   'Redes':                   {c:'#0e7490',bg:'#f0fdfa',i:'🌐'},
   'Domótica':                {c:'#7e22ce',bg:'#faf5ff',i:'🏠'},
+  'Ordenadores':             {c:'#1d4ed8',bg:'#eff6ff',i:'💻'},
   'Otros':                   {c:'#6b7280',bg:'#f9fafb',i:'🔧'},
 };
 const ESTC={'Bueno':'#059669','Deteriorado':'#d97706','Avería':'#dc2626','Baja':'#9ca3af'};
@@ -905,7 +906,6 @@ async function doLogin(){
 function logout(){
   if(!confirm('¿Cerrar sesión?')) return;
   localStorage.removeItem('inv_session');
-  localStorage.removeItem('inv_cache');
   SESSION = null;
   items = [];
   cf = null;
@@ -926,47 +926,16 @@ function showUserChip(){
   document.getElementById('userChip').style.display = 'flex';
 }
 
-function applyData(res){
-  items = res.items || [];
-  profesores = res.profesores || [];
-  prestamos = res.prestamos || [];
-  if(res.aulas && res.aulas.length) AULAS = res.aulas;
-  localStorage.setItem('inv_cache', JSON.stringify({items, profesores, prestamos, aulas: AULAS, ts: Date.now()}));
-}
-
-function showUI(){
-  document.getElementById('btnN').style.display='flex';
-  document.getElementById('btnPres').style.display='flex';
-  document.getElementById('btnPed').style.display='flex';
-  updatePedBadge();
-  if(cf) openSub(); else if(currentCiclo) openCiclo(currentCiclo.id); else { show('pH'); renderHome(); }
-}
-
 async function loadData(){
   if(!SESSION){show('pLogin');setConn('','Sin sesión');return}
   showUserChip();
-
-  // Mostrar datos cacheados al instante si existen
-  const cache = JSON.parse(localStorage.getItem('inv_cache')||'null');
-  if(cache){
-    items = cache.items || [];
-    profesores = cache.profesores || [];
-    prestamos = cache.prestamos || [];
-    if(cache.aulas && cache.aulas.length) AULAS = cache.aulas;
-    const ago = Math.round((Date.now()-cache.ts)/1000);
-    setConn('ok',`${items.length} ítems · caché (hace ${ago<60?ago+'s':Math.round(ago/60)+'min'})`);
-    showUI();
-  } else {
-    setConn('loading','Cargando...');
-  }
-
-  // Actualizar en segundo plano
+  setConn('loading','Cargando...');
   try{
     const res = await apiGet();
     if(!res.ok){
+      // Sesión inválida: forzar relogin
       if(res.error && res.error.includes('autorizado')){
         localStorage.removeItem('inv_session');
-        localStorage.removeItem('inv_cache');
         SESSION = null;
         document.getElementById('userChip').style.display = 'none';
         show('pLogin');
@@ -975,17 +944,22 @@ async function loadData(){
       }
       throw new Error(res.error||'Error');
     }
-    applyData(res);
+    items = res.items || [];
+    profesores = res.profesores || [];
+    prestamos = res.prestamos || [];
+    if(res.aulas && res.aulas.length) AULAS = res.aulas;
     setConn('ok',`${items.length} ítems · sincronizado`);
-    showUI();
+    document.getElementById('btnN').style.display='flex';
+    document.getElementById('btnPres').style.display='flex';
+    document.getElementById('btnPed').style.display='flex';
+    updatePedBadge();
+    if(cf) openSub(); else if(currentCiclo) openCiclo(currentCiclo.id); else { show('pH'); renderHome(); }
   }catch(err){
     console.error(err);
-    if(!cache){
-      setConn('err','Error de conexión');
+    setConn('err','Error de conexión');
+    if(!items.length){
       show('pH');
       document.getElementById('hStats').innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">⚠️</div><div class="et">No se pudo conectar.<br><small>${err.message}</small></div></div>`;
-    } else {
-      setConn('err',`Sin conexión · mostrando caché`);
     }
   }
 }
@@ -1172,7 +1146,7 @@ function rTable(data,mc){
         <td style="color:var(--muted);font-size:12px" title="${x.loc}">${x.loc||'—'}</td>
         <td>${x.est?`<span class="edot"><span class="dot" style="background:${ec}"></span>${x.est}</span>`:'—'}</td>
         <td style="color:var(--muted);font-size:12px" title="${x.util}">${x.util||'—'}</td>
-        <td style="white-space:nowrap"><div style="display:flex;gap:6px;flex-wrap:nowrap">
+        <td><div style="display:flex;gap:6px">
           <button class="btn btn-sm btn-loan" onclick="openPrestar(${x.id})" title="Prestar" ${Number(x.qty)<=0?'disabled style="opacity:0.4;cursor:not-allowed"':''}>📤</button>
           <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="${isPedido(x.id)?'Quitar del pedido':'Añadir al pedido'}">🛒</button>
           ${x.est!=='Baja'?`<button class="btn btn-sm btn-baja" onclick="openBaja(${x.id})" title="Dar de baja">⛔</button>`:''}
