@@ -438,7 +438,6 @@ textarea.fi-w{resize:vertical;min-height:60px}
     <div class="sec-label">
       Por aula / espacio
       <button class="mini-btn" onclick="openAulasModal()">⚙️ Gestionar aulas</button>
-      <button class="mini-btn" onclick="openCategoriasModal()">⚙️ Categorías</button>
     </div>
     <div class="choice-grid" id="gAulas"></div>
     <div style="height:32px"></div>
@@ -519,18 +518,13 @@ textarea.fi-w{resize:vertical;min-height:60px}
       <div><label class="fl">Cantidad</label><input class="fi-w" id="f_qty" type="number" min="0" value="1"></div>
       <div><label class="fl">Stock mínimo</label><input class="fi-w" id="f_min" type="number" min="0" value="5"></div>
       <div><label class="fl">Categoría</label>
-       function renderCategoriasSelect(){
-  const sel = document.getElementById("f_cat");
-  const filtro = document.getElementById("fCat");
-
-  sel.innerHTML = "";
-  filtro.innerHTML = '<option value="">Todas las categorías</option>';
-
-  CATEGORIAS.forEach(c=>{
-    sel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
-    filtro.innerHTML += `<option value="${c.name}">${c.name}</option>`;
-  });
-}
+        <select class="fi-w" id="f_cat">
+          <option>Componentes electrónicos</option><option>Herramientas</option>
+          <option>Equipos de medida</option><option>Consumibles</option>
+          <option>Fibra óptica</option><option>Telecomunicaciones</option>
+          <option>Material eléctrico</option><option>Redes</option>
+          <option>Domótica</option><option>Ordenadores</option><option>Otros</option>
+        </select>
       </div>
       <div><label class="fl">Ciclo</label>
         <select class="fi-w" id="f_ciclo" onchange="updateModSelect()">
@@ -710,31 +704,6 @@ textarea.fi-w{resize:vertical;min-height:60px}
       <div class="mf-right">
         <button class="btn" onclick="closeAulasModal()">Cancelar</button>
         <button class="btn btn-p" onclick="saveAulas()">💾 Guardar cambios</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- MODAL GESTIÓN DE CATEGORÍAS -->
-<div class="mbg" id="mCategorias" onclick="if(event.target===this)closeCategoriasModal()">
-  <div class="modal">
-    <div class="mh">
-      <div class="mt">Gestionar categorías</div>
-      <button class="mx" onclick="closeCategoriasModal()">✕</button>
-    </div>
-
-    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
-      Añade, edita o elimina categorías del inventario.
-    </p>
-
-    <div class="aulas-list" id="catList"></div>
-
-    <button class="add-aula-btn" onclick="addCategoriaRow()">＋ Añadir categoría</button>
-
-    <div class="mf" style="margin-top:18px">
-      <div></div>
-      <div class="mf-right">
-        <button class="btn" onclick="closeCategoriasModal()">Cancelar</button>
-        <button class="btn btn-p" onclick="saveCategorias()">💾 Guardar cambios</button>
       </div>
     </div>
   </div>
@@ -940,38 +909,19 @@ function findModulo(modId){
 // ═════════════════════════════════════════════════════════
 // CATEGORÍAS Y ESTADOS
 // ═════════════════════════════════════════════════════════
-
-// ═════════════════════════════════════
-// CATEGORÍAS — igual que aulas
-// ═════════════════════════════════════
-const CATEGORIAS_DEFAULT = [
-  { id:'comp', name:'Componentes electrónicos' },
-  { id:'herr', name:'Herramientas' },
-  { id:'med', name:'Equipos de medida' },
-  { id:'cons', name:'Consumibles' },
-  { id:'fibra', name:'Fibra óptica' },
-  { id:'teleco', name:'Telecomunicaciones' },
-  { id:'elec', name:'Material eléctrico' },
-  { id:'redes', name:'Redes' },
-  { id:'domo', name:'Domótica' },
-  { id:'pc', name:'Ordenadores' },
-  { id:'otros', name:'Otros' }
-];
-
-let CATEGORIAS = CATEGORIAS_DEFAULT.slice();
-//const CATS={
-  //'Componentes electrónicos':{c:'#2563eb',bg:'#eff6ff',i:'⚡'},
-  //'Herramientas':            {c:'#d97706',bg:'#fffbeb',i:'🔨'},
-  //'Equipos de medida':       {c:'#0891b2',bg:'#ecfeff',i:'📊'},
-  //'Consumibles':             {c:'#7c3aed',bg:'#f5f3ff',i:'📦'},
-  //'Fibra óptica':            {c:'#059669',bg:'#ecfdf5',i:'💡'},
-  //'Telecomunicaciones':      {c:'#ea580c',bg:'#fff7ed',i:'📡'},
-  //'Material eléctrico':      {c:'#db2777',bg:'#fdf2f8',i:'🔌'},
-  //'Redes':                   {c:'#0e7490',bg:'#f0fdfa',i:'🌐'},
-  //'Domótica':                {c:'#7e22ce',bg:'#faf5ff',i:'🏠'},
-  //'Ordenadores':             {c:'#1d4ed8',bg:'#eff6ff',i:'💻'},
- // 'Otros':                   {c:'#6b7280',bg:'#f9fafb',i:'🔧'},
-//};
+const CATS={
+  'Componentes electrónicos':{c:'#2563eb',bg:'#eff6ff',i:'⚡'},
+  'Herramientas':            {c:'#d97706',bg:'#fffbeb',i:'🔨'},
+  'Equipos de medida':       {c:'#0891b2',bg:'#ecfeff',i:'📊'},
+  'Consumibles':             {c:'#7c3aed',bg:'#f5f3ff',i:'📦'},
+  'Fibra óptica':            {c:'#059669',bg:'#ecfdf5',i:'💡'},
+  'Telecomunicaciones':      {c:'#ea580c',bg:'#fff7ed',i:'📡'},
+  'Material eléctrico':      {c:'#db2777',bg:'#fdf2f8',i:'🔌'},
+  'Redes':                   {c:'#0e7490',bg:'#f0fdfa',i:'🌐'},
+  'Domótica':                {c:'#7e22ce',bg:'#faf5ff',i:'🏠'},
+  'Ordenadores':             {c:'#1d4ed8',bg:'#eff6ff',i:'💻'},
+  'Otros':                   {c:'#6b7280',bg:'#f9fafb',i:'🔧'},
+};
 const ESTC={'Bueno':'#059669','Deteriorado':'#d97706','Avería':'#dc2626','Baja':'#9ca3af'};
 
 // ═════════════════════════════════════════════════════════
@@ -1689,58 +1639,7 @@ function renderPrestamos(){
     </div>`;
   }).join('');
 }
-//funcion categoria modal
-function openCategoriasModal(){
-  renderCategoriasList();
-  document.getElementById("mCategorias").classList.add("open");
-}
 
-function closeCategoriasModal(){
-  document.getElementById("mCategorias").classList.remove("open");
-}
-function renderCategoriasList(){
-  const cont = document.getElementById("catList");
-  cont.innerHTML = "";
-
-  CATEGORIAS.forEach((c, i)=>{
-    cont.innerHTML += `
-      <div class="aula-row">
-        <input class="fi-w name-input" value="${c.name}" placeholder="Nombre categoría">
-        <button class="del-btn" onclick="delCategoriaRow(${i})">🗑</button>
-      </div>
-    `;
-  });
-}
-function addCategoriaRow(){
-  CATEGORIAS.push({
-    id: 'cat_' + Date.now(),
-    name: ''
-  });
-  renderCategoriasList();
-}
-function delCategoriaRow(i){
-  CATEGORIAS.splice(i,1);
-  renderCategoriasList();
-}
-function saveCategorias(){
-  const filas = document.querySelectorAll("#catList .aula-row");
-
-  CATEGORIAS = [];
-
-  filas.forEach((row, i)=>{
-    const name = row.querySelector(".name-input").value.trim();
-    if(name){
-      CATEGORIAS.push({
-        id: 'cat_'+i,
-        name
-      });
-    }
-  });
-
-  renderCategoriasSelect();
-  closeCategoriasModal();
-  toast("Categorías actualizadas","ok");
-}
 // ─── PRESTAR ─────────────────────────────────────────────
 function openPrestar(itemId){
   const item = items.find(x=>x.id===itemId);
