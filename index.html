@@ -247,7 +247,7 @@ select:focus,.fi:focus{border-color:var(--accent)}
 .vbtn.on{background:var(--white);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
 .tw{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow-x:auto;box-shadow:var(--sh)}
-table{width:100%;border-collapse:collapse}
+table{width:100%;border-collapse:collapse;min-width:900px}
 thead{background:var(--surface2)}
 th{padding:11px 13px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);text-align:left;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:color .15s}
 th:hover{color:var(--text)}
@@ -601,8 +601,16 @@ textarea.fi-w{resize:vertical;min-height:60px}
 <div class="mbg" id="mBaja" onclick="if(event.target===this)closeBaja()">
   <div class="modal" style="max-width:420px">
     <div class="mh"><div class="mt">⛔ Dar de baja</div><button class="mx" onclick="closeBaja()">✕</button></div>
-    <div style="margin-bottom:16px;font-size:13px;color:var(--muted)">El ítem cambiará a estado <strong style="color:var(--red)">Baja</strong> y quedará registrado en el historial.</div>
-    <div style="font-weight:700;font-size:15px;margin-bottom:16px" id="bajaItemName"></div>
+    <div style="font-weight:700;font-size:15px;margin-bottom:14px" id="bajaItemName"></div>
+    <div style="display:flex;gap:12px;background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px">
+      <div>Stock actual: <strong id="bajaQtyActual">—</strong></div>
+      <div style="color:var(--muted)">·</div>
+      <div style="color:var(--muted)">Quedarán: <strong id="bajaQtyRestante" style="color:var(--green)">—</strong></div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label class="fl">Unidades a dar de baja *</label>
+      <input class="fi-w" type="number" id="bajaCantidad" min="1" value="1" oninput="updateBajaRestante()">
+    </div>
     <div style="margin-bottom:14px">
       <label class="fl">Motivo de la baja *</label>
       <textarea class="fi-w" id="bajaMotivo" rows="3" placeholder="Ej: Equipo irreparable, obsoleto, robado..."></textarea>
@@ -612,7 +620,7 @@ textarea.fi-w{resize:vertical;min-height:60px}
       <input class="fi-w" type="date" id="bajaFecha">
     </div>
     <div class="mf">
-      <div></div>
+      <div style="font-size:12px;color:var(--muted)" id="bajaNote"></div>
       <div class="mf-right">
         <button class="btn" onclick="closeBaja()">Cancelar</button>
         <button class="btn" style="background:var(--red);color:#fff;border-color:var(--red)" id="btnBaja" onclick="saveBaja()">⛔ Confirmar baja</button>
@@ -1732,21 +1740,51 @@ function openBaja(id){
   bajaId = id;
   const it = items.find(x=>x.id===id);
   if(!it) return;
+  const qty = Number(it.qty)||0;
   document.getElementById('bajaItemName').textContent = `${it.ref ? it.ref+' — ' : ''}${it.item}`;
+  document.getElementById('bajaQtyActual').textContent = qty;
+  document.getElementById('bajaCantidad').max = qty;
+  document.getElementById('bajaCantidad').value = 1;
   document.getElementById('bajaMotivo').value = '';
   document.getElementById('bajaFecha').value = new Date().toISOString().split('T')[0];
+  updateBajaRestante();
   document.getElementById('mBaja').classList.add('open');
 }
+
+function updateBajaRestante(){
+  const it = items.find(x=>x.id===bajaId);
+  if(!it) return;
+  const qty = Number(it.qty)||0;
+  const cant = Math.min(Number(document.getElementById('bajaCantidad').value)||1, qty);
+  const restante = qty - cant;
+  const el = document.getElementById('bajaQtyRestante');
+  el.textContent = restante;
+  el.style.color = restante === 0 ? 'var(--red)' : 'var(--green)';
+  document.getElementById('bajaNote').textContent = restante === 0
+    ? '⚠ El ítem pasará a estado Baja (sin stock).'
+    : `El ítem mantendrá ${restante} unidad${restante!==1?'es':''} en activo.`;
+}
+
 function closeBaja(){ document.getElementById('mBaja').classList.remove('open'); bajaId = null; }
 
 async function saveBaja(){
   const motivo = document.getElementById('bajaMotivo').value.trim();
   if(!motivo){ toast('Escribe el motivo de la baja','err'); return; }
-  const fecha = document.getElementById('bajaFecha').value;
   const it = items.find(x=>x.id===bajaId);
   if(!it) return;
-  const obsNuevo = `[BAJA ${fecha}] ${motivo}${it.obs ? '\n'+it.obs : ''}`;
-  const updated = {...it, est:'Baja', fecha, obs:obsNuevo};
+  const qty = Number(it.qty)||0;
+  const cant = Math.min(Number(document.getElementById('bajaCantidad').value)||1, qty);
+  if(cant < 1){ toast('La cantidad debe ser al menos 1','err'); return; }
+  const fecha = document.getElementById('bajaFecha').value;
+  const restante = qty - cant;
+  const obsNuevo = `[BAJA ${fecha}: ${cant} ud.] ${motivo}${it.obs ? '\n'+it.obs : ''}`;
+  const updated = {
+    ...it,
+    qty: restante,
+    est: restante === 0 ? 'Baja' : it.est,
+    fecha,
+    obs: obsNuevo
+  };
   const btn = document.getElementById('btnBaja');
   btn.disabled = true; btn.textContent = '⏳ Guardando...';
   try{
@@ -1756,7 +1794,7 @@ async function saveBaja(){
     items[idx] = updated;
     closeBaja();
     if(cf) openSub(); else renderHome();
-    toast('Ítem dado de baja','ok');
+    toast(restante===0 ? 'Ítem dado de baja completamente' : `${cant} unidad${cant!==1?'es':''} dada${cant!==1?'s':''} de baja · Quedan ${restante}`,'ok');
   }catch(err){ toast('Error: '+err.message,'err'); }
   finally{ btn.disabled=false; btn.textContent='⛔ Confirmar baja'; }
 }
