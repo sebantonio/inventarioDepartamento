@@ -162,6 +162,45 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .prof-row .del-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:6px 8px;border-radius:6px;transition:background .15s}
 .prof-row .del-btn:hover{background:var(--red-l)}
 
+/* IMPORT MODAL */
+.import-step{display:none}
+.import-step.active{display:block}
+.import-drop{border:2px dashed var(--border);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg)}
+.import-drop:hover,.import-drop.over{border-color:var(--accent);background:var(--accent-l)}
+.import-drop-icon{font-size:42px;margin-bottom:10px;opacity:.6}
+.import-drop-text{font-size:14px;font-weight:600;margin-bottom:4px}
+.import-drop-sub{font-size:12px;color:var(--muted)}
+.import-info{background:var(--accent-l);border:1px solid #93c5fd;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12px;line-height:1.6}
+.import-info code{background:var(--white);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:11px}
+.import-mapping{max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg);margin-bottom:14px}
+.map-row{display:grid;grid-template-columns:1fr 24px 1fr;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+.map-row:last-child{border-bottom:none}
+.map-csv{font-family:var(--mono);font-size:12px;background:var(--white);padding:6px 10px;border-radius:6px;border:1px solid var(--border)}
+.map-arrow{text-align:center;color:var(--muted)}
+.map-row select{font-size:12px;padding:6px 10px}
+.import-preview{max-height:300px;overflow:auto;border:1px solid var(--border);border-radius:10px;background:var(--white);margin-bottom:14px}
+.import-preview table{width:100%;font-size:11px}
+.import-preview th{position:sticky;top:0;background:var(--surface2);font-size:10px;padding:8px 10px;z-index:1}
+.import-preview td{padding:6px 10px;border-bottom:1px solid var(--border);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.import-preview tr.bad td{background:var(--red-l);color:var(--red)}
+.import-preview tr.bad td:first-child::before{content:'⚠ ';font-weight:700}
+.import-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.import-stat{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.import-stat-num{font-size:24px;font-weight:800;font-family:var(--mono);line-height:1}
+.import-stat-lbl{font-size:11px;color:var(--muted);margin-top:4px}
+.import-stat.ok .import-stat-num{color:var(--green)}
+.import-stat.warn .import-stat-num{color:var(--amber)}
+.import-stat.err .import-stat-num{color:var(--red)}
+.import-progress{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin:14px 0}
+.import-progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--acc2));transition:width .3s;width:0%}
+.import-result-icon{font-size:48px;text-align:center;margin-bottom:14px}
+.import-step-indicator{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;font-size:11px;color:var(--muted)}
+.step-dot{width:24px;height:24px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;transition:all .2s}
+.step-dot.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.step-dot.done{background:var(--green);color:#fff;border-color:var(--green)}
+.step-line{flex:1;max-width:30px;height:2px;background:var(--border);transition:background .2s}
+.step-line.done{background:var(--green)}
+
 /* HOME */
 .home-hero{text-align:center;padding:48px 24px 32px}
 .home-hero h1{font-size:30px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px}
@@ -354,6 +393,7 @@ textarea.fi-w{resize:vertical;min-height:60px}
     <button class="tbtn" id="btnPres" style="display:none" onclick="goPrestamos()">📋 Préstamos</button>
     <button class="tbtn" id="btnPed" style="display:none" onclick="openPedidos()">🛒 Pedidos<span class="pedido-badge" id="pedBadge" style="display:none">0</span></button>
     <button class="tbtn" id="btnE" style="display:none" onclick="exportCSV()">📥 CSV</button>
+    <button class="tbtn" id="btnImp" onclick="openImportModal()">📤 Importar</button>
     <button class="tbtn" id="btnReload" onclick="loadData()" title="Recargar">🔄</button>
     <div class="user-chip" id="userChip" style="display:none">
       <div class="user-avatar" id="userAvatar"></div>
@@ -550,6 +590,86 @@ textarea.fi-w{resize:vertical;min-height:60px}
       <div class="mf-right">
         <button class="btn" onclick="closeDevolver()">Cancelar</button>
         <button class="btn btn-return" id="btnDevolverSave" onclick="confirmDevolver()">📥 Confirmar devolución</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPORTAR CSV -->
+<div class="mbg" id="mImport" onclick="if(event.target===this)closeImport()">
+  <div class="modal" style="width:min(680px,100%)">
+    <div class="mh"><div class="mt" id="impTitle">📤 Importar inventario desde CSV</div><button class="mx" onclick="closeImport()">✕</button></div>
+    
+    <div class="import-step-indicator">
+      <div class="step-dot" id="sd1">1</div>
+      <div class="step-line" id="sl1"></div>
+      <div class="step-dot" id="sd2">2</div>
+      <div class="step-line" id="sl2"></div>
+      <div class="step-dot" id="sd3">3</div>
+      <div class="step-line" id="sl3"></div>
+      <div class="step-dot" id="sd4">4</div>
+    </div>
+    
+    <!-- PASO 1: Subir archivo -->
+    <div class="import-step active" id="impStep1">
+      <div class="import-drop" id="impDrop" onclick="document.getElementById('impFileInput').click()">
+        <div class="import-drop-icon">📁</div>
+        <div class="import-drop-text">Haz clic o arrastra aquí tu archivo CSV</div>
+        <div class="import-drop-sub">Formato: separado por comas, primera fila = cabeceras</div>
+      </div>
+      <input type="file" id="impFileInput" accept=".csv,text/csv" style="display:none">
+      <div class="import-info">
+        <strong>Columnas reconocidas automáticamente:</strong><br>
+        <code>Referencia</code>, <code>Aula</code>, <code>Item</code> / <code>Nombre</code>, <code>Cantidad</code>, <code>Stock mínimo</code>, <code>Categoría</code>, <code>Ubicación</code>, <code>Estado</code>, <code>Utilidad</code>, <code>Última revisión</code>, <code>Observaciones</code>
+        <br><br>
+        💡 Si una aula del CSV no existe en el sistema, el ítem se asignará a <strong>Departamento</strong>.
+      </div>
+      <div class="mf" style="margin-top:18px">
+        <div></div>
+        <div class="mf-right">
+          <button class="btn" onclick="closeImport()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- PASO 2: Mapeo de columnas -->
+    <div class="import-step" id="impStep2">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Confirma cómo mapear las columnas de tu CSV a los campos del inventario:</p>
+      <div class="import-mapping" id="impMapping"></div>
+      <div class="mf">
+        <button class="btn" onclick="impGoToStep(1)">← Volver</button>
+        <div class="mf-right">
+          <button class="btn" onclick="closeImport()">Cancelar</button>
+          <button class="btn btn-p" onclick="impGoToStep(3)">Vista previa →</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- PASO 3: Vista previa -->
+    <div class="import-step" id="impStep3">
+      <div class="import-summary" id="impSummary"></div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Vista previa (primeras 50 filas):</p>
+      <div class="import-preview" id="impPreview"></div>
+      <div class="mf">
+        <button class="btn" onclick="impGoToStep(2)">← Volver</button>
+        <div class="mf-right">
+          <button class="btn" onclick="closeImport()">Cancelar</button>
+          <button class="btn btn-p" id="impConfirmBtn" onclick="impDoImport()">📥 Importar al inventario</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- PASO 4: Resultado -->
+    <div class="import-step" id="impStep4">
+      <div id="impProgressWrap" style="display:none">
+        <div class="import-progress"><div class="import-progress-bar" id="impProgressBar"></div></div>
+        <p style="text-align:center;font-size:13px;color:var(--muted)" id="impProgressText">Importando...</p>
+      </div>
+      <div id="impResultWrap" style="display:none;text-align:center">
+        <div class="import-result-icon" id="impResultIcon">✅</div>
+        <h2 style="font-size:18px;font-weight:800;margin-bottom:6px" id="impResultTitle">Importación completada</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:18px" id="impResultMsg"></p>
+        <button class="btn btn-p" onclick="closeImport()">Cerrar</button>
       </div>
     </div>
   </div>
@@ -1728,9 +1848,343 @@ async function saveProfesores(){
 }
 
 // ═════════════════════════════════════════════════════════
+// IMPORTACIÓN CSV
+// ═════════════════════════════════════════════════════════
+let impData = { rawText:'', headers:[], rows:[], mapping:{}, validRows:[], invalidRows:[] };
+
+// Campos del inventario y sinónimos comunes para auto-detección
+const IMP_FIELDS = [
+  {k:'item',  label:'Nombre del ítem *', synonyms:['item','articulo','producto','nombre','descripcion','material']},
+  {k:'ref',   label:'Referencia',         synonyms:['ref','referencia','codigo','code','sku']},
+  {k:'aula',  label:'Aula',               synonyms:['aula','sala','ubicacion_aula','espacio','clase']},
+  {k:'qty',   label:'Cantidad',           synonyms:['cantidad','qty','cant','unidades','stock','existencias']},
+  {k:'min',   label:'Stock mínimo',       synonyms:['minimo','min','stock_minimo','reposicion']},
+  {k:'cat',   label:'Categoría',          synonyms:['categoria','cat','tipo','familia']},
+  {k:'loc',   label:'Ubicación',          synonyms:['ubicacion','localizacion','localizado','sitio','estanteria']},
+  {k:'est',   label:'Estado',             synonyms:['estado','condicion','status']},
+  {k:'util',  label:'Utilidad',           synonyms:['utilidad','uso','funcion','para_que']},
+  {k:'fecha', label:'Última revisión',    synonyms:['fecha','revision','ultima_revision','actualizado']},
+  {k:'obs',   label:'Observaciones',      synonyms:['observaciones','obs','notas','comentarios','comentario']},
+];
+const IMP_REQUIRED = ['item'];
+const ESTADOS_VALIDOS = ['Bueno','Deteriorado','Avería','Baja'];
+const CATEGORIAS_VALIDAS = Object.keys(CATS);
+
+function openImportModal(){
+  if(!SESSION){toast('Inicia sesión primero','err');return}
+  impData = { rawText:'', headers:[], rows:[], mapping:{}, validRows:[], invalidRows:[] };
+  impGoToStep(1);
+  // Reset file input
+  document.getElementById('impFileInput').value = '';
+  document.getElementById('mImport').classList.add('open');
+  // Configurar drag & drop
+  const drop = document.getElementById('impDrop');
+  drop.ondragover = (e)=>{ e.preventDefault(); drop.classList.add('over'); };
+  drop.ondragleave = ()=>drop.classList.remove('over');
+  drop.ondrop = (e)=>{
+    e.preventDefault(); drop.classList.remove('over');
+    if(e.dataTransfer.files.length) impHandleFile(e.dataTransfer.files[0]);
+  };
+  document.getElementById('impFileInput').onchange = (e)=>{
+    if(e.target.files.length) impHandleFile(e.target.files[0]);
+  };
+}
+
+function closeImport(){ document.getElementById('mImport').classList.remove('open'); }
+
+function impGoToStep(n){
+  for(let i=1;i<=4;i++){
+    document.getElementById('impStep'+i).classList.toggle('active', i===n);
+    const dot = document.getElementById('sd'+i);
+    dot.classList.remove('active','done');
+    if(i<n) dot.classList.add('done');
+    else if(i===n) dot.classList.add('active');
+    if(i<4){
+      const line = document.getElementById('sl'+i);
+      line.classList.toggle('done', i<n);
+    }
+  }
+  if(n===2) impRenderMapping();
+  if(n===3) impRenderPreview();
+}
+
+// Parser CSV simple pero robusto (acepta comas dentro de comillas, escape "")
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  // Quitar BOM si lo hay
+  if(text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  
+  for(let i=0; i<text.length; i++){
+    const c = text[i], next = text[i+1];
+    if(inQuotes){
+      if(c === '"' && next === '"'){ field += '"'; i++; }
+      else if(c === '"'){ inQuotes = false; }
+      else field += c;
+    } else {
+      if(c === '"'){ inQuotes = true; }
+      else if(c === ',' || c === ';'){ row.push(field); field = ''; }
+      else if(c === '\n' || c === '\r'){
+        if(field !== '' || row.length){ row.push(field); rows.push(row); }
+        row = []; field = '';
+        if(c === '\r' && next === '\n') i++;
+      } else field += c;
+    }
+  }
+  if(field !== '' || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.some(c => c && String(c).trim() !== ''));
+}
+
+// Normalizar texto para matching (sin acentos, minúsculas, sin guiones bajos)
+function normalize(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[\s_\-]+/g,'').trim();
+}
+
+function impHandleFile(file){
+  if(!file.name.toLowerCase().endsWith('.csv')){
+    toast('El archivo debe ser .csv','err');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    impData.rawText = e.target.result;
+    const parsed = parseCSV(impData.rawText);
+    if(parsed.length < 2){
+      toast('El CSV no tiene datos suficientes (necesita cabecera + al menos 1 fila)','err');
+      return;
+    }
+    impData.headers = parsed[0].map(h => String(h).trim());
+    impData.rows = parsed.slice(1);
+    
+    // Auto-mapeo
+    impData.mapping = {};
+    IMP_FIELDS.forEach(f => {
+      const idx = impData.headers.findIndex(h => {
+        const nh = normalize(h);
+        return nh === normalize(f.k) || f.synonyms.some(s => normalize(s) === nh);
+      });
+      if(idx >= 0) impData.mapping[f.k] = idx;
+    });
+    
+    impGoToStep(2);
+  };
+  reader.onerror = ()=>toast('Error al leer el archivo','err');
+  reader.readAsText(file, 'UTF-8');
+}
+
+function impRenderMapping(){
+  const div = document.getElementById('impMapping');
+  div.innerHTML = IMP_FIELDS.map(f => {
+    const opts = '<option value="-1">— No importar —</option>' + 
+      impData.headers.map((h,i)=>`<option value="${i}" ${impData.mapping[f.k]===i?'selected':''}>${h}</option>`).join('');
+    return `<div class="map-row">
+      <div style="font-size:12px;font-weight:600">${f.label}${IMP_REQUIRED.includes(f.k)?' <span style="color:var(--red)">*</span>':''}</div>
+      <div class="map-arrow">→</div>
+      <select class="fi" onchange="impData.mapping['${f.k}']=parseInt(this.value);if(this.value==='-1')delete impData.mapping['${f.k}']">${opts}</select>
+    </div>`;
+  }).join('');
+}
+
+function impRenderPreview(){
+  // Procesar filas validando
+  impData.validRows = [];
+  impData.invalidRows = [];
+  
+  // Map de aulas para detectar (por id, name o desc)
+  const aulasMap = {};
+  AULAS.forEach(a => {
+    aulasMap[normalize(a.id)] = a.id;
+    aulasMap[normalize(a.name)] = a.id;
+  });
+  // Asegurar que existe "departamento" como fallback
+  let aulaDepartamento = AULAS.find(a => 
+    normalize(a.id) === 'departamento' || normalize(a.name).includes('departamento')
+  );
+  const aulaFallback = aulaDepartamento ? aulaDepartamento.id : (AULAS[0]?.id || 'departamento');
+  
+  impData.rows.forEach((row, idx) => {
+    const item = {};
+    let valid = true;
+    let errors = [];
+    let aulaCambiada = false;
+    
+    IMP_FIELDS.forEach(f => {
+      const colIdx = impData.mapping[f.k];
+      if(colIdx == null || colIdx < 0) return;
+      let val = String(row[colIdx]||'').trim();
+      
+      if(f.k === 'qty' || f.k === 'min'){
+        const n = parseInt(val.replace(/[^\d-]/g,'')) || 0;
+        item[f.k] = Math.max(0, n);
+      } else if(f.k === 'aula'){
+        if(!val){ item.aula = aulaFallback; aulaCambiada=true; }
+        else {
+          const found = aulasMap[normalize(val)];
+          if(found) item.aula = found;
+          else { item.aula = aulaFallback; aulaCambiada = true; }
+        }
+      } else if(f.k === 'est'){
+        // Normalizar estado
+        const nv = normalize(val);
+        const match = ESTADOS_VALIDOS.find(e => normalize(e) === nv);
+        item.est = match || (val ? 'Bueno' : '');
+      } else if(f.k === 'cat'){
+        const nv = normalize(val);
+        const match = CATEGORIAS_VALIDAS.find(c => normalize(c) === nv);
+        item.cat = match || (val || 'Otros');
+      } else if(f.k === 'fecha'){
+        // Aceptar yyyy-mm-dd o dd/mm/yyyy
+        if(/^\d{4}-\d{2}-\d{2}$/.test(val)) item.fecha = val;
+        else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)){
+          const [d,m,y] = val.split('/');
+          item.fecha = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        } else item.fecha = val;
+      } else {
+        item[f.k] = val;
+      }
+    });
+    
+    // Defaults
+    if(!item.aula) { item.aula = aulaFallback; aulaCambiada = true; }
+    if(item.qty == null) item.qty = 1;
+    if(item.min == null) item.min = 0;
+    if(!item.est) item.est = 'Bueno';
+    if(!item.cat) item.cat = 'Otros';
+    item.mod = item.mod || '';
+    
+    // Validación
+    if(!item.item || !item.item.trim()){
+      valid = false;
+      errors.push('Sin nombre');
+    }
+    
+    if(valid){
+      impData.validRows.push({...item, _aulaCambiada:aulaCambiada, _rowNum:idx+2});
+    } else {
+      impData.invalidRows.push({...item, _row:row, _errors:errors, _rowNum:idx+2});
+    }
+  });
+  
+  // Stats
+  const total = impData.rows.length;
+  const validos = impData.validRows.length;
+  const invalidos = impData.invalidRows.length;
+  const aulasReasignadas = impData.validRows.filter(r=>r._aulaCambiada).length;
+  
+  document.getElementById('impSummary').innerHTML = `
+    <div class="import-stat ok">
+      <div class="import-stat-num">${validos}</div>
+      <div class="import-stat-lbl">listos para importar</div>
+    </div>
+    <div class="import-stat ${aulasReasignadas?'warn':''}">
+      <div class="import-stat-num">${aulasReasignadas}</div>
+      <div class="import-stat-lbl">→ Departamento</div>
+    </div>
+    <div class="import-stat ${invalidos?'err':''}">
+      <div class="import-stat-num">${invalidos}</div>
+      <div class="import-stat-lbl">errores (se omiten)</div>
+    </div>
+  `;
+  
+  // Preview tabla (solo primeras 50)
+  const showRows = [...impData.validRows.slice(0, 50), ...impData.invalidRows.slice(0, 10)];
+  const cols = IMP_FIELDS.filter(f => impData.mapping[f.k] != null && impData.mapping[f.k] >= 0);
+  const html = `<table>
+    <thead><tr><th>#</th>${cols.map(c=>`<th>${c.label.replace(' *','')}</th>`).join('')}<th>Estado</th></tr></thead>
+    <tbody>${showRows.map(r => {
+      const isInvalid = r._errors;
+      return `<tr class="${isInvalid?'bad':''}">
+        <td style="font-family:var(--mono);color:var(--muted)">${r._rowNum}</td>
+        ${cols.map(c=>{
+          let v = r[c.k] != null ? String(r[c.k]) : '';
+          if(c.k === 'aula'){ const a = AULAS.find(x=>x.id===v); v = a?a.name:v; if(r._aulaCambiada)v+=' ⚠'; }
+          return `<td title="${v}">${v}</td>`;
+        }).join('')}
+        <td>${isInvalid?`<span style="color:var(--red);font-weight:700">${r._errors.join(', ')}</span>`:'<span style="color:var(--green)">✓</span>'}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+  document.getElementById('impPreview').innerHTML = html;
+  
+  // Habilitar/deshabilitar botón
+  const btn = document.getElementById('impConfirmBtn');
+  btn.disabled = validos === 0;
+  btn.textContent = validos === 0 ? 'Sin ítems válidos' : `📥 Importar ${validos} ítem${validos!==1?'s':''}`;
+}
+
+async function impDoImport(){
+  impGoToStep(4);
+  document.getElementById('impProgressWrap').style.display = 'block';
+  document.getElementById('impResultWrap').style.display = 'none';
+  
+  const cleanItems = impData.validRows.map(r => {
+    const {_aulaCambiada, _rowNum, ...item} = r;
+    return item;
+  });
+  
+  // Importación en lotes para no saturar Apps Script (max 200 por petición es seguro)
+  const BATCH_SIZE = 100;
+  const total = cleanItems.length;
+  let done = 0;
+  let added = 0;
+  let errors = 0;
+  
+  const updateProgress = ()=>{
+    const pct = total ? Math.round((done/total)*100) : 0;
+    document.getElementById('impProgressBar').style.width = pct+'%';
+    document.getElementById('impProgressText').textContent = `Importando... ${done}/${total} (${pct}%)`;
+  };
+  updateProgress();
+  
+  try {
+    for(let i = 0; i < cleanItems.length; i += BATCH_SIZE){
+      const batch = cleanItems.slice(i, i + BATCH_SIZE);
+      const res = await apiPost({action:'bulkImport', items:batch});
+      if(res.ok){
+        added += res.imported || batch.length;
+        // Añadir los items con su id real al estado local
+        if(res.items) items.push(...res.items);
+      } else {
+        errors += batch.length;
+        console.error('Error en lote:', res.error);
+      }
+      done += batch.length;
+      updateProgress();
+    }
+    
+    // Resultado
+    document.getElementById('impProgressWrap').style.display = 'none';
+    const resultWrap = document.getElementById('impResultWrap');
+    resultWrap.style.display = 'block';
+    
+    if(errors === 0){
+      document.getElementById('impResultIcon').textContent = '✅';
+      document.getElementById('impResultTitle').textContent = '¡Importación completada!';
+      document.getElementById('impResultMsg').innerHTML = `Se han añadido <strong>${added} ítem${added!==1?'s':''}</strong> al inventario.${impData.invalidRows.length?`<br>Se omitieron ${impData.invalidRows.length} fila(s) con errores.`:''}`;
+    } else {
+      document.getElementById('impResultIcon').textContent = '⚠️';
+      document.getElementById('impResultTitle').textContent = 'Importación parcial';
+      document.getElementById('impResultMsg').innerHTML = `Se añadieron <strong>${added}</strong> ítems, pero <strong>${errors}</strong> fallaron.<br>Comprueba la consola para más detalles.`;
+    }
+    
+    // Refrescar vista
+    if(cf) openSub(); else if(currentCiclo) openCiclo(currentCiclo.id); else renderHome();
+    toast(`${added} ítem${added!==1?'s':''} importado${added!==1?'s':''}`,'ok');
+    
+  } catch(err){
+    document.getElementById('impProgressWrap').style.display = 'none';
+    const resultWrap = document.getElementById('impResultWrap');
+    resultWrap.style.display = 'block';
+    document.getElementById('impResultIcon').textContent = '❌';
+    document.getElementById('impResultTitle').textContent = 'Error de importación';
+    document.getElementById('impResultMsg').textContent = err.message || 'Error desconocido';
+  }
+}
+
+// ═════════════════════════════════════════════════════════
 // INIT
 // ═════════════════════════════════════════════════════════
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeM();closeConf();closeAulasModal();closePrestar();closeDevolver();closeProfModal()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeM();closeConf();closeAulasModal();closePrestar();closeDevolver();closeProfModal();closeImport()}});
 // Enter en login
 ['loginUser','loginPass'].forEach(id=>{
   document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
