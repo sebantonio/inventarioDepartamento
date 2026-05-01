@@ -905,6 +905,7 @@ async function doLogin(){
 function logout(){
   if(!confirm('¿Cerrar sesión?')) return;
   localStorage.removeItem('inv_session');
+  localStorage.removeItem('inv_cache');
   SESSION = null;
   items = [];
   cf = null;
@@ -925,16 +926,47 @@ function showUserChip(){
   document.getElementById('userChip').style.display = 'flex';
 }
 
+function applyData(res){
+  items = res.items || [];
+  profesores = res.profesores || [];
+  prestamos = res.prestamos || [];
+  if(res.aulas && res.aulas.length) AULAS = res.aulas;
+  localStorage.setItem('inv_cache', JSON.stringify({items, profesores, prestamos, aulas: AULAS, ts: Date.now()}));
+}
+
+function showUI(){
+  document.getElementById('btnN').style.display='flex';
+  document.getElementById('btnPres').style.display='flex';
+  document.getElementById('btnPed').style.display='flex';
+  updatePedBadge();
+  if(cf) openSub(); else if(currentCiclo) openCiclo(currentCiclo.id); else { show('pH'); renderHome(); }
+}
+
 async function loadData(){
   if(!SESSION){show('pLogin');setConn('','Sin sesión');return}
   showUserChip();
-  setConn('loading','Cargando...');
+
+  // Mostrar datos cacheados al instante si existen
+  const cache = JSON.parse(localStorage.getItem('inv_cache')||'null');
+  if(cache){
+    items = cache.items || [];
+    profesores = cache.profesores || [];
+    prestamos = cache.prestamos || [];
+    if(cache.aulas && cache.aulas.length) AULAS = cache.aulas;
+    const ago = Math.round((Date.now()-cache.ts)/1000);
+    setConn('ok',`${items.length} ítems · caché (hace ${ago<60?ago+'s':Math.round(ago/60)+'min'})`);
+    showUI();
+  } else {
+    setConn('loading','Cargando...');
+  }
+
+  // Actualizar en segundo plano
   try{
     const res = await apiGet();
     if(!res.ok){
-      // Sesión inválida: forzar relogin
       if(res.error && res.error.includes('autorizado')){
         localStorage.removeItem('inv_session');
+        localStorage.removeItem('inv_cache');
         SESSION = null;
         document.getElementById('userChip').style.display = 'none';
         show('pLogin');
@@ -943,22 +975,17 @@ async function loadData(){
       }
       throw new Error(res.error||'Error');
     }
-    items = res.items || [];
-    profesores = res.profesores || [];
-    prestamos = res.prestamos || [];
-    if(res.aulas && res.aulas.length) AULAS = res.aulas;
+    applyData(res);
     setConn('ok',`${items.length} ítems · sincronizado`);
-    document.getElementById('btnN').style.display='flex';
-    document.getElementById('btnPres').style.display='flex';
-    document.getElementById('btnPed').style.display='flex';
-    updatePedBadge();
-    if(cf) openSub(); else if(currentCiclo) openCiclo(currentCiclo.id); else { show('pH'); renderHome(); }
+    showUI();
   }catch(err){
     console.error(err);
-    setConn('err','Error de conexión');
-    if(!items.length){
+    if(!cache){
+      setConn('err','Error de conexión');
       show('pH');
       document.getElementById('hStats').innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">⚠️</div><div class="et">No se pudo conectar.<br><small>${err.message}</small></div></div>`;
+    } else {
+      setConn('err',`Sin conexión · mostrando caché`);
     }
   }
 }
