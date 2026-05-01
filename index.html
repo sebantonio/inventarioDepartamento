@@ -286,14 +286,14 @@ select:focus,.fi:focus{border-color:var(--accent)}
 .vbtn{background:none;border:none;padding:5px 10px;border-radius:6px;color:var(--muted);cursor:pointer;font-size:14px;transition:all .15s}
 .vbtn.on{background:var(--white);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
-.tw{width:100%;background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:clip;box-shadow:var(--sh)}
-.tw-scroll{overflow-x:auto;width:100%;scrollbar-width:thin;scrollbar-color:var(--border) var(--surface2)}
+.tw{width:100%;background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh)}
+.tw-scroll{overflow-x:auto;width:100%;scrollbar-width:thin;scrollbar-color:var(--border) var(--surface2);border-radius:var(--r)}
 .tw-scroll::-webkit-scrollbar{height:6px}
-.tw-scroll::-webkit-scrollbar-track{background:var(--surface2)}
+.tw-scroll::-webkit-scrollbar-track{background:var(--surface2);border-radius:0 0 var(--r) var(--r)}
 .tw-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 table{min-width:1100px;width:max-content;border-collapse:collapse}
-table th:last-child{position:sticky;right:0;background:var(--surface2);box-shadow:-4px 0 8px rgba(0,0,0,.06);z-index:2}
-table td:last-child{position:sticky;right:0;background:var(--white);box-shadow:-4px 0 8px rgba(0,0,0,.06);z-index:1}
+table th:last-child{position:sticky;right:0;background:var(--surface2);box-shadow:-4px 0 8px rgba(0,0,0,.07);z-index:2}
+table td:last-child{position:sticky;right:0;background:var(--white);box-shadow:-4px 0 8px rgba(0,0,0,.07);z-index:1}
 thead{background:var(--surface2)}
 th{padding:11px 13px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);text-align:left;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:color .15s}
 th:hover{color:var(--text)}
