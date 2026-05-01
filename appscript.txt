@@ -52,8 +52,8 @@ function rowsToObjects(sheet, headers) {
     const obj = {};
     headers.forEach((h, idx) => {
       let v = row[idx];
-      if (h === 'qty' || h === 'min' || h === 'cantidad' || h === 'cantidadDevuelta' || h === 'itemId' || h === 'profesorId' || h === 'orden') {
-        v = (v === '' || v == null) ? 0 : (Number(v) || 0);
+      if (h === 'id' || h === 'qty' || h === 'min' || h === 'cantidad' || h === 'cantidadDevuelta' || h === 'itemId' || h === 'profesorId' || h === 'orden') {
+        v = (v === '' || v == null) ? (h === 'id' ? '' : 0) : (Number(v) || 0);
       }
       if (v instanceof Date) v = Utilities.formatDate(v, 'GMT', 'yyyy-MM-dd');
       obj[h] = v == null ? '' : v;
@@ -144,6 +144,30 @@ function doPost(e) {
       if (r < 0) return json({ ok: false, error: 'No encontrado' });
       sheet.deleteRow(r);
       return json({ ok: true });
+    }
+    
+    // ─── IMPORTACIÓN MASIVA ─────────────────────────────────────
+    if (action === 'bulkImport') {
+      const sheet = ss.getSheetByName(SHEET_INVENTARIO);
+      const newItems = body.items || [];
+      if (!newItems.length) return json({ ok: false, error: 'Sin ítems para importar' });
+      
+      // Calcular siguiente id
+      const data = sheet.getDataRange().getValues();
+      let maxId = 0;
+      for (let i = 1; i < data.length; i++) if (Number(data[i][0]) > maxId) maxId = Number(data[i][0]);
+      
+      // Preparar todas las filas
+      const rows = newItems.map(it => {
+        it.id = ++maxId;
+        return HEADERS_INV.map(h => it[h] != null ? it[h] : '');
+      });
+      
+      // Inserción en bloque (mucho más rápido que appendRow uno a uno)
+      const startRow = sheet.getLastRow() + 1;
+      sheet.getRange(startRow, 1, rows.length, HEADERS_INV.length).setValues(rows);
+      
+      return json({ ok: true, imported: rows.length, items: newItems });
     }
 
     // ─── PROFESORES ─────────────────────────────────────────────
