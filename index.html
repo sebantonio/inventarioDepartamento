@@ -370,6 +370,21 @@ textarea.fi-w{resize:vertical;min-height:60px}
 .add-cat-btn{background:var(--accent-l);border:1px dashed var(--accent);color:var(--accent);padding:9px;border-radius:9px;font-weight:600;cursor:pointer;width:100%;font-family:var(--font);font-size:13px;transition:all .15s}
 .add-cat-btn:hover{background:var(--accent);color:#fff}
 
+/* DOCS EN MODAL */
+.docs-sep{border:none;border-top:1px solid var(--border);margin:18px 0 14px}
+.docs-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+.doc-drop{display:flex;align-items:center;gap:10px;background:var(--bg);border:2px dashed var(--border);border-radius:10px;padding:12px 16px;cursor:pointer;transition:all .15s;font-size:13px;color:var(--muted);width:100%;font-family:var(--font)}
+.doc-drop:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+.doc-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;max-height:200px;overflow-y:auto}
+.doc-row{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px}
+.doc-row .di{font-size:15px;flex-shrink:0}
+.doc-row .dn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-row .dv{color:var(--accent);text-decoration:none;font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--accent);flex-shrink:0}
+.doc-row .dv:hover{background:var(--accent);color:#fff}
+.doc-row .dx{background:none;border:none;color:var(--red);cursor:pointer;padding:2px 6px;border-radius:4px;font-size:13px;flex-shrink:0}
+.doc-row .dx:hover{background:var(--red-l)}
+.doc-row.dp{opacity:.65}
+
 .cbox{background:var(--white);border-radius:16px;border:1px solid var(--border);padding:26px;width:min(360px,100%);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.18);transform:translateY(16px) scale(.98);transition:transform .25s cubic-bezier(.34,1.4,.64,1)}
 .mbg.open .cbox{transform:none}
 
@@ -559,6 +574,15 @@ textarea.fi-w{resize:vertical;min-height:60px}
       <div><label class="fl">Utilidad</label><input class="fi-w" id="f_util" placeholder="Para qué se usa"></div>
       <div><label class="fl">Última revisión</label><input class="fi-w" id="f_fecha" type="date"></div>
       <div class="full"><label class="fl">Observaciones</label><textarea class="fi-w" id="f_obs" placeholder="Notas, proveedor, nº serie..."></textarea></div>
+      <div class="full">
+        <hr class="docs-sep">
+        <div class="docs-lbl">📎 Documentación adjunta</div>
+        <input type="file" id="f_doc_input" multiple style="display:none" onchange="addDocFiles(this.files);this.value=''">
+        <button type="button" class="doc-drop" onclick="document.getElementById('f_doc_input').click()">
+          <span style="font-size:20px">📁</span><span>Subir archivos — fotos, PDFs, fichas técnicas...</span>
+        </button>
+        <div class="doc-list" id="f_doc_list"></div>
+      </div>
     </div>
     <div class="mf">
       <div></div>
@@ -1397,6 +1421,7 @@ function openModal(id=null){
   document.getElementById('f_util').value=m?.util||'';
   document.getElementById('f_fecha').value=m?.fecha||new Date().toISOString().split('T')[0];
   document.getElementById('f_obs').value=m?.obs||'';
+  initDocSection(id);
   document.getElementById('mItem').classList.add('open');
 }
 function closeM(){document.getElementById('mItem').classList.remove('open')}
@@ -1426,11 +1451,13 @@ async function saveItem(){
       const res = await apiPost({action:'update', item});
       if(!res.ok) throw new Error(res.error);
       const i=items.findIndex(x=>x.id===eid); items[i]=item;
+      await uploadPendingDocs(eid, item.item, item.aula);
       toast('Ítem actualizado','ok');
     } else {
       const res = await apiPost({action:'add', item:v});
       if(!res.ok) throw new Error(res.error);
       items.push(res.item);
+      await uploadPendingDocs(res.item.id, res.item.item, res.item.aula);
       toast('Ítem añadido','ok');
     }
     closeM();
@@ -1559,6 +1586,90 @@ async function saveCats(){
   } catch(err) {
     toast('Error al sincronizar: '+err.message,'err');
   }
+}
+
+// ═════════════════════════════════════════════════════════
+// DOCUMENTACIÓN ADJUNTA
+// ═════════════════════════════════════════════════════════
+let docsPendientes = [];
+let docsActuales   = [];
+
+const DOC_ICONS = {pdf:'📄',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',gif:'🖼️',webp:'🖼️',
+  doc:'📝',docx:'📝',xls:'📊',xlsx:'📊',ppt:'📊',pptx:'📊',
+  zip:'🗜️',rar:'🗜️',mp4:'🎬',mp3:'🎵',txt:'📋',svg:'🖼️'};
+
+function docIcon(name){ return DOC_ICONS[(name||'').split('.').pop().toLowerCase()]||'📎'; }
+
+function initDocSection(itemId){
+  docsPendientes = []; docsActuales = [];
+  document.getElementById('f_doc_list').innerHTML = '';
+  if(itemId) loadItemDocs(itemId);
+}
+
+async function loadItemDocs(itemId){
+  try{
+    const res = await apiPost({action:'getDocs', itemId});
+    if(res.ok){ docsActuales = res.docs||[]; renderDocList(); }
+  }catch(e){}
+}
+
+function addDocFiles(files){
+  for(const f of files) docsPendientes.push(f);
+  renderDocList();
+}
+
+function removePendingDoc(idx){ docsPendientes.splice(idx,1); renderDocList(); }
+
+async function deleteExistingDoc(docId, driveId){
+  if(!confirm('¿Eliminar este documento de Drive?')) return;
+  try{
+    const res = await apiPost({action:'deleteDoc', docId, driveId});
+    if(!res.ok) throw new Error(res.error);
+    docsActuales = docsActuales.filter(d=>d.id!==docId);
+    renderDocList(); toast('Documento eliminado','ok');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+function renderDocList(){
+  const el = document.getElementById('f_doc_list');
+  const ex = docsActuales.map(d=>`
+    <div class="doc-row">
+      <span class="di">${docIcon(d.fileName)}</span>
+      <span class="dn" title="${d.fileName}">${d.fileName}</span>
+      <a class="dv" href="${d.driveUrl}" target="_blank">Ver</a>
+      <button class="dx" onclick="deleteExistingDoc(${d.id},'${d.driveId}')" title="Eliminar">✕</button>
+    </div>`).join('');
+  const pe = docsPendientes.map((f,i)=>`
+    <div class="doc-row dp">
+      <span class="di">${docIcon(f.name)}</span>
+      <span class="dn" title="${f.name}">${f.name} <span style="color:var(--muted);font-size:10px">${(f.size/1024).toFixed(0)} KB · pendiente</span></span>
+      <button class="dx" onclick="removePendingDoc(${i})" title="Quitar">✕</button>
+    </div>`).join('');
+  el.innerHTML = ex + pe;
+}
+
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function uploadPendingDocs(itemId, itemNombre, aulaId){
+  if(!docsPendientes.length) return;
+  const aulaName = AULAS.find(a=>a.id===aulaId)?.name || aulaId;
+  for(const file of [...docsPendientes]){
+    try{
+      toast(`Subiendo ${file.name}…`,'ok');
+      const data = await fileToBase64(file);
+      const res = await apiPost({action:'uploadDoc', itemId, itemNombre, aulaId, aulaName,
+        fileName:file.name, mimeType:file.type||'application/octet-stream', data});
+      if(!res.ok) throw new Error(res.error);
+    }catch(e){ toast(`Error con ${file.name}: ${e.message}`,'err'); }
+  }
+  docsPendientes = [];
 }
 
 // ═════════════════════════════════════════════════════════

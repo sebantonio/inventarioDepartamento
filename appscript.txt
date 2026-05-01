@@ -9,6 +9,7 @@ const SHEET_PROFESORES = 'Profesores';
 const SHEET_PRESTAMOS  = 'Prestamos';
 const SHEET_AULAS      = 'Aulas';
 const SHEET_CATS       = 'Categorias';
+const SHEET_DOCS       = 'Documentos';
 
 const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','obs'];
 const HEADERS_USR   = ['usuario','password','nombre','rol'];
@@ -16,6 +17,7 @@ const HEADERS_PROF  = ['id','nombre','departamento','email'];
 const HEADERS_PRES  = ['id','itemId','itemNombre','cantidad','aulaOrigen','aulaDestino','profesorId','profesorNombre','gestionadoPor','fechaPrestamo','fechaPrevista','fechaDevolucion','cantidadDevuelta','estado','obs'];
 const HEADERS_AULAS = ['id','name','icon','desc','th','orden'];
 const HEADERS_CATS  = ['name','c','bg','i','orden'];
+const HEADERS_DOCS  = ['id','itemId','itemNombre','aulaId','fileName','driveId','driveUrl','fecha'];
 
 const CATS_DEFAULT = [
   ['Componentes electrónicos','#2563eb','#eff6ff','⚡',1],
@@ -314,10 +316,60 @@ function doPost(e) {
       return json({ ok: true });
     }
 
+    // ─── DOCUMENTOS ─────────────────────────────────────────────
+    if (action === 'getDocs') {
+      const sheet = ss.getSheetByName(SHEET_DOCS);
+      if (!sheet) return json({ ok: true, docs: [] });
+      const docs = rowsToObjects(sheet, HEADERS_DOCS).filter(d => String(d.itemId) === String(body.itemId));
+      return json({ ok: true, docs });
+    }
+
+    if (action === 'uploadDoc') {
+      const { itemId, itemNombre, aulaId, aulaName, fileName, mimeType, data } = body;
+
+      // Carpeta raíz → carpeta de aula
+      const root    = getOrCreateFolder(DriveApp.getRootFolder(), 'Inventario Departamento');
+      const aulaDir = getOrCreateFolder(root, aulaName || aulaId);
+
+      // Crear archivo con nombre único: {itemId}_{fileName}
+      const safeName = String(itemId) + '_' + fileName;
+      const blob = Utilities.newBlob(Utilities.base64Decode(data), mimeType, safeName);
+      const file = aulaDir.createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+      // Guardar metadatos en hoja Documentos
+      let sheet = ss.getSheetByName(SHEET_DOCS);
+      if (!sheet) {
+        sheet = ss.insertSheet(SHEET_DOCS);
+        sheet.appendRow(HEADERS_DOCS);
+        sheet.getRange(1, 1, 1, HEADERS_DOCS.length).setFontWeight('bold').setBackground('#fce7f3');
+        sheet.setFrozenRows(1);
+      }
+      const docId = nextId(sheet);
+      const fecha = Utilities.formatDate(new Date(), 'GMT', 'yyyy-MM-dd');
+      sheet.appendRow([docId, itemId, itemNombre, aulaId, fileName, file.getId(), file.getUrl(), fecha]);
+
+      return json({ ok: true, doc: { id: docId, itemId, fileName, driveId: file.getId(), driveUrl: file.getUrl(), fecha } });
+    }
+
+    if (action === 'deleteDoc') {
+      const { docId, driveId } = body;
+      try { DriveApp.getFileById(driveId).setTrashed(true); } catch(e) {}
+      const sheet = ss.getSheetByName(SHEET_DOCS);
+      if (sheet) { const r = findRowById(sheet, docId); if (r > 0) sheet.deleteRow(r); }
+      return json({ ok: true });
+    }
+
     return json({ ok: false, error: 'Acción desconocida' });
   } catch (err) {
     return json({ ok: false, error: err.toString() });
   }
+}
+
+// ─── DRIVE HELPER ───────────────────────────────────────────────
+function getOrCreateFolder(parent, name) {
+  const it = parent.getFoldersByName(name);
+  return it.hasNext() ? it.next() : parent.createFolder(name);
 }
 
 function json(obj) {
