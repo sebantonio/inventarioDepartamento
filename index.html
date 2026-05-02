@@ -87,6 +87,53 @@
     <div style="height:20px"></div>
     <div class="sec-label">Por ciclo formativo</div>
     <div class="choice-grid" id="gCiclos"></div>
+    <div style="height:20px"></div>
+    <div class="sec-label">Recursos del departamento</div>
+    <div class="choice-grid">
+      <div class="ccard th-teal" onclick="goDocsDpto()">
+        <div class="ccard-icon">📂</div>
+        <div class="ccard-title">Documentación</div>
+        <div class="ccard-desc">Normativa, circulares y documentos del departamento</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DOCS DPTO PAGE ══ -->
+<div class="page" id="pDocsDpto">
+  <div class="sub-header">
+    <div class="sub-tag" style="background:var(--teal-l);color:var(--teal)">📂 Departamento</div>
+    <div class="sub-title">Documentación del departamento</div>
+    <div class="sub-meta">Normativa, circulares y recursos compartidos</div>
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <a id="docsExtLink" href="https://crfpcastilla.sharepoint.com/:f:/r/sites/EPT13000220E01-Dpto.ElectricidadyElectrnica/Documentos%20compartidos/Dpto.%20Electricidad%20y%20Electr%C3%B3nica/Normativa?csf=1&web=1&e=8XRgS6"
+         target="_blank" class="btn btn-p" style="font-size:13px;text-decoration:none">
+        🔗 Abrir en SharePoint
+      </a>
+      <span style="font-size:12px;color:var(--muted)">Si el visor no carga, usa el botón para abrirlo directamente</span>
+    </div>
+  </div>
+  <div class="docs-dpto-body">
+    <div class="docs-iframe-wrap">
+      <iframe id="docsIframe"
+        src="https://crfpcastilla.sharepoint.com/:f:/r/sites/EPT13000220E01-Dpto.ElectricidadyElectrnica/Documentos%20compartidos/Dpto.%20Electricidad%20y%20Electr%C3%B3nica/Normativa?csf=1&web=1&e=8XRgS6"
+        frameborder="0"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+      <div class="docs-iframe-fallback" id="docsFallback">
+        <div style="font-size:48px;margin-bottom:16px">📂</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px">Documentación del departamento</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:24px;max-width:400px">
+          SharePoint requiere autenticación con tu cuenta institucional.<br>
+          Pulsa el botón para acceder directamente.
+        </div>
+        <a href="https://crfpcastilla.sharepoint.com/:f:/r/sites/EPT13000220E01-Dpto.ElectricidadyElectrnica/Documentos%20compartidos/Dpto.%20Electricidad%20y%20Electr%C3%B3nica/Normativa?csf=1&web=1&e=8XRgS6"
+           target="_blank" class="btn btn-p" style="text-decoration:none;font-size:14px;padding:12px 28px">
+          🔗 Abrir documentación en SharePoint
+        </a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -460,6 +507,7 @@
 <script src="js/prestamos.js"></script>
 <script src="js/import.js"></script>
 <script src="js/nav.js"></script>
+<script src="js/docs-dpto.js"></script>
 <script src="js/auth.js"></script>
 </body>
 </html>

@@ -414,9 +414,16 @@ textarea.fi-w{resize:vertical;min-height:60px}
 .gsr-header{padding:6px 16px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);background:var(--surface2)}
 .gsr-header:first-child{border-radius:14px 14px 0 0}
 
+/* DOCS DPTO PAGE */
+.docs-dpto-body{display:flex;flex-direction:column;height:calc(100vh - 58px - 160px);min-height:400px;padding:0}
+.docs-iframe-wrap{position:relative;flex:1;display:flex;flex-direction:column}
+.docs-iframe-wrap iframe{flex:1;width:100%;border:none;min-height:500px}
+.docs-iframe-fallback{display:none;flex:1;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:48px 24px;background:var(--bg)}
+
 @media(max-width:640px){
   .fg{grid-template-columns:1fr}
   .sub-body,.home-body,.ciclo-body{padding:14px}
   .stats-strip{grid-template-columns:1fr 1fr}
   .gsearch-wrap{margin:16px 12px 0}
+  .docs-dpto-body{height:calc(100vh - 58px - 200px)}
 }
