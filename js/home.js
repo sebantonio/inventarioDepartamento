@@ -11,7 +11,7 @@ function renderHome(){
   document.getElementById('hStats').innerHTML=`
     <div class="scard"><div class="scard-icon">📦</div><div><div class="scard-num">${total}</div><div class="scard-lbl">tipos de ítem</div></div></div>
     <div class="scard"><div class="scard-icon">🔢</div><div><div class="scard-num">${units.toLocaleString()}</div><div class="scard-lbl">unidades totales</div></div></div>
-    <div class="scard" ${low?'onclick="goLowStock()" style="cursor:pointer"':''}><div class="scard-icon">⚠️</div><div><div class="scard-num" style="color:var(--red)">${low}</div><div class="scard-lbl">stock bajo</div></div></div>
+    <div class="scard${low?' scard-alert':''}" ${low?'onclick="goLowStock()" style="cursor:pointer"':''}><div class="scard-icon">⚠️</div><div><div class="scard-num" style="color:var(--red)">${low}</div><div class="scard-lbl">stock bajo</div></div></div>
     <div class="scard"><div class="scard-icon">🏫</div><div><div class="scard-num">${AULAS.length}</div><div class="scard-lbl">espacios</div></div></div>
   `;
   document.getElementById('gAulas').innerHTML=AULAS.map(a=>{
