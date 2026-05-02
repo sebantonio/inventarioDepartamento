@@ -9,11 +9,15 @@ function _push(state, hash){
 
 function _showHomeButtons(){
   document.getElementById('btnImp').style.display = 'flex';
+  document.getElementById('btnPres').style.display = 'flex';
+  document.getElementById('btnPed').style.display = 'flex';
   if(deferredInstallPrompt) document.getElementById('btnInstall').style.display = 'flex';
   document.getElementById('btnHome').style.display = 'none';
 }
 function _hideHomeButtons(){
   document.getElementById('btnImp').style.display = 'none';
+  document.getElementById('btnPres').style.display = 'none';
+  document.getElementById('btnPed').style.display = 'none';
   document.getElementById('btnInstall').style.display = 'none';
   document.getElementById('btnHome').style.display = 'flex';
 }
