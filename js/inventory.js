@@ -44,7 +44,7 @@ function renderInv(){
   document.getElementById('iLow').textContent=low>0?`⚠ ${low} con stock bajo`:'';
   const mc=document.getElementById('iContent');
   if(!data.length){mc.innerHTML=`<div class="empty"><div class="ei">🔍</div><div class="et">No hay ítems con estos filtros.</div></div>`;return}
-  view==='table'?rTable(data,mc):rCards(data,mc);
+  (view==='table' && window.innerWidth > 640) ? rTable(data,mc) : rCards(data,mc);
 }
 
 function th2(k,l){const i=k===sk?(sa?'▲':'▼'):'↕';return`<th onclick="sort('${k}')" class="${k===sk?'srt':''}">${l} <span style="font-size:9px;opacity:.6">${i}</span></th>`}
@@ -115,6 +115,7 @@ function rCards(data,mc){
 }
 
 function sv(v){view=v;document.getElementById('vT').classList.toggle('on',v==='table');document.getElementById('vC').classList.toggle('on',v==='cards');renderInv()}
+window.addEventListener('resize',()=>{if(document.getElementById('pS')?.classList.contains('active'))renderInv()});
 function sort(k){if(sk===k)sa=!sa;else{sk=k;sa=true}renderInv()}
 
 // ═════════════════════════════════════════════════════════

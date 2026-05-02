@@ -24,6 +24,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .brand-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--acc2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
 .brand-name{font-size:15px;font-weight:700}
 .topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.topbar-btns{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mob-menu-btn{display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:20px;cursor:pointer;font-weight:700;line-height:1}
 .breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
 .breadcrumb .bc-link{color:var(--accent);cursor:pointer;font-weight:600}
 .breadcrumb .bc-link:hover{text-decoration:underline}
@@ -483,14 +485,72 @@ textarea.fi-w{resize:vertical;min-height:60px}
 .docs-link-arrow{color:var(--muted);font-weight:700;font-size:12px}
 
 @media(max-width:640px){
+  /* ── TOPBAR ── */
+  .topbar{padding:0 12px}
+  .brand-name{display:none}
+  #connTxt{display:none}
+  .breadcrumb{display:none}
+  .mob-menu-btn{display:flex}
+  .topbar-btns{
+    position:absolute;top:58px;right:0;
+    background:var(--white);
+    border:1px solid var(--border);
+    border-radius:0 0 12px 12px;
+    border-top:2px solid var(--accent);
+    padding:8px;
+    flex-direction:column;
+    gap:4px;
+    min-width:200px;
+    box-shadow:var(--shh);
+    z-index:200;
+    display:none;
+  }
+  .topbar-btns.open{display:flex}
+  .topbar-btns .tbtn{width:100%;justify-content:flex-start}
+
+  /* ── VISTAS: siempre tarjetas en móvil ── */
+  .vtog{display:none}
+
+  /* ── HOME ── */
+  .home-hero{padding:28px 16px 20px}
+  .home-hero h1{font-size:22px}
+  .home-hero p{font-size:13px}
+  .home-body,.sub-body,.ciclo-body{padding:14px}
+
+  /* ── FORMULARIO MODAL ── */
   .fg{grid-template-columns:1fr}
-  .sub-body,.home-body,.ciclo-body{padding:14px}
+
+  /* ── STATS ── */
   .stats-strip{grid-template-columns:1fr 1fr}
+  .scard{padding:12px 14px}
+  .scard-num{font-size:18px}
+
+  /* ── SUBPAGE HEADER ── */
+  .sub-header{padding:16px 14px 14px}
+  .sub-title{font-size:19px}
+  .ciclo-page-header{padding:16px 14px}
+  .ciclo-title{font-size:19px}
+
+  /* ── TOOLBAR FILTROS ── */
+  .toolbar{flex-direction:column;align-items:stretch}
+  .sbox{min-width:unset}
+
+  /* ── BÚSQUEDA GLOBAL ── */
   .gsearch-wrap{margin:16px 12px 0}
+
+  /* ── PRÉSTAMOS ── */
+  .pres-card{grid-template-columns:1fr;gap:10px}
+  .pres-actions{justify-content:flex-start}
+
+  /* ── DOCS ── */
   .docs-grid{grid-template-columns:1fr 1fr;gap:10px}
   .docs-card{padding:14px}
   .docs-card-icon{font-size:24px}
   .docs-card-title{font-size:13px}
+
+  /* ── TOASTS ── */
+  .toasts{bottom:16px;right:12px;left:12px}
+  .toast{max-width:100%}
 }
 
 /* ── IMPRESIÓN ─────────────────────────────────────────── */

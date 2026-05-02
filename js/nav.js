@@ -153,3 +153,15 @@ window.addEventListener('popstate', function(){
   navigateFromHash(location.hash);
   _skipHistory = false;
 });
+
+// ─── MENÚ MÓVIL ───────────────────────────────────────────
+function toggleMobMenu(){
+  document.getElementById('topbarBtns').classList.toggle('open');
+}
+function closeMobMenu(){
+  document.getElementById('topbarBtns').classList.remove('open');
+}
+document.addEventListener('click', function(e){
+  if(!e.target.closest('#topbarBtns') && !e.target.closest('#mobMenuBtn'))
+    closeMobMenu();
+});
