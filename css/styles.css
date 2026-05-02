@@ -76,6 +76,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .login-btn:hover{background:#1d4ed8}
 .login-btn:disabled{opacity:.6;cursor:not-allowed}
 .login-footer{margin-top:20px;padding-top:18px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);text-align:center}
+.login-ok{background:var(--green-l);color:var(--green);border:1px solid #6ee7b7;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:600;margin-bottom:14px;display:none}
+.login-ok.show{display:block}
+.login-link{background:none;border:none;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;padding:4px 0;margin-top:8px;text-decoration:underline;font-family:var(--font)}
+.login-link:hover{color:#1d4ed8}
 
 /* USER MENU */
 .user-chip{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;background:var(--surface2);border-radius:20px;font-size:12px;font-weight:600}

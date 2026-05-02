@@ -116,6 +116,41 @@ function doGet(e) {
       return json({ ok: true, user });
     }
 
+    if (action === 'requestReset') {
+      const usuario = e.parameter.usuario || '';
+      if (!usuario) return json({ ok: true });
+      const ss2 = SpreadsheetApp.getActiveSpreadsheet();
+      const sheet2 = ss2.getSheetByName(SHEET_USUARIOS);
+      if (!sheet2) return json({ ok: true });
+      const rows2 = sheet2.getDataRange().getValues();
+      let userEmail = '', userName = '';
+      for (let i = 1; i < rows2.length; i++) {
+        if (String(rows2[i][0]).trim().toLowerCase() === String(usuario).trim().toLowerCase()) {
+          userEmail = String(rows2[i][4] || '').trim();
+          userName  = String(rows2[i][2] || usuario).trim();
+          break;
+        }
+      }
+      if (!userEmail) return json({ ok: true });
+      const token   = Utilities.getUuid();
+      const expires = Date.now() + 3600000;
+      PropertiesService.getScriptProperties().setProperty('reset_' + token, JSON.stringify({ usuario: String(usuario).trim(), expires }));
+      const appUrl    = decodeURIComponent(e.parameter.appUrl || '');
+      const resetLink = appUrl + '#reset/' + token;
+      MailApp.sendEmail({
+        to: userEmail,
+        subject: 'Recuperación de contraseña — Inventario Taller FP',
+        htmlBody: `<div style="font-family:sans-serif;max-width:500px;padding:24px;color:#1a1d2e">
+          <h2 style="color:#2563eb;margin-bottom:16px">🔑 Recuperar contraseña</h2>
+          <p>Hola <strong>${userName}</strong>,</p>
+          <p>Has solicitado recuperar tu contraseña del <strong>Inventario Taller FP — IES El Bosco</strong>.</p>
+          <p style="margin:24px 0"><a href="${resetLink}" style="background:#2563eb;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block">Cambiar mi contraseña</a></p>
+          <p style="color:#6b7280;font-size:13px">Enlace válido durante <strong>1 hora</strong>. Si no has solicitado este cambio, ignora este mensaje.</p>
+        </div>`
+      });
+      return json({ ok: true });
+    }
+
     const user = verificarLogin(u, p);
     if (!user) return json({ ok: false, error: 'No autorizado' });
 
@@ -147,12 +182,40 @@ function doGet(e) {
 // ─── POST ────────────────────────────────────────────────────────
 function doPost(e) {
   try {
-    const body = JSON.parse(e.postData.contents);
+    const body   = JSON.parse(e.postData.contents);
+    const action = body.action;
+
+    // ─── RESET CONTRASEÑA (sin autenticación) ───────────────────
+    if (action === 'resetPassword') {
+      const { token, newPassword } = body;
+      if (!token || !newPassword) return json({ ok: false, error: 'Faltan campos' });
+      if (String(newPassword).length < 4) return json({ ok: false, error: 'Contraseña demasiado corta' });
+      const props  = PropertiesService.getScriptProperties();
+      const stored = props.getProperty('reset_' + token);
+      if (!stored) return json({ ok: false, error: 'Enlace inválido o ya utilizado' });
+      let tData;
+      try { tData = JSON.parse(stored); } catch(ex) { return json({ ok: false, error: 'Token inválido' }); }
+      if (Date.now() > tData.expires) {
+        props.deleteProperty('reset_' + token);
+        return json({ ok: false, error: 'El enlace ha expirado. Solicita uno nuevo.' });
+      }
+      const ss0    = SpreadsheetApp.getActiveSpreadsheet();
+      const sheet0 = ss0.getSheetByName(SHEET_USUARIOS);
+      const rows0  = sheet0.getDataRange().getValues();
+      for (let i = 1; i < rows0.length; i++) {
+        if (String(rows0[i][0]).trim() === String(tData.usuario).trim()) {
+          sheet0.getRange(i + 1, 2).setValue(newPassword);
+          props.deleteProperty('reset_' + token);
+          return json({ ok: true });
+        }
+      }
+      return json({ ok: false, error: 'Usuario no encontrado' });
+    }
+
     const user = verificarLogin(body.u, body.p);
     if (!user) return json({ ok: false, error: 'No autorizado' });
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const action = body.action;
 
     // ─── ITEMS ──────────────────────────────────────────────────
     if (action === 'add') {

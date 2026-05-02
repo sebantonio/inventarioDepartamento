@@ -109,18 +109,65 @@
     <div class="login-card">
       <div class="login-icon"><img src="favicon.svg" style="width:36px;height:36px"></div>
       <h1>Inventario Taller FP</h1>
-      <p class="login-sub">Introduce tus credenciales para continuar</p>
-      <div class="login-error" id="loginError"></div>
+
+      <!-- Vista: formulario de acceso -->
+      <div id="loginForm">
+        <p class="login-sub">Introduce tus credenciales para continuar</p>
+        <div class="login-ok" id="loginOk"></div>
+        <div class="login-error" id="loginError"></div>
+        <div class="login-field">
+          <label>Usuario</label>
+          <input type="text" id="loginUser" autocomplete="username">
+        </div>
+        <div class="login-field">
+          <label>Contraseña</label>
+          <input type="password" id="loginPass" autocomplete="current-password">
+        </div>
+        <button class="login-btn" id="loginBtn" onclick="doLogin()">Entrar</button>
+        <div class="login-footer">
+          Si no tienes cuenta, contacta con el administrador del centro
+          <br><button class="login-link" onclick="showRecovery()">¿Olvidaste tu contraseña?</button>
+        </div>
+      </div>
+
+      <!-- Vista: solicitar recuperación -->
+      <div id="recoveryForm" style="display:none">
+        <p class="login-sub">Introduce tu usuario y te enviaremos un enlace de recuperación.</p>
+        <div class="login-error" id="recoveryError"></div>
+        <div class="login-ok" id="recoveryOk"></div>
+        <div class="login-field">
+          <label>Usuario</label>
+          <input type="text" id="recoveryUser" autocomplete="username">
+        </div>
+        <button class="login-btn" id="recoveryBtn" onclick="requestReset()">Enviar correo de recuperación</button>
+        <div class="login-footer">
+          <button class="login-link" onclick="showLogin()">← Volver al inicio de sesión</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RESET CONTRASEÑA ══ -->
+<div class="page" id="pReset">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-icon" style="font-size:30px">🔑</div>
+      <h1>Nueva contraseña</h1>
+      <p class="login-sub">Elige una contraseña segura para tu cuenta</p>
+      <div class="login-error" id="resetError"></div>
       <div class="login-field">
-        <label>Usuario</label>
-        <input type="text" id="loginUser" autocomplete="username">
+        <label>Nueva contraseña</label>
+        <input type="password" id="resetPass1" autocomplete="new-password">
       </div>
       <div class="login-field">
-        <label>Contraseña</label>
-        <input type="password" id="loginPass" autocomplete="current-password">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="resetPass2" autocomplete="new-password">
       </div>
-      <button class="login-btn" id="loginBtn" onclick="doLogin()">Entrar</button>
-      <div class="login-footer">Si no tienes cuenta, contacta con el administrador del centro</div>
+      <button class="login-btn" id="resetBtn" onclick="doResetPassword()">Cambiar contraseña</button>
+      <div class="login-footer">
+        <button class="login-link" onclick="goBackToLogin()">← Volver al inicio de sesión</button>
+      </div>
     </div>
   </div>
 </div>
@@ -584,6 +631,7 @@
 <script defer src="js/docs-dpto.js"></script>
 <script defer src="js/pwa.js"></script>
 <script defer src="js/profile.js"></script>
+<script defer src="js/reset.js"></script>
 <script defer src="js/auth.js"></script>
 </body>
 </html>

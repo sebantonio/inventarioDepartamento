@@ -119,9 +119,13 @@ async function loadData(){
 // ─── INIT ────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeM();closeConf();closeAulasModal();closePrestar();closeDevolver();closeProfModal();closeImport()}});
-  // Enter en login
   ['loginUser','loginPass'].forEach(id=>{
     document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
   });
+  // Detectar enlace de recuperación de contraseña
+  if(location.hash.startsWith('#reset/')){
+    showResetPage(location.hash.slice(7));
+    return;
+  }
   loadData();
 });
