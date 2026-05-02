@@ -235,6 +235,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .ccard.add-new{border:2px dashed var(--border);background:transparent;color:var(--muted)}
 .ccard.add-new:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
 
+.ccard[style*="--ch"]:hover{border-color:var(--ch);background:var(--cbg)}
 .th-blue:hover{border-color:var(--accent);background:var(--accent-l)}
 .th-green:hover{border-color:var(--green);background:var(--green-l)}
 .th-amber:hover{border-color:var(--amber);background:var(--amber-l)}
@@ -472,9 +473,10 @@ textarea.fi-w{resize:vertical;min-height:60px}
     <div class="choice-grid" id="gAulas"></div>
     <div style="height:20px"></div>
     <div class="sec-label">
-      Categorías
+      Por categoría
       <button class="mini-btn" onclick="openCatsModal()">⚙️ Gestionar categorías</button>
     </div>
+    <div class="choice-grid" id="gCats"></div>
     <div style="height:20px"></div>
     <div class="sec-label">Por ciclo formativo</div>
     <div class="choice-grid" id="gCiclos"></div>
@@ -1173,6 +1175,12 @@ function goAula(id){
   openSub();
 }
 
+function goCat(name){
+  const c=CATS[name]||{c:'#6b7280',bg:'#f9fafb',i:'🔧'};
+  cf={type:'cat',id:name,label:name,icon:c.i,catColor:c.c,catBg:c.bg};
+  openSub();
+}
+
 function openCiclo(cicloId){
   currentCiclo = CICLOS.find(c=>c.id===cicloId);
   if(!currentCiclo) return;
@@ -1209,20 +1217,26 @@ function goMod(modId){
 function openSub(){
   const all=getBase();
   const low=all.filter(x=>Number(x.qty)<=Number(x.min)).length;
-  const tagC=cf.type==='aula'?'background:#eff6ff;color:#2563eb':'background:#f5f3ff;color:#7c3aed';
-  const typeLabel=cf.type==='aula'?'Aula':'Módulo';
+  let tagC, typeLabel;
+  if(cf.type==='aula'){tagC='background:#eff6ff;color:#2563eb';typeLabel='Aula';}
+  else if(cf.type==='cat'){tagC=`background:${cf.catBg};color:${cf.catColor}`;typeLabel='Categoría';}
+  else{tagC='background:#f5f3ff;color:#7c3aed';typeLabel='Módulo';}
   document.getElementById('sTag').textContent=`${cf.icon} ${typeLabel}`;
   document.getElementById('sTag').style.cssText=tagC;
   document.getElementById('sTitle').textContent=cf.label;
   if(cf.type==='aula'){
     const a = AULAS.find(x=>x.id===cf.id);
     document.getElementById('sMeta').textContent = `${a?.desc||''} · ${all.length} tipos · ${all.reduce((a2,x)=>a2+(Number(x.qty)||0),0)} unidades`;
+  } else if(cf.type==='cat'){
+    document.getElementById('sMeta').textContent = `${all.length} tipos · ${all.reduce((a2,x)=>a2+(Number(x.qty)||0),0)} unidades`;
   } else {
     document.getElementById('sMeta').textContent = `${cf.ciclo.name} · ${all.length} tipos · ${all.reduce((a2,x)=>a2+(Number(x.qty)||0),0)} unidades`;
   }
 
   // Breadcrumb
   if(cf.type==='aula'){
+    document.getElementById('bc').innerHTML=`<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><strong>${cf.icon} ${cf.label}</strong>`;
+  } else if(cf.type==='cat'){
     document.getElementById('bc').innerHTML=`<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><strong>${cf.icon} ${cf.label}</strong>`;
   } else {
     document.getElementById('bc').innerHTML=`<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><span class="bc-link" onclick="openCiclo('${cf.ciclo.id}')">${cf.ciclo.icon} ${cf.ciclo.name}</span><span class="sep">›</span><strong>${cf.label}</strong>`;
@@ -1264,6 +1278,19 @@ function renderHome(){
       <div class="ccard-desc">${a.desc}${w?`<div class="ccard-warn">⚠ ${w} stock bajo</div>`:''}</div>
     </div>`;
   }).join('');
+  const catEntries=Object.entries(CATS).filter(([name])=>items.some(x=>x.cat===name));
+  document.getElementById('gCats').innerHTML=catEntries.length
+    ? catEntries.map(([name,c])=>{
+        const n=items.filter(x=>x.cat===name).length;
+        const w=items.filter(x=>x.cat===name&&Number(x.qty)<=Number(x.min)).length;
+        return`<div class="ccard" style="--ch:${c.c};--cbg:${c.bg}" onclick="goCat('${name.replace(/'/g,"\\'")}')">
+          <span class="ccard-count">${n} ítems</span>
+          <div class="ccard-icon">${c.i}</div>
+          <div class="ccard-title">${name}</div>
+          <div class="ccard-desc">${w?`<div class="ccard-warn">⚠ ${w} stock bajo</div>`:''}</div>
+        </div>`;
+      }).join('')
+    : `<div class="empty" style="grid-column:1/-1;padding:32px;text-align:center;color:var(--muted);font-size:13px">No hay ítems clasificados por categoría aún.</div>`;
   document.getElementById('gCiclos').innerHTML=CICLOS.map(c=>{
     const n=items.filter(x=>x.mod && x.mod.startsWith(c.id+'__')).length;
     return`<div class="ccard ${c.th}" onclick="openCiclo('${c.id}')">
@@ -1292,6 +1319,7 @@ function renderSubStats(data,low){
 function getBase(){
   return items.filter(x=>{
     if(cf.type==='aula') return x.aula===cf.id;
+    if(cf.type==='cat') return x.cat===cf.id;
     return x.mod===cf.id;
   });
 }
