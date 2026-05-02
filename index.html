@@ -182,9 +182,16 @@
     <div class="sub-tag" id="sTag"></div>
     <div class="sub-title" id="sTitle"></div>
     <div class="sub-meta" id="sMeta"></div>
-    <button class="btn btn-p" style="margin-top:14px;padding:10px 22px;font-size:13px" onclick="openModal()">＋ Añadir ítem</button>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-p print-no" style="padding:10px 22px;font-size:13px" onclick="openModal()">＋ Añadir ítem</button>
+      <button class="btn print-no" style="padding:10px 22px;font-size:13px" onclick="printInv()">🖨️ Imprimir</button>
+    </div>
   </div>
   <div class="sub-body">
+    <div class="print-header">
+      <div class="print-header-title" id="printTitle"></div>
+      <div class="print-header-meta" id="printMeta"></div>
+    </div>
     <div class="stats-strip" id="sStats"></div>
     <div class="toolbar">
       <div class="sbox"><span class="si">🔍</span><input type="text" id="srch" placeholder="Buscar ítem, referencia..." oninput="renderInv()"></div>

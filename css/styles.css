@@ -427,3 +427,38 @@ textarea.fi-w{resize:vertical;min-height:60px}
   .gsearch-wrap{margin:16px 12px 0}
   .docs-dpto-body{height:calc(100vh - 58px - 200px)}
 }
+
+/* ── IMPRESIÓN ─────────────────────────────────────────── */
+.print-header{display:none}
+
+@media print{
+  @page{size:A4 landscape;margin:1.5cm}
+
+  /* Ocultar todo excepto la subpágina activa */
+  .topbar,.sub-header,.toolbar,.srow,.stats-strip,
+  .mbg,#toasts,.vtog,.print-no{display:none!important}
+
+  body{background:#fff;color:#000;font-size:11pt}
+  .page{display:none!important}
+  #pS.active,#pS.page{display:block!important}
+
+  .sub-body{max-width:100%!important;padding:0!important;margin:0!important}
+
+  /* Cabecera de impresión */
+  .print-header{
+    display:flex!important;justify-content:space-between;align-items:flex-end;
+    border-bottom:2px solid #1a1d2e;margin-bottom:14px;padding-bottom:8px
+  }
+  .print-header-title{font-size:16pt;font-weight:700}
+  .print-header-meta{font-size:9pt;color:#555;text-align:right;line-height:1.6}
+
+  /* Tabla */
+  .tw{box-shadow:none!important;border:1px solid #ccc!important}
+  .tw-scroll{overflow:visible!important;display:block!important}
+  table{min-width:100%!important;width:100%!important;font-size:9pt}
+  th{background:#f0f2f8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  tr{page-break-inside:avoid}
+
+  /* Ocultar columna de acciones */
+  th:last-child,td:last-child{display:none!important}
+}

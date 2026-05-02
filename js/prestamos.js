@@ -200,7 +200,6 @@ function openPrestar(itemId){
 function closePrestar(){ document.getElementById('mPrestar').classList.remove('open'); }
 
 async function confirmPrestar(){
-  console.log('[confirmPrestar] prestarItemId=', prestarItemId);
   if(prestarItemId===null||prestarItemId===undefined){ toast('Selecciona un ítem','err'); return; }
   const profId = document.getElementById('pres_prof').value;
   const cant = parseInt(document.getElementById('pres_cant').value)||0;

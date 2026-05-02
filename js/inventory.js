@@ -123,6 +123,23 @@ function exportCSV(){
 }
 
 // ═════════════════════════════════════════════════════════
+// IMPRIMIR
+// ═════════════════════════════════════════════════════════
+function printInv(){
+  const titulo = cf?.label || 'Inventario';
+  const total = getBase().length;
+  const uds = getBase().reduce((s,x)=>s+(Number(x.qty)||0),0);
+  const fecha = new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('printTitle').textContent = `${cf?.icon||'📦'} ${titulo}`;
+  document.getElementById('printMeta').innerHTML =
+    `IES El Bosco — Inventario Departamento<br>${total} tipos · ${uds} unidades<br>${fecha}`;
+  const prev = document.title;
+  document.title = `Inventario ${titulo}`;
+  window.print();
+  document.title = prev;
+}
+
+// ═════════════════════════════════════════════════════════
 // TOAST
 // ═════════════════════════════════════════════════════════
 function toast(msg,type='ok'){
