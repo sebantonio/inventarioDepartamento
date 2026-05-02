@@ -118,20 +118,22 @@ function doGet(e) {
 
     if (action === 'requestReset') {
       const usuario = e.parameter.usuario || '';
-      if (!usuario) return json({ ok: true });
+      if (!usuario) return json({ ok: false, error: 'Introduce un usuario' });
       const ss2 = SpreadsheetApp.getActiveSpreadsheet();
       const sheet2 = ss2.getSheetByName(SHEET_USUARIOS);
-      if (!sheet2) return json({ ok: true });
+      if (!sheet2) return json({ ok: false, error: 'Error interno. Contacta con el administrador.' });
       const rows2 = sheet2.getDataRange().getValues();
-      let userEmail = '', userName = '';
+      let userEmail = '', userName = '', userFound = false;
       for (let i = 1; i < rows2.length; i++) {
         if (String(rows2[i][0]).trim().toLowerCase() === String(usuario).trim().toLowerCase()) {
+          userFound = true;
           userEmail = String(rows2[i][4] || '').trim();
           userName  = String(rows2[i][2] || usuario).trim();
           break;
         }
       }
-      if (!userEmail) return json({ ok: true });
+      if (!userFound) return json({ ok: false, error: 'Usuario no encontrado.' });
+      if (!userEmail) return json({ ok: false, error: 'Este usuario no tiene correo asociado. Contacta con el administrador.' });
       const token   = Utilities.getUuid();
       const expires = Date.now() + 3600000;
       PropertiesService.getScriptProperties().setProperty('reset_' + token, JSON.stringify({ usuario: String(usuario).trim(), expires }));
