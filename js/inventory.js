@@ -66,7 +66,7 @@ function rTable(data,mc){
         <td style="color:var(--muted);font-size:12px" title="${x.util}">${x.util||'—'}</td>
         <td><div style="display:flex;gap:6px">
           <button class="btn btn-sm" onclick="openModal(${x.id})" title="Editar">✏️</button>
-          <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">📑</button>
+          <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">⧉</button>
           <button class="btn btn-sm btn-loan" 
              onclick="openPrestar(${x.id})" 
              title="Prestar"
