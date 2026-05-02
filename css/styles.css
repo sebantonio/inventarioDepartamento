@@ -280,13 +280,46 @@ select:focus,.fi:focus{border-color:var(--accent)}
 .vbtn{background:none;border:none;padding:5px 10px;border-radius:6px;color:var(--muted);cursor:pointer;font-size:14px;transition:all .15s}
 .vbtn.on{background:var(--white);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
-.tw{width:100%;background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh)}
-.tw-scroll{overflow-x:auto;overflow-y:hidden;width:100%;display:block;scrollbar-width:auto;scrollbar-color:#cbd5e1 var(--surface2)}
+.tw{
+  width:100%;
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  box-shadow:var(--sh);
+}
+
+/* CONTENEDOR SCROLL */
+.tw-scroll{
+  overflow-x:auto;
+  overflow-y:hidden;
+  width:100%;
+  display:block;
+  scrollbar-width:auto;
+  scrollbar-color:#cbd5e1 var(--surface2);
+}
+
 .tw-scroll::-webkit-scrollbar{height:12px}
 .tw-scroll::-webkit-scrollbar-track{background:var(--surface2)}
 .tw-scroll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:6px}
-table{min-width:1400px;width:max-content;border-collapse:collapse}
-td:last-child{white-space:nowrap;min-width:180px}
+
+/* 🔥 CLAVE: SOLO TABLAS CON SCROLL */
+.tw-scroll table{
+  min-width:1400px;
+  width:max-content;
+  border-collapse:collapse;
+}
+
+/* 🔥 EVITAR COMPRESIÓN */
+.tw-scroll th,
+.tw-scroll td{
+  white-space:nowrap;
+  max-width:none;
+}
+
+/* 🔥 COLUMNA ACCIONES */
+.tw-scroll td:last-child{
+  min-width:200px;
+}
 thead{background:var(--surface2)}
 th{padding:11px 13px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);text-align:left;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);transition:color .15s}
 th:hover{color:var(--text)}
