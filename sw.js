@@ -1,5 +1,6 @@
-const CACHE = 'inventario-fp-v1';
+const CACHE = 'inventario-fp-v2';
 const SHELL = [
+  './',
   './index.html',
   './css/styles.css',
   './js/config.js',
@@ -54,8 +55,9 @@ self.addEventListener('fetch', e => {
           }
           return res;
         })
-        .catch(() => {
-          if(e.request.destination === 'document') return caches.match('./index.html');
+        .catch(async () => {
+          if(e.request.destination === 'document')
+            return (await caches.match('./')) || caches.match('./index.html');
         });
     })
   );
