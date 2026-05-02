@@ -120,6 +120,25 @@ function _fillPrestarInfo(item){
     </div>`;
 }
 
+function _buildPresItemOptions(filtered){
+  document.getElementById('pres_item').innerHTML =
+    '<option value="">— Seleccionar ítem —</option>' +
+    filtered.map(x=>`<option value="${x.id}">${x.item}${x.ref?' ['+x.ref+']':''} · ${x.qty} uds.</option>`).join('');
+}
+
+function filterPresItems(){
+  const aulaVal = document.getElementById('pres_filtAula').value;
+  const q = document.getElementById('pres_filtQ').value.toLowerCase().trim();
+  let filtered = items.filter(x=>Number(x.qty)>0);
+  if(aulaVal) filtered = filtered.filter(x=>String(x.aula)===String(aulaVal));
+  if(q) filtered = filtered.filter(x=>(x.item+' '+(x.ref||'')).toLowerCase().includes(q));
+  filtered.sort((a,b)=>a.item.localeCompare(b.item));
+  _buildPresItemOptions(filtered);
+  // reset selection
+  prestarItemId = null;
+  document.getElementById('prestarItemInfo').innerHTML='<div style="color:var(--muted);font-size:13px">Selecciona un ítem para ver su información</div>';
+}
+
 function onPresItemChange(val){
   if(!val){ prestarItemId=null; document.getElementById('prestarItemInfo').innerHTML='<div style="color:var(--muted);font-size:13px">Selecciona un ítem para ver su información</div>'; return; }
   const item = items.find(x=>String(x.id)===String(val));
@@ -154,11 +173,13 @@ function openPrestar(itemId){
   } else {
     prestarItemId = null;
     selector.style.display = '';
-    document.getElementById('pres_item').innerHTML = '<option value="">— Seleccionar ítem —</option>' +
-      items.filter(x=>Number(x.qty)>0)
-           .sort((a,b)=>a.item.localeCompare(b.item))
-           .map(x=>`<option value="${x.id}">${x.item}${x.ref?' ['+x.ref+']':''} · ${x.qty} uds.</option>`)
-           .join('');
+    // Filtro de aulas
+    document.getElementById('pres_filtAula').innerHTML = '<option value="">Todas las aulas</option>' +
+      AULAS.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+    document.getElementById('pres_filtQ').value = '';
+    // Lista de ítems (todos con stock, ordenados)
+    const disponibles = items.filter(x=>Number(x.qty)>0).sort((a,b)=>a.item.localeCompare(b.item));
+    _buildPresItemOptions(disponibles);
     document.getElementById('prestarItemInfo').innerHTML = '<div style="color:var(--muted);font-size:13px">Selecciona un ítem para ver su información</div>';
     document.getElementById('pres_aulaDest').innerHTML = '<option value="">— Sin especificar —</option>';
     document.getElementById('pres_cant').value = 1;
