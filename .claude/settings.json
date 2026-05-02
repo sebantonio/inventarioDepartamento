@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path \"c:\\\\OneDrive\\\\OneDrive - Consejería de Educación, Cultura y Deportes Castilla La-Mancha\\\\DOCUMENTOS DEL BOSCO\\\\Curso 2025-2026\\\\Pagina inventario Departamento\" -Recurse)",
-      "Bash(Select-Object -Property FullName)"
+      "Bash(Select-Object -Property FullName)",
+      "Read(//c/Users/seban/.claude/**)"
     ]
   }
 }

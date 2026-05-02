@@ -236,9 +236,15 @@
         <hr class="docs-sep">
         <div class="docs-lbl">📎 Documentación adjunta</div>
         <input type="file" id="f_doc_input" multiple style="display:none" onchange="addDocFiles(this.files);this.value=''">
-        <button type="button" class="doc-drop" onclick="document.getElementById('f_doc_input').click()">
-          <span style="font-size:20px">📁</span><span>Subir archivos — fotos, PDFs, fichas técnicas...</span>
-        </button>
+        <input type="file" id="f_cam_input" accept="image/*" capture="environment" style="display:none" onchange="addDocFiles(this.files);this.value=''">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('f_doc_input').click()">
+            <span style="font-size:20px">📁</span><span>Subir archivos</span>
+          </button>
+          <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('f_cam_input').click()">
+            <span style="font-size:20px">📷</span><span>Hacer foto</span>
+          </button>
+        </div>
         <div class="doc-list" id="f_doc_list"></div>
       </div>
     </div>
