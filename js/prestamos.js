@@ -18,6 +18,7 @@ function getVencidos(){
 }
 
 function goPrestamos(tab){
+  _push({page:'prestamos'}, '#prestamos');
   cf=null; currentCiclo=null;
   if(tab) currentPresTab = tab;
   document.getElementById('btnN').style.display='none';
@@ -198,6 +199,7 @@ function openPrestar(itemId){
 function closePrestar(){ document.getElementById('mPrestar').classList.remove('open'); }
 
 async function confirmPrestar(){
+  console.log('[confirmPrestar] prestarItemId=', prestarItemId);
   if(prestarItemId===null||prestarItemId===undefined){ toast('Selecciona un ítem','err'); return; }
   const profId = document.getElementById('pres_prof').value;
   const cant = parseInt(document.getElementById('pres_cant').value)||0;
@@ -228,8 +230,7 @@ async function confirmPrestar(){
     const res = await apiPost({action:'prestar', prestamo:pres});
     if(!res.ok) throw new Error(res.error);
     prestamos.push(res.prestamo);
-    // Actualizar stock localmente
-    const i = items.findIndex(x=>x.id===item.id);
+    const i = items.findIndex(x=>Number(x.id)===Number(item.id));
     items[i].qty = Number(items[i].qty) - cant;
     closePrestar();
     toast(`Préstamo registrado: ${cant} × ${item.item}`,'ok');

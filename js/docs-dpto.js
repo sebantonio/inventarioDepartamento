@@ -4,6 +4,7 @@
 const DOCS_DPTO_URL = 'https://crfpcastilla.sharepoint.com/:f:/r/sites/EPT13000220E01-Dpto.ElectricidadyElectrnica/Documentos%20compartidos/Dpto.%20Electricidad%20y%20Electr%C3%B3nica/Normativa?csf=1&web=1&e=8XRgS6';
 
 function goDocsDpto(){
+  _push({page:'docs'}, '#docs');
   cf = null; currentCiclo = null;
   document.getElementById('bc').innerHTML = `<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><strong>📂 Documentación</strong>`;
   document.getElementById('btnN').style.display = 'none';

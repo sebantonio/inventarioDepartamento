@@ -1,7 +1,14 @@
 // ═════════════════════════════════════════════════════════
-// NAVEGACIÓN
+// NAVEGACIÓN + HASH ROUTING
 // ═════════════════════════════════════════════════════════
+let _skipHistory = false;
+
+function _push(state, hash){
+  if(!_skipHistory) history.pushState(state, '', hash || './');
+}
+
 function goHome(){
+  _push({page:'home'}, './');
   cf=null; currentCiclo=null;
   document.getElementById('bc').innerHTML='';
   document.getElementById('btnN').style.display='flex';
@@ -11,17 +18,20 @@ function goHome(){
 }
 
 function goAula(id){
+  _push({page:'aula', id}, '#aula/'+id);
   cf={type:'aula',id,label:AULAS.find(a=>a.id===id)?.name,icon:AULAS.find(a=>a.id===id)?.icon};
   openSub();
 }
 
 function goCat(name){
+  _push({page:'cat', id:name}, '#cat/'+encodeURIComponent(name));
   const c=CATS[name]||{c:'#6b7280',bg:'#f9fafb',i:'🔧'};
   cf={type:'cat',id:name,label:name,icon:c.i,catColor:c.c,catBg:c.bg};
   openSub();
 }
 
 function openCiclo(cicloId){
+  _push({page:'ciclo', id:cicloId}, '#ciclo/'+cicloId);
   currentCiclo = CICLOS.find(c=>c.id===cicloId);
   if(!currentCiclo) return;
   cf=null;
@@ -48,6 +58,7 @@ function openCiclo(cicloId){
 }
 
 function goMod(modId){
+  _push({page:'mod', id:modId}, '#mod/'+encodeURIComponent(modId));
   const m = findModulo(modId);
   if(!m) return;
   cf={type:'mod',id:modId,label:m.name,icon:m.ciclo.icon,ciclo:m.ciclo};
@@ -90,3 +101,25 @@ function openSub(){
   document.getElementById('fCat').innerHTML='<option value="">Todas las categorías</option>'+cats.map(c=>`<option>${c}</option>`).join('');
   show('pS'); renderInv(); renderSubStats(all,low);
 }
+
+// ─── HASH ROUTING ─────────────────────────────────────────
+function navigateFromHash(hash){
+  if(!hash || hash === '#' || hash === '#home') { goHome(); return; }
+  const h = hash.replace(/^#/, '');
+  const [seg, ...rest] = h.split('/');
+  const id = decodeURIComponent(rest.join('/'));
+  if(seg === 'prestamos')  { goPrestamos(); return; }
+  if(seg === 'docs')       { goDocsDpto(); return; }
+  if(seg === 'aula' && id) { goAula(id); return; }
+  if(seg === 'cat'  && id) { goCat(id); return; }
+  if(seg === 'ciclo'&& id) { openCiclo(id); return; }
+  if(seg === 'mod'  && id) { goMod(id); return; }
+  goHome();
+}
+
+window.addEventListener('popstate', function(){
+  if(!SESSION) return;
+  _skipHistory = true;
+  navigateFromHash(location.hash);
+  _skipHistory = false;
+});

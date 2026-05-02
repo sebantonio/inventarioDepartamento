@@ -103,7 +103,8 @@ async function loadData(){
     document.getElementById('btnPres').style.display='flex';
     document.getElementById('btnPed').style.display='flex';
     updatePedBadge();
-    if(cf) openSub(); else if(currentCiclo) openCiclo(currentCiclo.id); else { show('pH'); renderHome(); }
+    if(location.hash && location.hash.length > 1) navigateFromHash(location.hash);
+    else if(cf) openSub(); else if(currentCiclo) openCiclo(currentCiclo.id); else { show('pH'); renderHome(); }
   }catch(err){
     console.error(err);
     setConn('err','Error de conexión');
