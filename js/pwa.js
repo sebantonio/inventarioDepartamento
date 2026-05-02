@@ -25,9 +25,8 @@ if('serviceWorker' in navigator){
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  // Mostrar botón de instalación en la topbar
   const btn = document.getElementById('btnInstall');
-  if(btn) btn.style.display = 'flex';
+  if(btn && document.getElementById('pH').classList.contains('active')) btn.style.display = 'flex';
 });
 
 window.addEventListener('appinstalled', () => {

@@ -104,7 +104,7 @@ async function loadData(){
     document.getElementById('btnPed').style.display='flex';
     updatePedBadge();
     if(location.hash && location.hash.length > 1) navigateFromHash(location.hash);
-    else if(cf) openSub(); else if(currentCiclo) openCiclo(currentCiclo.id); else { show('pH'); renderHome(); }
+    else if(cf) openSub(); else if(currentCiclo) openCiclo(currentCiclo.id); else goHome();
   }catch(err){
     console.error(err);
     setConn('err','Error de conexión');

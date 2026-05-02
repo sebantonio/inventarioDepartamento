@@ -23,6 +23,7 @@ function goPrestamos(tab){
   if(tab) currentPresTab = tab;
   document.getElementById('btnN').style.display='none';
   document.getElementById('btnE').style.display='none';
+  _hideHomeButtons();
   document.getElementById('bc').innerHTML=`<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><strong>📋 Préstamos</strong>`;
 
   // Stats

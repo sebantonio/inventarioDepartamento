@@ -9,6 +9,7 @@ function goDocsDpto(){
   document.getElementById('bc').innerHTML = `<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><strong>📂 Documentación</strong>`;
   document.getElementById('btnN').style.display = 'none';
   document.getElementById('btnE').style.display = 'none';
+  _hideHomeButtons();
 
   // Intentar cargar el iframe; si falla (X-Frame-Options), mostrar fallback
   const iframe = document.getElementById('docsIframe');

@@ -7,12 +7,22 @@ function _push(state, hash){
   if(!_skipHistory) history.pushState(state, '', hash || './');
 }
 
+function _showHomeButtons(){
+  document.getElementById('btnImp').style.display = 'flex';
+  if(deferredInstallPrompt) document.getElementById('btnInstall').style.display = 'flex';
+}
+function _hideHomeButtons(){
+  document.getElementById('btnImp').style.display = 'none';
+  document.getElementById('btnInstall').style.display = 'none';
+}
+
 function goHome(){
   _push({page:'home'}, './');
   cf=null; currentCiclo=null;
   document.getElementById('bc').innerHTML='';
   document.getElementById('btnN').style.display='flex';
   document.getElementById('btnE').style.display='none';
+  _showHomeButtons();
   gsClear();
   show('pH'); renderHome();
 }
@@ -37,6 +47,7 @@ function openCiclo(cicloId){
   cf=null;
   document.getElementById('btnN').style.display='flex';
   document.getElementById('btnE').style.display='none';
+  _hideHomeButtons();
   document.getElementById('cicloTag').textContent = `${currentCiclo.icon} ${currentCiclo.nivel}`;
   document.getElementById('cicloTitle').textContent = currentCiclo.name;
   document.getElementById('cicloMeta').textContent = currentCiclo.desc;
@@ -95,6 +106,7 @@ function openSub(){
 
   document.getElementById('btnN').style.display='flex';
   document.getElementById('btnE').style.display='flex';
+  _hideHomeButtons();
   document.getElementById('srch').value='';
   document.getElementById('fEst').value='';
   const cats=[...new Set(all.map(x=>x.cat).filter(Boolean))].sort();
