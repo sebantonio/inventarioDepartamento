@@ -159,8 +159,8 @@ function openPrestar(itemId){
 
   const selector = document.getElementById('prestarItemSelector');
 
-  if(itemId){
-    const item = items.find(x=>x.id===itemId);
+  if(itemId!==undefined && itemId!==null){
+    const item = items.find(x=>Number(x.id)===Number(itemId));
     if(!item) return;
     if(Number(item.qty)<=0){ toast('No hay stock disponible para prestar','err'); return; }
     prestarItemId = itemId;
@@ -198,15 +198,16 @@ function openPrestar(itemId){
 function closePrestar(){ document.getElementById('mPrestar').classList.remove('open'); }
 
 async function confirmPrestar(){
-  if(!prestarItemId){ toast('Selecciona un ítem','err'); return; }
+  if(prestarItemId===null||prestarItemId===undefined){ toast('Selecciona un ítem','err'); return; }
   const profId = document.getElementById('pres_prof').value;
   const cant = parseInt(document.getElementById('pres_cant').value)||0;
   if(!profId){ toast('Selecciona un profesor','err'); return; }
   if(cant<=0){ toast('Cantidad inválida','err'); return; }
 
-  const item = items.find(x=>x.id===prestarItemId);
+  const item = items.find(x=>Number(x.id)===Number(prestarItemId));
   const prof = profesores.find(p=>Number(p.id)===Number(profId));
-  if(!item || !prof) return;
+  if(!item){ toast('Ítem no encontrado','err'); return; }
+  if(!prof){ toast('Profesor no encontrado','err'); return; }
   if(cant > Number(item.qty)){ toast(`Solo hay ${item.qty} disponible(s)`,'err'); return; }
 
   const pres = {
