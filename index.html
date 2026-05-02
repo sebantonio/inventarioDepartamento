@@ -4,7 +4,14 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inventario Taller Electricidad/Electrónica FP — IES Juan Bosco</title>
+<title>Inventario Taller FP — IES Juan Bosco</title>
+<meta name="description" content="Gestión de inventario del departamento de Electricidad y Electrónica">
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Inventario FP">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
@@ -24,6 +31,7 @@
     <button class="tbtn" id="btnPed" style="display:none" onclick="openPedidos()">🛒 Pedidos<span class="pedido-badge" id="pedBadge" style="display:none">0</span></button>
     <button class="tbtn" id="btnE" style="display:none" onclick="exportCSV()">📥 CSV</button>
     <button class="tbtn" id="btnImp" onclick="openImportModal()">📤 Importar</button>
+    <button class="tbtn" id="btnInstall" style="display:none" onclick="installPWA()" title="Instalar app">📲 Instalar</button>
     <button class="tbtn" id="btnReload" onclick="loadData()" title="Recargar">🔄</button>
     <div class="user-chip" id="userChip" style="display:none">
       <div class="user-avatar" id="userAvatar"></div>
@@ -502,6 +510,7 @@
 <script src="js/import.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/docs-dpto.js"></script>
+<script src="js/pwa.js"></script>
 <script src="js/auth.js"></script>
 </body>
 </html>
