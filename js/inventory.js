@@ -16,6 +16,7 @@ function getBase(){
   return items.filter(x=>{
     if(cf.type==='aula') return x.aula===cf.id;
     if(cf.type==='cat') return x.cat===cf.id;
+    if(cf.type==='lowstock') return Number(x.qty)<=Number(x.min);
     return x.mod===cf.id;
   });
 }

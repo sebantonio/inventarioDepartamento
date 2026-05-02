@@ -198,7 +198,7 @@ function impRenderPreview(){
     // Defaults
     if(!item.aula) { item.aula = aulaFallback; aulaCambiada = true; }
     if(item.qty == null) item.qty = 1;
-    if(item.min == null) item.min = 0;
+    if(item.min == null) item.min = 1;
     if(!item.est) item.est = 'Bueno';
     if(!item.cat) item.cat = 'Otros';
     item.mod = item.mod || '';
