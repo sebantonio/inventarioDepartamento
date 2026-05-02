@@ -111,39 +111,63 @@ function renderPrestamos(){
 }
 
 // ─── PRESTAR ─────────────────────────────────────────────
-function openPrestar(itemId){
-  const item = items.find(x=>x.id===itemId);
-  if(!item) return;
-  if(Number(item.qty)<=0){ toast('No hay stock disponible para prestar','err'); return; }
-  if(!profesores.length){
-    if(confirm('No hay profesores registrados. ¿Quieres añadir alguno ahora?')){
-      openProfModal();
-    }
-    return;
-  }
-  prestarItemId = itemId;
-
+function _fillPrestarInfo(item){
   document.getElementById('prestarItemInfo').innerHTML = `
     <div style="font-weight:700;font-size:14px;margin-bottom:4px">${item.item}</div>
     <div style="font-size:12px;color:var(--muted)">
       ${item.ref?`<span style="font-family:var(--mono);background:var(--white);padding:2px 6px;border-radius:4px;margin-right:8px">${item.ref}</span>`:''}
       Stock disponible: <strong style="color:var(--accent)">${item.qty} unidades</strong>
     </div>`;
+}
 
-  // Profesores
+function onPresItemChange(val){
+  if(!val){ prestarItemId=null; document.getElementById('prestarItemInfo').innerHTML='<div style="color:var(--muted);font-size:13px">Selecciona un ítem para ver su información</div>'; return; }
+  const item = items.find(x=>String(x.id)===String(val));
+  if(!item) return;
+  prestarItemId = item.id;
+  _fillPrestarInfo(item);
+  document.getElementById('pres_aulaDest').innerHTML = '<option value="">— Sin especificar —</option>' +
+    AULAS.filter(a=>a.id!==item.aula).map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+  document.getElementById('pres_cant').max = item.qty;
+  document.getElementById('pres_cant').value = 1;
+}
+
+function openPrestar(itemId){
+  if(!profesores.length){
+    if(confirm('No hay profesores registrados. ¿Quieres añadir alguno ahora?')){ openProfModal(); }
+    return;
+  }
+
+  const selector = document.getElementById('prestarItemSelector');
+
+  if(itemId){
+    const item = items.find(x=>x.id===itemId);
+    if(!item) return;
+    if(Number(item.qty)<=0){ toast('No hay stock disponible para prestar','err'); return; }
+    prestarItemId = itemId;
+    selector.style.display = 'none';
+    _fillPrestarInfo(item);
+    document.getElementById('pres_aulaDest').innerHTML = '<option value="">— Sin especificar —</option>' +
+      AULAS.filter(a=>a.id!==item.aula).map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+    document.getElementById('pres_cant').value = 1;
+    document.getElementById('pres_cant').max = item.qty;
+  } else {
+    prestarItemId = null;
+    selector.style.display = '';
+    document.getElementById('pres_item').innerHTML = '<option value="">— Seleccionar ítem —</option>' +
+      items.filter(x=>Number(x.qty)>0)
+           .sort((a,b)=>a.item.localeCompare(b.item))
+           .map(x=>`<option value="${x.id}">${x.item}${x.ref?' ['+x.ref+']':''} · ${x.qty} uds.</option>`)
+           .join('');
+    document.getElementById('prestarItemInfo').innerHTML = '<div style="color:var(--muted);font-size:13px">Selecciona un ítem para ver su información</div>';
+    document.getElementById('pres_aulaDest').innerHTML = '<option value="">— Sin especificar —</option>';
+    document.getElementById('pres_cant').value = 1;
+    document.getElementById('pres_cant').max = 9999;
+  }
+
   document.getElementById('pres_prof').innerHTML = '<option value="">— Seleccionar —</option>' +
     profesores.map(p=>`<option value="${p.id}">${p.nombre}${p.departamento?' ('+p.departamento+')':''}</option>`).join('');
 
-  // Aulas destino
-  document.getElementById('pres_aulaDest').innerHTML = '<option value="">— Sin especificar —</option>' +
-    AULAS.filter(a=>a.id!==item.aula).map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
-
-  // Cantidad por defecto 1, máximo qty
-  const cantInput = document.getElementById('pres_cant');
-  cantInput.value = 1;
-  cantInput.max = item.qty;
-
-  // Fecha por defecto: dentro de 7 días
   const f = new Date(); f.setDate(f.getDate()+7);
   document.getElementById('pres_fecha').value = f.toISOString().split('T')[0];
   document.getElementById('pres_obs').value = '';
@@ -153,6 +177,7 @@ function openPrestar(itemId){
 function closePrestar(){ document.getElementById('mPrestar').classList.remove('open'); }
 
 async function confirmPrestar(){
+  if(!prestarItemId){ toast('Selecciona un ítem','err'); return; }
   const profId = document.getElementById('pres_prof').value;
   const cant = parseInt(document.getElementById('pres_cant').value)||0;
   if(!profId){ toast('Selecciona un profesor','err'); return; }

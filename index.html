@@ -70,6 +70,7 @@
     <p>Selecciona un aula o un ciclo formativo para ver su inventario</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">
       <button class="btn btn-p" style="padding:11px 24px;font-size:14px" onclick="openModal()">＋ Añadir ítem rápido</button>
+      <button class="btn" style="padding:11px 24px;font-size:14px;border-color:var(--amber);color:var(--amber)" onclick="openPrestar()">📤 Nuevo préstamo</button>
       <a class="btn" href="javascript:void(0)" onclick="goDocsDpto()" style="display:inline-flex;padding:11px 24px;font-size:14px;border-color:#0891b2;color:#0891b2;text-decoration:none">📂 Documentación</a>
     </div>
     <div class="gsearch-wrap" id="gsWrap">
@@ -155,6 +156,7 @@
     </div>
     <div class="toolbar">
       <div class="sbox"><span class="si">🔍</span><input type="text" id="presSearch" placeholder="Buscar por ítem o profesor..." oninput="renderPrestamos()"></div>
+      <button class="btn btn-loan" onclick="openPrestar()">＋ Nuevo préstamo</button>
       <button class="btn" onclick="openProfModal()">👥 Gestionar profesores</button>
     </div>
     <div id="presContent"></div>
@@ -262,6 +264,10 @@
 <div class="mbg" id="mPrestar" onclick="if(event.target===this)closePrestar()">
   <div class="modal" style="width:min(500px,100%)">
     <div class="mh"><div class="mt">📤 Prestar material</div><button class="mx" onclick="closePrestar()">✕</button></div>
+    <div id="prestarItemSelector" style="display:none;margin-bottom:14px">
+      <label class="fl">Ítem a prestar *</label>
+      <select class="fi-w" id="pres_item" onchange="onPresItemChange(this.value)"></select>
+    </div>
     <div id="prestarItemInfo" style="background:var(--accent-l);border:1px solid #93c5fd;border-radius:10px;padding:12px 14px;margin-bottom:18px"></div>
     <div class="fg">
       <div class="full"><label class="fl">Profesor que pide *</label>
