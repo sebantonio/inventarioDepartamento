@@ -44,12 +44,13 @@ function duplicateItem(id){
 }
 
 function _autoRef(name){
-  const prefix = name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z]/g,'').slice(0,3);
+  const clean = name.normalize('NFD').split('').filter(c=>c.charCodeAt(0)<0x300||c.charCodeAt(0)>0x36F).join('');
+  const prefix = clean.replace(/[^a-zA-Z]/g,'').slice(0,3);
   if(!prefix) return '';
   const cap = prefix.charAt(0).toUpperCase() + prefix.slice(1).toLowerCase();
-  const pat = new RegExp(`^${cap}-\\d+$`);
+  const pat = new RegExp('^' + cap + '-\\d+$');
   const nums = items.filter(x=>x.id!==eid).map(x=>x.ref||'').filter(r=>pat.test(r)).map(r=>parseInt(r.split('-')[1])||0);
-  return `${cap}-${nums.length ? Math.max(...nums)+1 : 1}`;
+  return cap + '-' + (nums.length ? Math.max(...nums)+1 : 1);
 }
 function closeM(){document.getElementById('mItem').classList.remove('open')}
 
