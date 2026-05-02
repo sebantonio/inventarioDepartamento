@@ -68,6 +68,7 @@ function rTable(data,mc){
           <button class="btn btn-sm btn-loan" onclick="openPrestar(${x.id})" title="Prestar" ${Number(x.qty)<=0?'disabled style="opacity:0.4;cursor:not-allowed"':''}>📤</button>
           <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="${isPedido(x.id)?'Quitar del pedido':'Añadir al pedido'}">🛒</button>
           ${x.est!=='Baja'?`<button class="btn btn-sm btn-baja" onclick="openBaja(${x.id})" title="Dar de baja">⛔</button>`:''}
+          <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">📋</button>
           <button class="btn btn-sm" onclick="openModal(${x.id})">✏️</button>
           <button class="btn btn-sm btn-d" onclick="confDel(${x.id})">🗑</button>
         </div></td>
@@ -99,6 +100,7 @@ function rCards(data,mc){
         <button class="btn btn-sm btn-loan" onclick="openPrestar(${x.id})" ${Number(x.qty)<=0?'disabled style="opacity:0.4;cursor:not-allowed"':''}>📤 Prestar</button>
         <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="Pedido">🛒</button>
         ${x.est!=='Baja'?`<button class="btn btn-sm btn-baja" onclick="openBaja(${x.id})">⛔</button>`:''}
+        <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">📋</button>
         <button class="btn btn-sm" onclick="openModal(${x.id})">✏️</button>
         <button class="btn btn-sm btn-d" onclick="confDel(${x.id})">🗑</button>
       </div>

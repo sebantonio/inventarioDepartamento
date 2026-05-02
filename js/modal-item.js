@@ -15,17 +15,16 @@ function updateModSelect(){
   sel.innerHTML='<option value="">Sin asignar</option>'+c.modulos.map(m=>`<option value="${cId}__${m.cod}">${m.cod} — ${m.name}</option>`).join('');
 }
 
-function openModal(id=null){
+function openModal(id=null, src=null){
   eid=id; fillModalSelects();
-  const m=id?items.find(x=>x.id===id):null;
-  document.getElementById('mT').textContent=id?'Editar ítem':'Nuevo ítem';
-  document.getElementById('f_ref').value=m?.ref||'';
+  const m = id ? items.find(x=>x.id===id) : src;
+  document.getElementById('mT').textContent = id ? 'Editar ítem' : src ? '📋 Duplicar ítem' : 'Nuevo ítem';
+  document.getElementById('f_ref').value = id ? (m?.ref||'') : '';
   document.getElementById('f_aula').value=m?.aula||(cf?.type==='aula'?cf.id:AULAS[0]?.id);
   document.getElementById('f_item').value=m?.item||'';
-  document.getElementById('f_qty').value=m?.qty??1;
+  document.getElementById('f_qty').value = id ? (m?.qty??1) : 1;
   document.getElementById('f_min').value=m?.min??0;
   document.getElementById('f_cat').value=m?.cat||Object.keys(CATS)[0]||'Componentes electrónicos';
-  // ciclo y módulo
   const itemCiclo = m?.mod ? m.mod.split('__')[0] : (cf?.type==='mod' ? cf.ciclo.id : '');
   document.getElementById('f_ciclo').value = itemCiclo;
   updateModSelect();
@@ -38,13 +37,28 @@ function openModal(id=null){
   initDocSection(id);
   document.getElementById('mItem').classList.add('open');
 }
+
+function duplicateItem(id){
+  const src = items.find(x=>x.id===id);
+  if(src) openModal(null, src);
+}
+
+function _autoRef(name){
+  const prefix = name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z]/g,'').slice(0,3);
+  if(!prefix) return '';
+  const cap = prefix.charAt(0).toUpperCase() + prefix.slice(1).toLowerCase();
+  const pat = new RegExp(`^${cap}-\\d+$`);
+  const nums = items.filter(x=>x.id!==eid).map(x=>x.ref||'').filter(r=>pat.test(r)).map(r=>parseInt(r.split('-')[1])||0);
+  return `${cap}-${nums.length ? Math.max(...nums)+1 : 1}`;
+}
 function closeM(){document.getElementById('mItem').classList.remove('open')}
 
 async function saveItem(){
   const name=document.getElementById('f_item').value.trim();
   if(!name){toast('El nombre es obligatorio','err');return}
+  const refRaw = document.getElementById('f_ref').value.trim();
   const v={
-    ref:document.getElementById('f_ref').value.trim(),
+    ref: refRaw || _autoRef(name),
     aula:document.getElementById('f_aula').value,
     item:name,
     qty:parseInt(document.getElementById('f_qty').value)||0,
