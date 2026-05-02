@@ -137,6 +137,7 @@ function navigateFromHash(hash){
   const h = hash.replace(/^#/, '');
   const [seg, ...rest] = h.split('/');
   const id = decodeURIComponent(rest.join('/'));
+  if(seg === 'profile')    { goProfile(); return; }
   if(seg === 'prestamos')  { goPrestamos(); return; }
   if(seg === 'lowstock')   { goLowStock(); return; }
   if(seg === 'docs')       { goDocsDpto(); return; }

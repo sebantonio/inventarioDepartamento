@@ -39,12 +39,69 @@
       <button class="tbtn" id="btnReload" onclick="loadData()" title="Recargar">🔄</button>
     </div>
     <div class="user-chip" id="userChip" style="display:none">
-      <div class="user-avatar" id="userAvatar"></div>
-      <span id="userName"></span>
+      <div class="user-chip-info" onclick="goProfile()" title="Ver mi perfil">
+        <div class="user-avatar" id="userAvatar"></div>
+        <span id="userName"></span>
+      </div>
       <button class="user-logout" onclick="logout()" title="Cerrar sesión">⏻</button>
     </div>
   </div>
 </nav>
+
+<!-- ══ PERFIL ══ -->
+<div class="page" id="pProfile">
+  <div class="profile-wrap">
+    <div class="profile-avatar-big" id="profAvatar"></div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">👤 Información de perfil</div>
+      <div class="fg">
+        <div>
+          <label class="fl">Usuario</label>
+          <div class="profile-readonly" id="profUser"></div>
+        </div>
+        <div>
+          <label class="fl">Rol</label>
+          <div class="profile-readonly" id="profRol"></div>
+        </div>
+        <div class="full">
+          <label class="fl">Nombre completo</label>
+          <input class="fi-w" type="text" id="profNombre" placeholder="Tu nombre completo" autocomplete="name">
+        </div>
+        <div class="full">
+          <label class="fl">Correo electrónico</label>
+          <input class="fi-w" type="email" id="profEmail" placeholder="tu@correo.es" autocomplete="email">
+        </div>
+      </div>
+      <div class="mf" style="margin-top:18px">
+        <div></div>
+        <button class="btn btn-p" id="btnSavePerfil" onclick="saveProfile()">💾 Guardar cambios</button>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">🔑 Cambiar contraseña</div>
+      <div class="fg">
+        <div class="full">
+          <label class="fl">Contraseña actual</label>
+          <input class="fi-w" type="password" id="profPassOld" autocomplete="current-password">
+        </div>
+        <div>
+          <label class="fl">Nueva contraseña</label>
+          <input class="fi-w" type="password" id="profPassNew" autocomplete="new-password">
+        </div>
+        <div>
+          <label class="fl">Confirmar contraseña</label>
+          <input class="fi-w" type="password" id="profPassConf" autocomplete="new-password">
+        </div>
+      </div>
+      <div class="mf" style="margin-top:18px">
+        <div></div>
+        <button class="btn" id="btnChangePass" onclick="doChangePassword()" style="border-color:var(--acc2);color:var(--acc2)">🔑 Cambiar contraseña</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══ LOGIN ══ -->
 <div class="page" id="pLogin">
@@ -526,6 +583,7 @@
 <script defer src="js/nav.js"></script>
 <script defer src="js/docs-dpto.js"></script>
 <script defer src="js/pwa.js"></script>
+<script defer src="js/profile.js"></script>
 <script defer src="js/auth.js"></script>
 </body>
 </html>

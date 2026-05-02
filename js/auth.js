@@ -36,7 +36,8 @@ async function doLogin(){
       usuario: usuario,
       password: password,
       nombre: res.user.nombre || usuario,
-      rol: res.user.rol || 'profesor'
+      rol: res.user.rol || 'profesor',
+      email: res.user.email || ''
     };
     localStorage.setItem('inv_session', JSON.stringify(SESSION));
     document.getElementById('loginUser').value = '';

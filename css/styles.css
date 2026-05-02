@@ -79,9 +79,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
 /* USER MENU */
 .user-chip{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;background:var(--surface2);border-radius:20px;font-size:12px;font-weight:600}
+.user-chip-info{display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:16px;padding:2px 6px 2px 0;transition:background .15s}
+.user-chip-info:hover{background:var(--border)}
 .user-avatar{width:24px;height:24px;background:linear-gradient(135deg,var(--accent),var(--acc2));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
 .user-logout{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0 4px;transition:color .15s}
 .user-logout:hover{color:var(--red)}
+
+/* PERFIL */
+.profile-wrap{max-width:600px;margin:0 auto;padding:32px 24px 48px}
+.profile-avatar-big{width:80px;height:80px;background:linear-gradient(135deg,var(--accent),var(--acc2));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;font-weight:800;margin:0 auto 24px;box-shadow:0 4px 20px rgba(37,99,235,.25)}
+.profile-section{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:var(--sh)}
+.profile-section-title{font-size:15px;font-weight:800;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.profile-readonly{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:13px;color:var(--muted);font-weight:600}
 
 /* PRESTAMO BUTTONS */
 .btn-loan{background:var(--amber);border-color:var(--amber);color:#fff}
