@@ -65,12 +65,12 @@ function rTable(data,mc){
         <td>${x.est?`<span class="edot"><span class="dot" style="background:${ec}"></span>${x.est}</span>`:'—'}</td>
         <td style="color:var(--muted);font-size:12px" title="${x.util}">${x.util||'—'}</td>
         <td><div style="display:flex;gap:6px">
-          <button class="btn btn-sm btn-loan" onclick="openPrestar(${x.id})" title="Prestar" ${Number(x.qty)<=0?'disabled style="opacity:0.4;cursor:not-allowed"':''}>📤</button>
+          <button class="btn btn-sm" onclick="openModal(${x.id})" title="Editar">✏️</button>
+          <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">📋</button>
+          <button class="btn btn-sm btn-loan" onclick="openPrestar(${x.id})" title="Prestar" ${Number(x.qty)<=0?'disabled style="opacity:0.4;cursor:not-allowed"':''}><img src="icons/prestar.png" style="width:16px;height:16px;vertical-align:middle"></button>
           <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="${isPedido(x.id)?'Quitar del pedido':'Añadir al pedido'}">🛒</button>
           ${x.est!=='Baja'?`<button class="btn btn-sm btn-baja" onclick="openBaja(${x.id})" title="Dar de baja">⛔</button>`:''}
-          <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">📋</button>
-          <button class="btn btn-sm" onclick="openModal(${x.id})">✏️</button>
-          <button class="btn btn-sm btn-d" onclick="confDel(${x.id})">🗑</button>
+          <button class="btn btn-sm btn-d" onclick="confDel(${x.id})" title="Eliminar">🗑</button>
         </div></td>
       </tr>`;
     }).join('')}</tbody>
@@ -97,12 +97,12 @@ function rCards(data,mc){
       </div>
       ${x.obs?`<div class="cobs">💬 ${x.obs}</div>`:''}
       <div class="cfoot">
-        <button class="btn btn-sm btn-loan" onclick="openPrestar(${x.id})" ${Number(x.qty)<=0?'disabled style="opacity:0.4;cursor:not-allowed"':''}>📤 Prestar</button>
+        <button class="btn btn-sm" onclick="openModal(${x.id})" title="Editar">✏️</button>
+        <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">📋</button>
+        <button class="btn btn-sm btn-loan" onclick="openPrestar(${x.id})" ${Number(x.qty)<=0?'disabled style="opacity:0.4;cursor:not-allowed"':''}><img src="icons/prestar.png" style="width:16px;height:16px;vertical-align:middle"> Prestar</button>
         <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="Pedido">🛒</button>
         ${x.est!=='Baja'?`<button class="btn btn-sm btn-baja" onclick="openBaja(${x.id})">⛔</button>`:''}
-        <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">📋</button>
-        <button class="btn btn-sm" onclick="openModal(${x.id})">✏️</button>
-        <button class="btn btn-sm btn-d" onclick="confDel(${x.id})">🗑</button>
+        <button class="btn btn-sm btn-d" onclick="confDel(${x.id})" title="Eliminar">🗑</button>
       </div>
     </div>`;
   }).join('')}</div>`;
