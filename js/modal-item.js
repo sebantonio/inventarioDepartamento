@@ -23,7 +23,7 @@ function openModal(id=null){
   document.getElementById('f_aula').value=m?.aula||(cf?.type==='aula'?cf.id:AULAS[0]?.id);
   document.getElementById('f_item').value=m?.item||'';
   document.getElementById('f_qty').value=m?.qty??1;
-  document.getElementById('f_min').value=m?.min??1;
+  document.getElementById('f_min').value=m?.min??0;
   document.getElementById('f_cat').value=m?.cat||Object.keys(CATS)[0]||'Componentes electrónicos';
   // ciclo y módulo
   const itemCiclo = m?.mod ? m.mod.split('__')[0] : (cf?.type==='mod' ? cf.ciclo.id : '');
