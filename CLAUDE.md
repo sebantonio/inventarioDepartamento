@@ -26,7 +26,7 @@ config → state → api → docs → search → home → inventory → modal-it
 - `js/modal-cats.js` — openCatsModal(), saveCats()
 - `js/prestamos.js` — renderPrestamos(), openPrestar(), openDevolver(), saveProfesores(), openPresDevModal(), closePresDevModal()
 - `js/import.js` — openImportModal(), parseCSV(), impDoImport()
-- `js/docs.js` — loadItemDocs(), addDocFiles(), uploadPendingDocs()
+- `js/docs.js` — loadItemDocs(), addDocFiles(), uploadPendingDocs(), openDocsModal(itemId), closeDocsModal(), saveDocsModal()
 - `js/docs-dpto.js` — goDocsDpto(), DOCS_DPTO_URL (SharePoint)
 - `js/pwa.js` — SW registration, beforeinstallprompt, installPWA()
 - `js/profile.js` — goProfile(), saveProfile(), doChangePassword()
@@ -51,6 +51,7 @@ config → state → api → docs → search → home → inventory → modal-it
 - Barra de progreso #loadBar: se activa en loadData() antes del await apiGet(), se cierra en finally
 - loadData() hace `show('pH')` ANTES del await apiGet() para evitar pantalla en blanco
 - El Departamento como módulo genérico: `id:'departamento'`, módulo `cod:'dpto'` → se guarda como `departamento__dpto`
+- `Number('dpto')` = NaN → la búsqueda en hoja Modulos no encuentra nada → no se envía email de préstamo (comportamiento correcto, no tiene responsable de módulo)
 
 ## Botón combinado Prestar/Devolver (implementado 2026-05-03)
 En rTable y rCards de inventory.js, el botón 🔁 llama a `openPresDevModal(itemId)` (en prestamos.js).
@@ -71,6 +72,20 @@ for(let i=1;i<usersData.length;i++){
 // Luego: jefeEmails.join(',') para CC, o jefeEmails.join(',') para TO en pedidos
 ```
 NO usar `break` tras encontrar el primero. Colectar en array y usar `.join(',')`.
+
+## Modal de documentación independiente (implementado 2026-05-03)
+- `#mDocs` en index.html — modal propio para ver/subir/eliminar docs de un ítem
+- Botón 📌 en tabla y tarjetas llama a `openDocsModal(itemId)`
+- Estado propio: `_dmItem`, `_dmActuales`, `_dmPendientes` (no comparte estado con modal de edición)
+- `saveDocsModal()` sube pendientes vía `action=uploadDoc` y refresca la lista
+
+## Otras mejoras (implementadas 2026-05-03)
+- Ciclo y módulo **obligatorios** en `saveItem()` — toast de error si no están seleccionados
+- Botón "Nuevo préstamo" en subheader de `pS` (aulas/categorías/módulos)
+- Cabecera tabla "Acciones" (antes "Acc.")
+- `deploy.ps1` — script PowerShell para commit+push a GitHub con mensaje descriptivo interactivo
+- `action=notificarPedido` en GAS — email al Jefe Departamento al añadir ítem al carrito 🛒
+- `action=devolver` — email al responsable del módulo + profesor que tomó prestado + CC todos los Jefes
 
 ## Funcionalidades implementadas (estado 2026-05-03)
 - Login / logout / recuperación de contraseña por email (reset.js)
