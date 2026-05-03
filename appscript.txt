@@ -346,29 +346,42 @@ function doPost(e) {
       presSheet.appendRow(HEADERS_PRES.map(h => pres[h] != null ? pres[h] : ''));
 
       // ── Notificación email al responsable del módulo ────────────
+      const emailDebug = { moduloCod: pres.moduloCod, moduloNombre: pres.moduloNombre };
       if (pres.moduloCod) {
         try {
           const modSheet = ss.getSheetByName(SHEET_MODULOS);
+          emailDebug.hojaModulos = modSheet ? 'encontrada' : 'NO ENCONTRADA';
           if (modSheet) {
             const modRows = modSheet.getDataRange().getValues();
+            emailDebug.filasModulos = modRows.length - 1;
             let responsableNombre = '';
             for (let i = 1; i < modRows.length; i++) {
               if (String(modRows[i][0]).trim() === String(pres.moduloCod).trim()) {
-                responsableNombre = String(modRows[i][2] || '').trim(); // col C
+                responsableNombre = String(modRows[i][2] || '').trim();
+                emailDebug.filaEncontrada = i + 1;
+                emailDebug.colA = String(modRows[i][0]).trim();
+                emailDebug.colC = responsableNombre;
                 break;
               }
             }
-            if (responsableNombre) {
+            if (!responsableNombre) {
+              emailDebug.error = 'Código no encontrado en hoja Modulos col A';
+              emailDebug.codigosDisponibles = modRows.slice(1).map(r => String(r[0]).trim()).filter(Boolean);
+            } else {
               const usrSheet = ss.getSheetByName(SHEET_USUARIOS);
               const usrRows = usrSheet.getDataRange().getValues();
               let responsableEmail = '';
               for (let i = 1; i < usrRows.length; i++) {
                 if (String(usrRows[i][2] || '').trim() === responsableNombre) {
                   responsableEmail = String(usrRows[i][4] || '').trim();
+                  emailDebug.emailEncontrado = responsableEmail || '(vacío)';
                   break;
                 }
               }
-              if (responsableEmail) {
+              if (!responsableEmail) {
+                emailDebug.error = `Profesor "${responsableNombre}" no encontrado en Usuarios o sin email`;
+                emailDebug.nombresUsuarios = usrRows.slice(1).map(r => String(r[2]).trim()).filter(Boolean);
+              } else {
                 const qty = Number(pres.cantidad);
                 MailApp.sendEmail({
                   to: responsableEmail,
@@ -387,15 +400,16 @@ function doPost(e) {
                     <p style="color:#6b7280;font-size:12px">Inventario Taller FP — IES El Bosco</p>
                   </div>`
                 });
+                emailDebug.enviado = true;
               }
             }
           }
         } catch(emailErr) {
-          // Email no fatal — el préstamo ya está registrado
+          emailDebug.excepcion = emailErr.toString();
         }
       }
 
-      return json({ ok: true, prestamo: pres });
+      return json({ ok: true, prestamo: pres, emailDebug });
     }
 
     if (action === 'devolver') {

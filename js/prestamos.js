@@ -232,6 +232,7 @@ async function confirmPrestar(){
   try {
     const res = await apiPost({action:'prestar', prestamo:pres});
     if(!res.ok) throw new Error(res.error);
+    if(res.emailDebug) console.log('[EMAIL DEBUG]', res.emailDebug);
     prestamos.push(res.prestamo);
     const i = items.findIndex(x=>Number(x.id)===Number(item.id));
     items[i].qty = Number(items[i].qty) - cant;
