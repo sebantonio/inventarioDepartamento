@@ -382,8 +382,17 @@ function doPost(e) {
                 emailDebug.error = `Profesor "${responsableNombre}" no encontrado en Usuarios o sin email`;
                 emailDebug.nombresUsuarios = usrRows.slice(1).map(r => String(r[2]).trim()).filter(Boolean);
               } else {
+                // Buscar email del Jefe de Departamento para CC
+                let jefeEmail = '';
+                for (let i = 1; i < usrRows.length; i++) {
+                  if (String(usrRows[i][3] || '').trim() === 'Jefe Departamento') {
+                    jefeEmail = String(usrRows[i][4] || '').trim();
+                    break;
+                  }
+                }
+                emailDebug.jefeCc = jefeEmail || '(no encontrado)';
                 const qty = Number(pres.cantidad);
-                MailApp.sendEmail({
+                const mailOpts = {
                   to: responsableEmail,
                   subject: `Préstamo de material — ${pres.itemNombre}`,
                   htmlBody: `<div style="font-family:sans-serif;max-width:500px;padding:24px;color:#1a1d2e">
@@ -398,7 +407,9 @@ function doPost(e) {
                     </table>
                     <p style="color:#6b7280;font-size:12px">Inventario Taller FP — IES El Bosco</p>
                   </div>`
-                });
+                };
+                if (jefeEmail && jefeEmail !== responsableEmail) mailOpts.cc = jefeEmail;
+                MailApp.sendEmail(mailOpts);
                 emailDebug.enviado = true;
               }
             }
