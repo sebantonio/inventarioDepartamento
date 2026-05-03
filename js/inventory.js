@@ -51,7 +51,7 @@ function th2(k,l){const i=k===sk?(sa?'▲':'▼'):'↕';return`<th onclick="sort
 
 function rTable(data,mc){
   mc.innerHTML=`<div class="tw"><div class="tw-scroll"><table>
-    <thead><tr>${th2('ref','Ref.')}${th2('aula','Aula')}${th2('item','Ítem')}${th2('qty','Cant.')}<th>Mín.</th>${th2('cat','Categoría')}${th2('loc','Ubicación')}${th2('est','Estado')}${th2('util','Utilidad')}<th>Acc.</th></tr></thead>
+    <thead><tr>${th2('ref','Ref.')}${th2('aula','Aula')}${th2('item','Ítem')}${th2('qty','Cant.')}<th>Mín.</th>${th2('cat','Categoría')}${th2('loc','Ubicación')}${th2('est','Estado')}${th2('util','Utilidad')}<th>Acciones</th></tr></thead>
     <tbody>${data.map(x=>{
       const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280';
       return`<tr>
@@ -67,6 +67,7 @@ function rTable(data,mc){
         <td><div style="display:flex;gap:6px">
           <button class="btn btn-sm" onclick="openModal(${x.id})" title="Editar">✏️</button>
           <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">⧉</button>
+          <button class="btn btn-sm" onclick="openModal(${x.id})" title="Documentación">📎</button>
           <button class="btn btn-sm btn-loan" 
              onclick="openPrestar(${x.id})" 
              title="Prestar"
@@ -105,6 +106,7 @@ function rCards(data,mc){
       <div class="cfoot">
         <button class="btn btn-sm" onclick="openModal(${x.id})" title="Editar">✏️</button>
         <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">📋</button>
+        <button class="btn btn-sm" onclick="openModal(${x.id})" title="Documentación">📎</button>
         <button class="btn btn-sm btn-loan" onclick="openPrestar(${x.id})" title="Prestar" ${Number(x.qty)<=0?'disabled style="opacity:0.4;cursor:not-allowed"':''}><img src="icons/prestar.png" style="width:16px;height:16px;vertical-align:middle"></button>
         <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="Pedido">🛒</button>
         ${x.est!=='Baja'?`<button class="btn btn-sm btn-baja" onclick="openBaja(${x.id})">⛔</button>`:''}
