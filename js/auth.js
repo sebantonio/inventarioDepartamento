@@ -79,7 +79,11 @@ function showUserChip(){
 async function loadData(){
   if(!SESSION){show('pLogin');setConn('','Sin sesión');return}
   showUserChip();
+  show('pH');
   setConn('loading','Cargando...');
+  const bar = document.getElementById('loadBar');
+  bar.className = ''; bar.style.width = '0'; bar.offsetWidth;
+  bar.className = 'is-loading';
   try{
     const res = await apiGet();
     if(!res.ok){
@@ -113,6 +117,9 @@ async function loadData(){
       show('pH');
       document.getElementById('hStats').innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">⚠️</div><div class="et">No se pudo conectar.<br><small>${err.message}</small></div></div>`;
     }
+  }finally{
+    bar.className = 'is-done';
+    setTimeout(()=>{bar.className='';bar.style.width='0';}, 500);
   }
 }
 
