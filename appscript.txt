@@ -448,12 +448,94 @@ function doPost(e) {
 
       const nuevaDevuelta = yaDevuelta + cantDev;
       presSheet.getRange(rPres, 13).setValue(nuevaDevuelta);
+      const estadoFinal = nuevaDevuelta >= cantPrestada ? 'Devuelto' : 'Parcial';
       if (nuevaDevuelta >= cantPrestada) {
         presSheet.getRange(rPres, 12).setValue(Utilities.formatDate(new Date(), 'GMT', 'yyyy-MM-dd'));
         presSheet.getRange(rPres, 14).setValue('Devuelto');
       } else {
         presSheet.getRange(rPres, 14).setValue('Parcial');
       }
+
+      // ── Notificación email devolución ───────────────────────────
+      try {
+        const itemNombre   = String(presRow[2] || '');
+        const profesorId   = Number(presRow[6]);
+        const profesorNombre = String(presRow[7] || '');
+        const fechaPrestamo  = presRow[9] || '—';
+
+        // Email del profesor que tomó prestado (hoja Profesores)
+        const profSheet = ss.getSheetByName(SHEET_PROFESORES);
+        let profesorEmail = '';
+        if (profSheet) {
+          const profRows = profSheet.getDataRange().getValues();
+          for (let i = 1; i < profRows.length; i++) {
+            if (Number(profRows[i][0]) === profesorId) {
+              profesorEmail = String(profRows[i][3] || '').trim();
+              break;
+            }
+          }
+        }
+
+        // Email del responsable del módulo (Inventario → Modulos → Usuarios)
+        let responsableNombre = '', responsableEmail = '', jefeEmail = '';
+        if (rInv >= 0) {
+          const invRowFull = invSheet.getRange(rInv, 1, 1, HEADERS_INV.length).getValues()[0];
+          const modField = String(invRowFull[3] || '');
+          const modCod = modField.includes('__') ? modField.split('__')[1] : '';
+          if (modCod) {
+            const modSheet = ss.getSheetByName(SHEET_MODULOS);
+            if (modSheet) {
+              const modRows = modSheet.getDataRange().getValues();
+              for (let i = 1; i < modRows.length; i++) {
+                if (Number(modRows[i][0]) === Number(modCod)) {
+                  responsableNombre = String(modRows[i][2] || '').trim();
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        // Emails de Usuarios (responsable + jefe)
+        const usrSheet = ss.getSheetByName(SHEET_USUARIOS);
+        if (usrSheet) {
+          const usrRows = usrSheet.getDataRange().getValues();
+          for (let i = 1; i < usrRows.length; i++) {
+            const nombre = String(usrRows[i][2] || '').trim();
+            const rol    = String(usrRows[i][3] || '').trim();
+            const email  = String(usrRows[i][4] || '').trim();
+            if (responsableNombre && nombre === responsableNombre) responsableEmail = email;
+            if (rol === 'Jefe Departamento') jefeEmail = email;
+          }
+        }
+
+        // Construir destinatarios (sin duplicados)
+        const toSet = new Set([responsableEmail, profesorEmail].filter(e => e));
+        if (toSet.size > 0) {
+          const htmlBody = `<div style="font-family:sans-serif;max-width:500px;padding:24px;color:#1a1d2e">
+            <h2 style="color:#059669;margin-bottom:16px">📥 Devolución de material</h2>
+            <p>Se ha registrado una devolución de material:</p>
+            <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px">
+              <tr><td style="padding:6px 12px;color:#6b7280">Material:</td><td style="padding:6px 12px;font-weight:700">${itemNombre}</td></tr>
+              <tr style="background:#f8fafc"><td style="padding:6px 12px;color:#6b7280">Devuelto por:</td><td style="padding:6px 12px">${profesorNombre}</td></tr>
+              <tr><td style="padding:6px 12px;color:#6b7280">Cantidad devuelta:</td><td style="padding:6px 12px">${cantDev} unidad${cantDev!==1?'es':''}</td></tr>
+              <tr style="background:#f8fafc"><td style="padding:6px 12px;color:#6b7280">Estado préstamo:</td><td style="padding:6px 12px;font-weight:700;color:${estadoFinal==='Devuelto'?'#059669':'#d97706'}">${estadoFinal}</td></tr>
+              <tr><td style="padding:6px 12px;color:#6b7280">Fecha préstamo:</td><td style="padding:6px 12px">${fechaPrestamo}</td></tr>
+            </table>
+            <p style="color:#6b7280;font-size:12px">Inventario Taller FP — IES El Bosco</p>
+          </div>`;
+          const mailOpts = {
+            to: [...toSet].join(','),
+            subject: `Devolución de material — ${itemNombre}`,
+            htmlBody
+          };
+          if (jefeEmail && !toSet.has(jefeEmail)) mailOpts.cc = jefeEmail;
+          MailApp.sendEmail(mailOpts);
+        }
+      } catch(emailErr) {
+        // No fatal
+      }
+
       return json({ ok: true });
     }
 
