@@ -366,6 +366,26 @@
   </div>
 </div>
 
+<!-- MODAL DOCS -->
+<div class="mbg" id="mDocs" onclick="if(event.target===this)closeDocsModal()">
+  <div class="modal" style="width:min(520px,100%)">
+    <div class="mh"><div class="mt" id="docsModalTitle">📎 Documentación</div><button class="mx" onclick="closeDocsModal()">✕</button></div>
+    <div class="mb" style="padding:20px;display:flex;flex-direction:column;gap:12px">
+      <div class="doc-list" id="dm_doc_list"></div>
+      <input type="file" id="dm_doc_input" multiple style="display:none" onchange="addDocsModalFiles(this.files);this.value=''">
+      <input type="file" id="dm_cam_input" accept="image/*" capture="environment" style="display:none" onchange="addDocsModalFiles(this.files);this.value=''">
+      <div style="display:flex;gap:8px">
+        <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('dm_doc_input').click()"><span style="font-size:18px">📁</span><span>Subir archivos</span></button>
+        <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('dm_cam_input').click()"><span style="font-size:18px">📷</span><span>Hacer foto</span></button>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeDocsModal()">Cerrar</button>
+      <button class="btn btn-p" id="btnDocsSave" onclick="saveDocsModal()">💾 Guardar documentos</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PRESTAR -->
 <div class="mbg" id="mPrestar" onclick="if(event.target===this)closePrestar()">
   <div class="modal" style="width:min(500px,100%)">
