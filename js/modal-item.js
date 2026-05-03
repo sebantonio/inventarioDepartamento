@@ -57,6 +57,8 @@ function closeM(){document.getElementById('mItem').classList.remove('open')}
 async function saveItem(){
   const name=document.getElementById('f_item').value.trim();
   if(!name){toast('El nombre es obligatorio','err');return}
+  if(!document.getElementById('f_ciclo').value){toast('El ciclo es obligatorio','err');return}
+  if(!document.getElementById('f_mod').value){toast('El módulo es obligatorio','err');return}
   const refRaw = document.getElementById('f_ref').value.trim();
   const v={
     ref: refRaw || _autoRef(name),
