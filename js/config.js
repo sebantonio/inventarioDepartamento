@@ -119,6 +119,17 @@ const CICLOS = [
       {cod:'0526',name:'Proyecto intermodular SEA',horas:0},
     ]
   },
+  ,{
+    id:'departamento',
+    name:'Departamento',
+    nivel:'',
+    icon:'🏛️',
+    th:'th-pink',
+    desc:'Material genérico del departamento',
+    modulos:[
+      {cod:'dpto',name:'Departamento',horas:0},
+    ]
+  }
 ];
 
 // Helper para encontrar un módulo por su id (formato: cicloId__codigo)
