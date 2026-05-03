@@ -208,10 +208,12 @@ function updatePedBadge(){
 }
 
 function togglePedido(id){
-  if(pedidos[id]){ delete pedidos[id]; }
-  else {
+  if(pedidos[id]){
+    delete pedidos[id];
+  } else {
     const it = items.find(x=>x.id===id);
     pedidos[id] = { qty: Math.max(1, (Number(it?.min)||1) - (Number(it?.qty)||0)), nota:'' };
+    if(it) apiPost({action:'notificarPedido', item:{id:it.id, item:it.item, ref:it.ref, aula:AULAS.find(a=>a.id===it.aula)?.name||it.aula, qty:it.qty, min:it.min}}).catch(()=>{});
   }
   savePedidosLocal();
   updatePedBadge();

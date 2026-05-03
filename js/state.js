@@ -1,7 +1,7 @@
 // ═════════════════════════════════════════════════════════
 // ESTADO
 // ═════════════════════════════════════════════════════════
-let API_URL = 'https://script.google.com/macros/s/AKfycbxq-MatNCl9RJ96ESSmOzSqe9rZrEuU_RE7BCn0G2DbiI17QJ5IXwZppCc14JfGdZveIw/exec';
+let API_URL = 'https://script.google.com/macros/s/AKfycbyoDjMzdjaNzOX4w8OGxT2zNahOiVvM6N5SLYdAI1Q2pd8tmR2e1zzXfhcQP35B-Zj9Jg/exec';
 let SESSION = JSON.parse(localStorage.getItem('inv_session') || 'null');
 let items = [];
 let profesores = [];

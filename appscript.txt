@@ -529,6 +529,42 @@ function doPost(e) {
       return json({ ok: false, error: 'Usuario no encontrado' });
     }
 
+    // ─── NOTIFICAR PEDIDO ────────────────────────────────────────
+    if (action === 'notificarPedido') {
+      try {
+        const usrSheet = ss.getSheetByName(SHEET_USUARIOS);
+        const usrRows = usrSheet.getDataRange().getValues();
+        let jefeEmail = '';
+        for (let i = 1; i < usrRows.length; i++) {
+          if (String(usrRows[i][3] || '').trim() === 'Jefe Departamento') {
+            jefeEmail = String(usrRows[i][4] || '').trim();
+            break;
+          }
+        }
+        if (jefeEmail) {
+          const it = body.item || {};
+          const aula = it.aula || '—';
+          MailApp.sendEmail({
+            to: jefeEmail,
+            subject: `Solicitud de compra — ${it.item || 'material'}`,
+            htmlBody: `<div style="font-family:sans-serif;max-width:500px;padding:24px;color:#1a1d2e">
+              <h2 style="color:#d97706;margin-bottom:16px">🛒 Nuevo ítem en lista de compra</h2>
+              <p>Se ha añadido un ítem a la lista de solicitud de compra:</p>
+              <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px">
+                <tr><td style="padding:6px 12px;color:#6b7280">Material:</td><td style="padding:6px 12px;font-weight:700">${it.item||'—'}</td></tr>
+                <tr style="background:#f8fafc"><td style="padding:6px 12px;color:#6b7280">Referencia:</td><td style="padding:6px 12px;font-family:monospace">${it.ref||'—'}</td></tr>
+                <tr><td style="padding:6px 12px;color:#6b7280">Aula:</td><td style="padding:6px 12px">${aula}</td></tr>
+                <tr style="background:#f8fafc"><td style="padding:6px 12px;color:#6b7280">Stock actual:</td><td style="padding:6px 12px;color:#dc2626;font-weight:700">${it.qty}</td></tr>
+                <tr><td style="padding:6px 12px;color:#6b7280">Stock mínimo:</td><td style="padding:6px 12px">${it.min}</td></tr>
+              </table>
+              <p style="color:#6b7280;font-size:12px">Inventario Taller FP — IES El Bosco</p>
+            </div>`
+          });
+        }
+      } catch(e) {}
+      return json({ ok: true });
+    }
+
     return json({ ok: false, error: 'Acción desconocida' });
   } catch (err) {
     return json({ ok: false, error: err.toString() });
