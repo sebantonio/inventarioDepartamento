@@ -247,6 +247,8 @@ function openDevolver(presId){
   const p = prestamos.find(x=>Number(x.id)===Number(presId));
   if(!p) return;
   devolverPresId = presId;
+  const btn = document.getElementById('btnDevolverSave');
+  btn.disabled = false; btn.textContent = '📥 Confirmar devolución';
   const pendiente = Number(p.cantidad) - Number(p.cantidadDevuelta||0);
 
   document.getElementById('devolverInfo').innerHTML = `
@@ -366,4 +368,50 @@ async function saveProfesores(){
   } catch(err){
     toast('Error: '+err.message,'err');
   }
+}
+
+// ─── PICKER PRESTAR / DEVOLVER ────────────────────────────
+let _pickerItemId = null;
+
+function openPresDevModal(itemId){
+  const item = items.find(x=>Number(x.id)===Number(itemId));
+  if(!item) return;
+  _pickerItemId = itemId;
+
+  document.getElementById('pickerItemName').textContent = item.item;
+
+  const btnPrestar = document.getElementById('pickerBtnPrestar');
+  const noStock = Number(item.qty) <= 0;
+  btnPrestar.disabled = noStock;
+  btnPrestar.style.opacity = noStock ? '0.4' : '1';
+
+  const activeLoans = prestamos.filter(p=>
+    Number(p.itemId)===Number(itemId) &&
+    (p.estado==='Activo'||p.estado==='Parcial')
+  );
+
+  const loansEl = document.getElementById('pickerLoans');
+  if(activeLoans.length){
+    loansEl.innerHTML =
+      `<div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600">Préstamos activos:</div>` +
+      activeLoans.map(p=>{
+        const pendiente = Number(p.cantidad) - Number(p.cantidadDevuelta||0);
+        const venc = isVencido(p);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg);border-radius:8px;gap:8px;margin-bottom:6px;border:1px solid var(--border)">
+          <div style="font-size:13px">
+            <strong>${p.profesorNombre}</strong>
+            <div style="font-size:11px;color:${venc?'var(--red)':'var(--muted)'};margin-top:2px">${pendiente} ud${pendiente!==1?'s':''} · devolver: ${p.fechaPrevista||'—'}${venc?' ⚠ Vencido':''}</div>
+          </div>
+          <button class="btn btn-sm btn-return" onclick="closePresDevModal();openDevolver(${p.id})">📥 Devolver</button>
+        </div>`;
+      }).join('');
+  } else {
+    loansEl.innerHTML = `<div style="font-size:13px;color:var(--muted);text-align:center;padding:8px 0">Sin préstamos activos</div>`;
+  }
+
+  document.getElementById('mPresDevPicker').classList.add('open');
+}
+
+function closePresDevModal(){
+  document.getElementById('mPresDevPicker').classList.remove('open');
 }

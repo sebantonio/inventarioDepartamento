@@ -418,6 +418,17 @@
   </div>
 </div>
 
+<!-- MODAL PICKER PRESTAR / DEVOLVER -->
+<div class="mbg" id="mPresDevPicker" onclick="if(event.target===this)closePresDevModal()">
+  <div class="modal" style="width:min(400px,100%)">
+    <div class="mh"><div class="mt" id="pickerItemName">Material</div><button class="mx" onclick="closePresDevModal()">✕</button></div>
+    <div style="padding:4px 0 8px">
+      <button class="btn btn-p" id="pickerBtnPrestar" style="width:100%;justify-content:center;margin-bottom:14px" onclick="closePresDevModal();openPrestar(_pickerItemId)">📤 Nuevo préstamo</button>
+      <div id="pickerLoans"></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL DEVOLVER -->
 <div class="mbg" id="mDevolver" onclick="if(event.target===this)closeDevolver()">
   <div class="modal" style="width:min(440px,100%)">
