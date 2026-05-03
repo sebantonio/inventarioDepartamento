@@ -395,7 +395,6 @@ function doPost(e) {
                       <tr style="background:#f8fafc"><td style="padding:6px 12px;color:#6b7280">Cantidad:</td><td style="padding:6px 12px">${qty} unidad${qty!==1?'es':''}</td></tr>
                       <tr><td style="padding:6px 12px;color:#6b7280">Prestado a:</td><td style="padding:6px 12px">${pres.profesorNombre}</td></tr>
                       <tr style="background:#f8fafc"><td style="padding:6px 12px;color:#6b7280">Devolución prevista:</td><td style="padding:6px 12px">${pres.fechaPrevista||'—'}</td></tr>
-                      <tr><td style="padding:6px 12px;color:#6b7280">Gestionado por:</td><td style="padding:6px 12px">${pres.gestionadoPor}</td></tr>
                     </table>
                     <p style="color:#6b7280;font-size:12px">Inventario Taller FP — IES El Bosco</p>
                   </div>`

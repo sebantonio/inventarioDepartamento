@@ -99,7 +99,6 @@ function renderPrestamos(){
           <span class="pres-pill ${pillClass}">${p.estado}${venc&&p.estado!=='Devuelto'?' (vencido)':''}</span>
         </div>
         ${p.obs?`<div style="font-size:11px;color:var(--muted);margin-top:4px">💬 ${p.obs}</div>`:''}
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">Gestionado por: ${p.gestionadoPor||'—'}</div>
       </div>
       <div class="pres-actions">
         <div class="pres-qty-info">
