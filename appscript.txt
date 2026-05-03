@@ -10,6 +10,7 @@ const SHEET_PRESTAMOS  = 'Prestamos';
 const SHEET_AULAS      = 'Aulas';
 const SHEET_CATS       = 'Categorias';
 const SHEET_DOCS       = 'Documentos';
+const SHEET_MODULOS    = 'Modulos';
 
 const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','obs'];
 const HEADERS_USR   = ['usuario','password','nombre','rol','email'];
@@ -343,6 +344,57 @@ function doPost(e) {
       pres.cantidadDevuelta = 0;
       pres.estado = 'Activo';
       presSheet.appendRow(HEADERS_PRES.map(h => pres[h] != null ? pres[h] : ''));
+
+      // ── Notificación email al responsable del módulo ────────────
+      if (pres.moduloCod) {
+        try {
+          const modSheet = ss.getSheetByName(SHEET_MODULOS);
+          if (modSheet) {
+            const modRows = modSheet.getDataRange().getValues();
+            let responsableNombre = '';
+            for (let i = 1; i < modRows.length; i++) {
+              if (String(modRows[i][0]).trim() === String(pres.moduloCod).trim()) {
+                responsableNombre = String(modRows[i][2] || '').trim(); // col C
+                break;
+              }
+            }
+            if (responsableNombre) {
+              const usrSheet = ss.getSheetByName(SHEET_USUARIOS);
+              const usrRows = usrSheet.getDataRange().getValues();
+              let responsableEmail = '';
+              for (let i = 1; i < usrRows.length; i++) {
+                if (String(usrRows[i][2] || '').trim() === responsableNombre) {
+                  responsableEmail = String(usrRows[i][4] || '').trim();
+                  break;
+                }
+              }
+              if (responsableEmail) {
+                const qty = Number(pres.cantidad);
+                MailApp.sendEmail({
+                  to: responsableEmail,
+                  subject: `Préstamo de material — ${pres.itemNombre}`,
+                  htmlBody: `<div style="font-family:sans-serif;max-width:500px;padding:24px;color:#1a1d2e">
+                    <h2 style="color:#2563eb;margin-bottom:16px">📦 Préstamo de material</h2>
+                    <p>Hola <strong>${responsableNombre}</strong>,</p>
+                    <p>Se ha registrado un préstamo de material del módulo <strong>${pres.moduloNombre}</strong>:</p>
+                    <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px">
+                      <tr><td style="padding:6px 12px;color:#6b7280">Material:</td><td style="padding:6px 12px;font-weight:700">${pres.itemNombre}</td></tr>
+                      <tr style="background:#f8fafc"><td style="padding:6px 12px;color:#6b7280">Cantidad:</td><td style="padding:6px 12px">${qty} unidad${qty!==1?'es':''}</td></tr>
+                      <tr><td style="padding:6px 12px;color:#6b7280">Prestado a:</td><td style="padding:6px 12px">${pres.profesorNombre}</td></tr>
+                      <tr style="background:#f8fafc"><td style="padding:6px 12px;color:#6b7280">Devolución prevista:</td><td style="padding:6px 12px">${pres.fechaPrevista||'—'}</td></tr>
+                      <tr><td style="padding:6px 12px;color:#6b7280">Gestionado por:</td><td style="padding:6px 12px">${pres.gestionadoPor}</td></tr>
+                    </table>
+                    <p style="color:#6b7280;font-size:12px">Inventario Taller FP — IES El Bosco</p>
+                  </div>`
+                });
+              }
+            }
+          }
+        } catch(emailErr) {
+          // Email no fatal — el préstamo ya está registrado
+        }
+      }
+
       return json({ ok: true, prestamo: pres });
     }
 

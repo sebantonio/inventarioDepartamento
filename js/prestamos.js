@@ -212,6 +212,7 @@ async function confirmPrestar(){
   if(!prof){ toast('Profesor no encontrado','err'); return; }
   if(cant > Number(item.qty)){ toast(`Solo hay ${item.qty} disponible(s)`,'err'); return; }
 
+  const modInfo = findModulo(item.mod);
   const pres = {
     itemId: item.id,
     itemNombre: item.item,
@@ -222,6 +223,8 @@ async function confirmPrestar(){
     profesorNombre: prof.nombre,
     fechaPrevista: document.getElementById('pres_fecha').value,
     obs: document.getElementById('pres_obs').value.trim(),
+    moduloCod: modInfo ? modInfo.cod : '',
+    moduloNombre: modInfo ? modInfo.name : '',
   };
 
   const btn = document.getElementById('btnPrestarSave');
