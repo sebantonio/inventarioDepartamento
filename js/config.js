@@ -118,8 +118,7 @@ const CICLOS = [
       {cod:'1710',name:'Empleabilidad II',horas:60},
       {cod:'0526',name:'Proyecto intermodular SEA',horas:0},
     ]
-  },
-  ,{
+  },{
     id:'departamento',
     name:'Departamento',
     nivel:'',
