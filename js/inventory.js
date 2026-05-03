@@ -105,7 +105,7 @@ function rCards(data,mc){
       ${x.obs?`<div class="cobs">💬 ${x.obs}</div>`:''}
       <div class="cfoot">
         <button class="btn btn-sm" onclick="openModal(${x.id})" title="Editar">✏️</button>
-        <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">📋</button>
+        <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">⧉</button>
         <button class="btn btn-sm" onclick="openDocsModal(${x.id})" title="Documentación">📌</button>
         <button class="btn btn-sm btn-loan" onclick="openPrestar(${x.id})" title="Prestar" ${Number(x.qty)<=0?'disabled style="opacity:0.4;cursor:not-allowed"':''}><img src="icons/prestar.png" style="width:16px;height:16px;vertical-align:middle"></button>
         <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="Pedido">🛒</button>
