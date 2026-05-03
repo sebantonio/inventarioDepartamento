@@ -356,7 +356,7 @@ function doPost(e) {
             emailDebug.filasModulos = modRows.length - 1;
             let responsableNombre = '';
             for (let i = 1; i < modRows.length; i++) {
-              if (String(modRows[i][0]).trim() === String(pres.moduloCod).trim()) {
+              if (Number(modRows[i][0]) === Number(pres.moduloCod)) {
                 responsableNombre = String(modRows[i][2] || '').trim();
                 emailDebug.filaEncontrada = i + 1;
                 emailDebug.colA = String(modRows[i][0]).trim();
