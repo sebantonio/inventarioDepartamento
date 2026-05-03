@@ -382,15 +382,15 @@ function doPost(e) {
                 emailDebug.error = `Profesor "${responsableNombre}" no encontrado en Usuarios o sin email`;
                 emailDebug.nombresUsuarios = usrRows.slice(1).map(r => String(r[2]).trim()).filter(Boolean);
               } else {
-                // Buscar email del Jefe de Departamento para CC
-                let jefeEmail = '';
+                // Buscar emails de todos los Jefes de Departamento para CC
+                const jefeEmails1 = [];
                 for (let i = 1; i < usrRows.length; i++) {
                   if (String(usrRows[i][3] || '').trim() === 'Jefe Departamento') {
-                    jefeEmail = String(usrRows[i][4] || '').trim();
-                    break;
+                    const e = String(usrRows[i][4] || '').trim();
+                    if (e) jefeEmails1.push(e);
                   }
                 }
-                emailDebug.jefeCc = jefeEmail || '(no encontrado)';
+                emailDebug.jefeCc = jefeEmails1.join(',') || '(no encontrado)';
                 const qty = Number(pres.cantidad);
                 const mailOpts = {
                   to: responsableEmail,
@@ -408,7 +408,8 @@ function doPost(e) {
                     <p style="color:#6b7280;font-size:12px">Inventario Taller FP — IES El Bosco</p>
                   </div>`
                 };
-                if (jefeEmail && jefeEmail !== responsableEmail) mailOpts.cc = jefeEmail;
+                const jefeCcs1 = jefeEmails1.filter(e => e !== responsableEmail);
+                if (jefeCcs1.length) mailOpts.cc = jefeCcs1.join(',');
                 MailApp.sendEmail(mailOpts);
                 emailDebug.enviado = true;
               }
@@ -477,7 +478,8 @@ function doPost(e) {
         }
 
         // Email del responsable del módulo (Inventario → Modulos → Usuarios)
-        let responsableNombre = '', responsableEmail = '', jefeEmail = '';
+        let responsableNombre = '', responsableEmail = '';
+        const jefeEmails2 = [];
         if (rInv >= 0) {
           const invRowFull = invSheet.getRange(rInv, 1, 1, HEADERS_INV.length).getValues()[0];
           const modField = String(invRowFull[3] || '');
@@ -505,7 +507,7 @@ function doPost(e) {
             const rol    = String(usrRows[i][3] || '').trim();
             const email  = String(usrRows[i][4] || '').trim();
             if (responsableNombre && nombre === responsableNombre) responsableEmail = email;
-            if (rol === 'Jefe Departamento') jefeEmail = email;
+            if (rol === 'Jefe Departamento' && email) jefeEmails2.push(email);
           }
         }
 
@@ -529,7 +531,8 @@ function doPost(e) {
             subject: `Devolución de material — ${itemNombre}`,
             htmlBody
           };
-          if (jefeEmail && !toSet.has(jefeEmail)) mailOpts.cc = jefeEmail;
+          const jefeCcs2 = jefeEmails2.filter(e => !toSet.has(e));
+          if (jefeCcs2.length) mailOpts.cc = jefeCcs2.join(',');
           MailApp.sendEmail(mailOpts);
         }
       } catch(emailErr) {
@@ -616,18 +619,18 @@ function doPost(e) {
       try {
         const usrSheet = ss.getSheetByName(SHEET_USUARIOS);
         const usrRows = usrSheet.getDataRange().getValues();
-        let jefeEmail = '';
+        const jefeEmails3 = [];
         for (let i = 1; i < usrRows.length; i++) {
           if (String(usrRows[i][3] || '').trim() === 'Jefe Departamento') {
-            jefeEmail = String(usrRows[i][4] || '').trim();
-            break;
+            const e = String(usrRows[i][4] || '').trim();
+            if (e) jefeEmails3.push(e);
           }
         }
-        if (jefeEmail) {
+        if (jefeEmails3.length) {
           const it = body.item || {};
           const aula = it.aula || '—';
           MailApp.sendEmail({
-            to: jefeEmail,
+            to: jefeEmails3.join(','),
             subject: `Solicitud de compra — ${it.item || 'material'}`,
             htmlBody: `<div style="font-family:sans-serif;max-width:500px;padding:24px;color:#1a1d2e">
               <h2 style="color:#d97706;margin-bottom:16px">🛒 Nuevo ítem en lista de compra</h2>
