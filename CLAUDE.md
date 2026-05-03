@@ -40,30 +40,35 @@ config → state → api → docs → search → home → inventory → modal-it
 ## Google Sheet — hojas relevantes
 - **Usuarios**: usuario | password | nombre | rol | Email — login de la app
 - **Profesores**: id | nombre | departamento | email — prestatarios (quién pide prestado)
-- **Modulos** (creada 2026-05-03): col A = nombre módulo | col B = profesor/a responsable
+- **Modulos**: col A = código numérico del módulo (ej: 237) | col B = nombre módulo | col C = nombre profesor/a responsable
+  - El GAS busca por código numérico en col A (`Number(modRows[i][0]) === Number(pres.moduloCod)`)
+  - El nombre del profesor en col C debe coincidir EXACTAMENTE con el campo `nombre` de la hoja Usuarios
+  - El rol 'Jefe Departamento' en Usuarios recibe CC en todos los emails de préstamo
 
 ## Reglas importantes
 - NUNCA usar `const show` como nombre de variable en ningún JS — shadowing de show() en state.js rompe toda la navegación
 - Los módulos se guardan en ítems como `cicloId__cod` (ej: `gm_telecom__0237`) — usar findModulo() para resolverlos
 - Barra de progreso #loadBar: se activa en loadData() antes del await apiGet(), se cierra en finally
 
-## EN CURSO — Notificación email al crear préstamo (NO implementado aún)
+## Funcionalidades implementadas (estado 2026-05-03)
+- Login / logout / recuperación de contraseña por email (reset.js)
+- Perfil de usuario: editar nombre, email, cambiar contraseña (profile.js)
+- Inventario por aula, categoría y módulo con tabla y tarjetas
+- Buscador global en topbar (atajo / o Ctrl+K)
+- Añadir/editar ítems con documentos adjuntos (base64 → GAS → Drive)
+- Bajas y pedidos (localStorage inv_pedidos); pedido notifica por email al Jefe de Departamento
+- Préstamos: prestar desde inventario, categorías y aulas; devolver; ver activos/vencidos/histórico
+- **Email automático al prestar**: GAS busca responsable del módulo en hoja Modulos → email al responsable + CC al Jefe de Departamento
+- **Email automático al devolver**: mismo flujo, notifica la devolución
+- Importar CSV con mapeo de columnas
+- Documentación del departamento: iframe SharePoint + botón externo
+- PWA instalable, funciona offline (cache-first sw v4)
 
-Al crear un préstamo, enviar email al profesor responsable del módulo del ítem.
+## appscript.txt
+Contiene el código completo del backend GAS. Para actualizar el backend hay que copiar el contenido en el editor de Google Apps Script y redesplegar como aplicación web.
 
-**Flujo diseñado:**
-1. Frontend: al confirmar préstamo, pasar el nombre del módulo (resuelto con findModulo()) al GAS
-2. GAS: buscar en hoja "Modulos" col A el nombre del módulo → obtener nombre profesor col B
-3. GAS: buscar email del profesor en hoja "Usuarios" por campo `nombre`
-4. GAS: `MailApp.sendEmail(email, asunto, cuerpo)`
-
-**Pendiente antes de implementar:**
-- Verificar que los nombres en hoja "Modulos" col A coinciden EXACTAMENTE con los `name` de CICLOS en config.js (tildes, mayúsculas, puntuación)
-- Decidir si el email va solo al responsable del módulo o también al prestatario como confirmación
-- Implementar en GAS (acción nueva, ej: `action=notificarPrestamo`) y en js/prestamos.js (llamar al GAS tras confirmPrestar)
-
-**Nombres de módulos en config.js (para verificar contra GSheet):**
-GM Telecom: Infraestructuras comunes de telecomunicación, Instalaciones domóticas, Electrónica aplicada, Equipos microinformáticos, Infraestructuras de redes de datos y telefonía, Instalaciones eléctricas básicas, Megafonía y sonorización, CCTV y seguridad electrónica, Instalaciones de radiocomunicaciones, Inglés profesional GM, Digitalización (GM), Sostenibilidad aplicada, Empleabilidad I, Empleabilidad II, Proyecto intermodular telecom.
-GM Eléctricas: Automatismos industriales, Electrónica, Electrotecnia, Instalaciones eléctricas interiores, Instalaciones de distribución, Infraestructuras comunes de telecomunicación, Instalaciones domóticas, Instalaciones solares fotovoltaicas, Máquinas eléctricas, Inglés profesional GM, Digitalización (GM), Sostenibilidad aplicada, Empleabilidad I, Empleabilidad II, Proyecto intermodular eléctricas
-GS Mant. Electrónico: Circuitos electrónicos analógicos, Equipos microprogramables, Mantenimiento eq. radiocomunicaciones, Mantenimiento eq. voz y datos, Mantenimiento eq. electrónica industrial, Mantenimiento eq. de audio, Mantenimiento eq. de video, Montaje y mantenimiento eq. electrónicos, Infraestructuras y desarrollo del mant., Inglés profesional GS, Digitalización (GS), Sostenibilidad aplicada, Empleabilidad I, Empleabilidad II, Proyecto intermodular mant. electrónico
-GS SEA: Procesos en ICT, Técnicas en instalaciones eléctricas, Documentación técnica eléctrica, Sistemas y circuitos eléctricos, Inst. domóticas y automáticas, Redes eléctricas y centros de transformación, Configuración inst. domóticas, Configuración inst. eléctricas, Gestión del montaje y mantenimiento, Inglés profesional GS, Digitalización (GS), Sostenibilidad aplicada, Empleabilidad I, Empleabilidad II, Proyecto intermodular SEA
+Acciones GAS relevantes:
+- `action=prestar` — registra préstamo + envía email al responsable del módulo
+- `action=devolver` — registra devolución + envía email de notificación
+- `action=notificarPedido` — email al Jefe de Departamento con lista de pedidos
+- `action=profAdd/profUpdate/profDelete` — CRUD de profesores prestatarios
