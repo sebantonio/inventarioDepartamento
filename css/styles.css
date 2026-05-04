@@ -308,13 +308,6 @@ select:focus,.fi:focus{border-color:var(--accent)}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn-d{color:var(--red);border-color:#fca5a5}
 .btn-d:hover{background:var(--red-l)}
-.del-wrap{position:relative;display:inline-block}
-.del-menu{display:none;position:absolute;right:0;bottom:calc(100% + 6px);background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shh);min-width:190px;overflow:hidden;z-index:200}
-.del-menu.open{display:block}
-.del-menu button{display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:13px;font-family:var(--font);color:var(--text);white-space:nowrap}
-.del-menu button:hover{background:var(--bg)}
-.del-menu .del-perm{color:var(--red)}
-.del-menu .del-perm:hover{background:var(--red-l)}
 .vtog{display:flex;gap:2px;background:var(--surface2);border-radius:8px;padding:3px}
 .vbtn{background:none;border:none;padding:5px 10px;border-radius:6px;color:var(--muted);cursor:pointer;font-size:14px;transition:all .15s}
 .vbtn.on{background:var(--white);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}

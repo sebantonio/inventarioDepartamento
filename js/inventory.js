@@ -75,13 +75,7 @@ function rTable(data,mc){
             ⌛
           </button>
           <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="${isPedido(x.id)?'Quitar del pedido':'Añadir al pedido'}">🛒</button>
-          <div class="del-wrap">
-            <button class="btn btn-sm btn-d" onclick="toggleDelMenu(${x.id},event)" title="Baja / Eliminar">🗑️</button>
-            <div class="del-menu" id="dm${x.id}">
-              ${x.est!=='Baja'?`<button onclick="closeDelMenu();openBaja(${x.id})">🚮 Dar de baja</button>`:''}
-              <button class="del-perm" onclick="closeDelMenu();confDel(${x.id})">⛔ Eliminar definitivamente</button>
-            </div>
-          </div>
+          <button class="btn btn-sm btn-d" onclick="openDelModal(${x.id})" title="Baja / Eliminar">🗑️</button>
         </div></td>
       </tr>`;
     }).join('')}</tbody>
@@ -114,13 +108,7 @@ function rCards(data,mc){
         <button class="btn btn-sm" onclick="openDocsModal(${x.id})" title="Documentación">📌</button>
         <button class="btn btn-sm btn-loan" onclick="openPresDevModal(${x.id})" title="Prestar / Devolver" style="font-size:16px;line-height:1">⌛</button>
         <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="Pedido">🛒</button>
-        <div class="del-wrap">
-          <button class="btn btn-sm btn-d" onclick="toggleDelMenu(${x.id},event)" title="Baja / Eliminar">🗑️</button>
-          <div class="del-menu" id="dm${x.id}">
-            ${x.est!=='Baja'?`<button onclick="closeDelMenu();openBaja(${x.id})">🚮 Dar de baja</button>`:''}
-            <button class="del-perm" onclick="closeDelMenu();confDel(${x.id})">⛔ Eliminar definitivamente</button>
-          </div>
-        </div>
+        <button class="btn btn-sm btn-d" onclick="openDelModal(${x.id})" title="Baja / Eliminar">🗑️</button>
       </div>
     </div>`;
   }).join('')}</div>`;
@@ -130,17 +118,18 @@ function sv(v){view=v;document.getElementById('vT').classList.toggle('on',v==='t
 window.addEventListener('resize',()=>{if(document.getElementById('pS')?.classList.contains('active'))renderInv()});
 function sort(k){if(sk===k)sa=!sa;else{sk=k;sa=true}renderInv()}
 
-function toggleDelMenu(id,e){
-  e.stopPropagation();
-  const menu=document.getElementById('dm'+id);
-  const isOpen=menu.classList.contains('open');
-  closeDelMenu();
-  if(!isOpen) menu.classList.add('open');
+let _delItemId = null;
+function openDelModal(itemId){
+  const item = items.find(x=>Number(x.id)===Number(itemId));
+  if(!item) return;
+  _delItemId = itemId;
+  document.getElementById('delPickerName').textContent = item.item;
+  document.getElementById('delBtnBaja').style.display = item.est !== 'Baja' ? '' : 'none';
+  document.getElementById('mDelPicker').classList.add('open');
 }
-function closeDelMenu(){
-  document.querySelectorAll('.del-menu.open').forEach(m=>m.classList.remove('open'));
+function closeDelModal(){
+  document.getElementById('mDelPicker').classList.remove('open');
 }
-document.addEventListener('click',closeDelMenu);
 
 // ═════════════════════════════════════════════════════════
 // EXPORT

@@ -431,6 +431,17 @@
   </div>
 </div>
 
+<!-- MODAL PICKER BAJA / ELIMINAR -->
+<div class="mbg" id="mDelPicker" onclick="if(event.target===this)closeDelModal()">
+  <div class="modal" style="width:min(360px,100%)">
+    <div class="mh"><div class="mt">🗑️ <span id="delPickerName"></span></div><button class="mx" onclick="closeDelModal()">✕</button></div>
+    <div style="padding:4px 0 8px;display:flex;flex-direction:column;gap:10px">
+      <button id="delBtnBaja" class="btn" style="width:100%;justify-content:center;padding:13px;font-size:14px;border-color:var(--amber);color:var(--amber)" onclick="closeDelModal();openBaja(_delItemId)">🚮 Dar de baja</button>
+      <button class="btn" style="width:100%;justify-content:center;padding:13px;font-size:14px;border-color:var(--red);color:var(--red)" onclick="closeDelModal();confDel(_delItemId)">⛔ Eliminar definitivamente</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PICKER PRESTAR / DEVOLVER -->
 <div class="mbg" id="mPresDevPicker" onclick="if(event.target===this)closePresDevModal()">
   <div class="modal" style="width:min(400px,100%)">
