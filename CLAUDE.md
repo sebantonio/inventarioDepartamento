@@ -37,6 +37,13 @@ config → state → api → docs → search → home → inventory → modal-it
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
 - sw.js: VERSION='v6', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
+- `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
+
+## Cloudflare Pages — reglas de despliegue
+- Auto-deploy desde GitHub rama `main`
+- **Límite por archivo: 25 MB** — archivos mayores rompen el deploy con "failed in 0s"
+- NUNCA commitear ZIPs, RARs ni archivos binarios grandes al repo
+- Si el deploy falla en 0 segundos: comprobar si hay archivos >25 MB en git (`git ls-files | xargs ls -la`)
 
 ## Google Sheet — hojas relevantes
 - **Usuarios**: usuario | password | nombre | rol | Email — login de la app; rol='Jefe Departamento' recibe CC en todos los emails
@@ -88,7 +95,15 @@ NO usar `break` tras encontrar el primero. Colectar en array y usar `.join(',')`
 - `action=notificarPedido` en GAS — email al Jefe Departamento al añadir ítem al carrito 🛒
 - `action=devolver` — email al responsable del módulo + profesor que tomó prestado + CC todos los Jefes
 
-## Funcionalidades implementadas (estado 2026-05-03)
+## Pantalla de carga animada (implementada 2026-05-04)
+`#loadOverlay` en index.html — overlay de pantalla completa que cubre todo mientras loadData() espera la API.
+- Muestra: logo (favicon.svg con pulso CSS), título, subtítulo, tres puntos rebotando
+- `_hideOverlay()` en auth.js: añade clase `lo-hide` (opacity:0) y tras 480ms pone `display:none`
+- Se oculta en el `finally` de loadData(), también si sesión inválida o sin sesión → login
+- NO se muestra en recargas tras login (overlay ya está `display:none`)
+- Icono 🔁 uniforme en TODOS los botones de préstamo: filas inventario Y botones "Nuevo préstamo" independientes (home hero, subpágina pS, página préstamos pPres)
+
+## Funcionalidades implementadas (estado 2026-05-04)
 - Login / logout / recuperación de contraseña por email (reset.js)
 - Perfil de usuario: editar nombre, email, cambiar contraseña (profile.js)
 - Inventario por aula, categoría y módulo con tabla y tarjetas
@@ -101,7 +116,8 @@ NO usar `break` tras encontrar el primero. Colectar en array y usar `.join(',')`
 - Módulo genérico "Departamento" disponible en todos los ítems (config.js CICLOS[4])
 - Importar CSV con mapeo de columnas
 - Documentación del departamento: iframe SharePoint + botón externo
-- PWA instalable, funciona offline (cache-first sw v4)
+- PWA instalable, funciona offline (cache-first sw v6)
+- Pantalla de carga animada (#loadOverlay) con logo + puntos rebotando
 - Barra de progreso animada #loadBar durante carga inicial
 
 ## appscript.txt
