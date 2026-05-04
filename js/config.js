@@ -18,7 +18,7 @@ const TH_OPTIONS = ['th-blue','th-green','th-amber','th-teal','th-orange','th-pi
 // ═════════════════════════════════════════════════════════
 // CICLOS Y MÓDULOS
 // ═════════════════════════════════════════════════════════
-const CICLOS = [
+let CICLOS = [
   {
     id:'gm_telecom',
     name:'Inst. de Telecomunicaciones',

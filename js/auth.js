@@ -111,6 +111,7 @@ async function loadData(){
     prestamos = res.prestamos || [];
     if(res.aulas && res.aulas.length) AULAS = res.aulas;
     if(res.cats && res.cats.length) CATS = Object.fromEntries(res.cats.sort((a,b)=>a.orden-b.orden).map(c=>[c.name,{c:c.c,bg:c.bg,i:c.i}]));
+    if(res.ciclos && res.ciclos.length) CICLOS = res.ciclos;
     setConn('ok',`${items.length} ítems · sincronizado`);
     document.getElementById('btnN').style.display='flex';
     document.getElementById('btnPres').style.display='flex';

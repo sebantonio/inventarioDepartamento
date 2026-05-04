@@ -218,7 +218,10 @@
     </div>
     <div class="choice-grid" id="gCats"></div>
     <div style="height:20px"></div>
-    <div class="sec-label">Por ciclo formativo</div>
+    <div class="sec-label">
+      Por ciclo formativo
+      <button class="mini-btn" onclick="openCiclosModal()">⚙️ Gestionar ciclos</button>
+    </div>
     <div class="choice-grid" id="gCiclos"></div>
   </div>
 </div>
@@ -596,6 +599,23 @@
   </div>
 </div>
 
+<!-- MODAL GESTIÓN DE CICLOS Y MÓDULOS -->
+<div class="mbg" id="mCiclos" onclick="if(event.target===this)closeCiclosModal()">
+  <div class="modal" style="max-width:680px">
+    <div class="mh"><div class="mt">⚙️ Gestionar ciclos y módulos</div><button class="mx" onclick="closeCiclosModal()">✕</button></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Añade, edita o elimina ciclos formativos y sus módulos. El ciclo "Departamento" no se puede eliminar.</p>
+    <div id="ciclosList"></div>
+    <button class="add-aula-btn" onclick="showNewCicloForm()">＋ Nuevo ciclo</button>
+    <div class="mf" style="margin-top:18px">
+      <div></div>
+      <div class="mf-right">
+        <button class="btn" onclick="closeCiclosModal()">Cancelar</button>
+        <button class="btn btn-p" onclick="saveCiclos()">💾 Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- CONFIRM -->
 <div class="mbg" id="mConf">
   <div class="cbox">
@@ -669,6 +689,7 @@
 <script defer src="js/modal-item.js"></script>
 <script defer src="js/modal-aulas.js"></script>
 <script defer src="js/modal-cats.js"></script>
+<script defer src="js/modal-ciclos.js"></script>
 <script defer src="js/prestamos.js"></script>
 <script defer src="js/import.js"></script>
 <script defer src="js/nav.js"></script>

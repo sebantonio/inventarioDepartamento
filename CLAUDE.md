@@ -13,7 +13,7 @@ SPA de inventario para el departamento de Electricidad y Electrónica. Vanilla J
 ## Estructura de archivos JS (orden de carga en index.html)
 config → state → api → docs → search → home → inventory → modal-item → modal-aulas → modal-cats → prestamos → import → nav → docs-dpto → pwa → profile → reset → auth
 
-- `js/config.js` — AULAS_DEFAULT, CICLOS (5 ciclos con módulos, incl. Departamento), CATS_DEFAULT (11), findModulo()
+- `js/config.js` — AULAS_DEFAULT, CICLOS (5 ciclos con módulos, incl. Departamento; `let` reemplazable desde backend), CATS_DEFAULT (11), findModulo()
 - `js/state.js` — API_URL, SESSION, items, cf, view, show(), setConn()
 - `js/api.js` — urlWithAuth(), apiGet(), apiPost()
 - `js/auth.js` — doLogin(), logout(), loadData() (con barra de progreso #loadBar), DOMContentLoaded
@@ -24,6 +24,7 @@ config → state → api → docs → search → home → inventory → modal-it
 - `js/modal-item.js` — openModal(), saveItem(), pedidos
 - `js/modal-aulas.js` — openAulasModal(), saveAulas()
 - `js/modal-cats.js` — openCatsModal(), saveCats()
+- `js/modal-ciclos.js` — openCiclosModal(), saveCiclos(), showNewCicloForm(), confirmAddCiclo(), addModuloRow(), removeModuloRow()
 - `js/prestamos.js` — renderPrestamos(), openPrestar(), openDevolver(), saveProfesores(), openPresDevModal(), closePresDevModal()
 - `js/import.js` — openImportModal(), parseCSV(), impDoImport()
 - `js/docs.js` — loadItemDocs(), addDocFiles(), uploadPendingDocs(), openDocsModal(itemId), closeDocsModal(), saveDocsModal()
@@ -109,6 +110,7 @@ Contiene el código completo del backend GAS. Para actualizar el backend hay que
 Acciones GAS relevantes:
 - `action=prestar` — registra préstamo + envía email al responsable del módulo + CC todos los Jefes
 - `action=devolver` — registra devolución + envía email de notificación + CC todos los Jefes
+- `action=ciclosSync` — sync completo hoja Ciclos (una fila por módulo: cicloId|cicloNombre|nivel|icon|th|desc|modCod|modNombre|modHoras|cicloOrden|modOrden)
 - `action=notificarPedido` — email a TODOS los Jefes de Departamento con lista de pedidos
 - `action=profAdd/profUpdate/profDelete` — CRUD de profesores prestatarios
 

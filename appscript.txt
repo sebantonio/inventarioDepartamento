@@ -11,6 +11,7 @@ const SHEET_AULAS      = 'Aulas';
 const SHEET_CATS       = 'Categorias';
 const SHEET_DOCS       = 'Documentos';
 const SHEET_MODULOS    = 'Modulos';
+const SHEET_CICLOS     = 'Ciclos';
 
 const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','obs'];
 const HEADERS_USR   = ['usuario','password','nombre','rol','email'];
@@ -18,7 +19,8 @@ const HEADERS_PROF  = ['id','nombre','departamento','email'];
 const HEADERS_PRES  = ['id','itemId','itemNombre','cantidad','aulaOrigen','aulaDestino','profesorId','profesorNombre','gestionadoPor','fechaPrestamo','fechaPrevista','fechaDevolucion','cantidadDevuelta','estado','obs'];
 const HEADERS_AULAS = ['id','name','icon','desc','th','orden'];
 const HEADERS_CATS  = ['name','c','bg','i','orden'];
-const HEADERS_DOCS  = ['id','itemId','itemNombre','aulaId','fileName','driveId','driveUrl','fecha'];
+const HEADERS_DOCS   = ['id','itemId','itemNombre','aulaId','fileName','driveId','driveUrl','fecha'];
+const HEADERS_CICLOS = ['cicloId','cicloNombre','nivel','icon','th','desc','modCod','modNombre','modHoras','cicloOrden','modOrden'];
 
 const CATS_DEFAULT = [
   ['Componentes electrónicos','#2563eb','#eff6ff','⚡',1],
@@ -163,6 +165,7 @@ function doGet(e) {
     const prestamos  = rowsToObjects(ss.getSheetByName(SHEET_PRESTAMOS), HEADERS_PRES);
     let aulas        = rowsToObjects(ss.getSheetByName(SHEET_AULAS), HEADERS_AULAS);
     let cats         = rowsToObjects(ss.getSheetByName(SHEET_CATS), HEADERS_CATS);
+    let ciclosRows   = rowsToObjects(ss.getSheetByName(SHEET_CICLOS), HEADERS_CICLOS);
 
     // Si no hay aulas configuradas, devolver las por defecto
     if (!aulas.length) {
@@ -176,7 +179,23 @@ function doGet(e) {
     }
     cats.sort((a,b)=>(Number(a.orden)||0)-(Number(b.orden)||0));
 
-    return json({ ok: true, items, profesores, prestamos, aulas, cats, user });
+    // Reconstruir ciclos desde filas planas (agrupadas por cicloId)
+    let ciclos = [];
+    if (ciclosRows.length) {
+      ciclosRows.sort((a,b)=>(Number(a.cicloOrden)||0)-(Number(b.cicloOrden)||0)||(Number(a.modOrden)||0)-(Number(b.modOrden)||0));
+      const cicloMap = {};
+      const cicloOrder = [];
+      ciclosRows.forEach(r => {
+        if (!cicloMap[r.cicloId]) {
+          cicloMap[r.cicloId] = {id:r.cicloId,name:r.cicloNombre,nivel:r.nivel,icon:r.icon,th:r.th,desc:r.desc,modulos:[]};
+          cicloOrder.push(r.cicloId);
+        }
+        if (r.modCod) cicloMap[r.cicloId].modulos.push({cod:String(r.modCod),name:r.modNombre,horas:Number(r.modHoras)||0});
+      });
+      ciclos = cicloOrder.map(id => cicloMap[id]);
+    }
+
+    return json({ ok: true, items, profesores, prestamos, aulas, cats, ciclos, user });
   } catch (err) {
     return json({ ok: false, error: err.toString() });
   }
@@ -319,6 +338,22 @@ function doPost(e) {
         sheet.appendRow([c.name, c.c, c.bg, c.i, c.orden]);
       });
       return json({ ok: true, cats });
+    }
+
+    // ─── CICLOS Y MÓDULOS (sync completo) ──────────────────────
+    if (action === 'ciclosSync') {
+      const sheet = ss.getSheetByName(SHEET_CICLOS) || ss.insertSheet(SHEET_CICLOS);
+      const ciclos = body.ciclos || [];
+      sheet.clear();
+      sheet.appendRow(HEADERS_CICLOS);
+      sheet.getRange(1, 1, 1, HEADERS_CICLOS.length).setFontWeight('bold').setBackground('#d1fae5');
+      sheet.setFrozenRows(1);
+      ciclos.forEach((c, ci) => {
+        c.modulos.forEach((m, mi) => {
+          sheet.appendRow([c.id, c.name, c.nivel, c.icon, c.th, c.desc, String(m.cod), m.name, Number(m.horas)||0, ci+1, mi+1]);
+        });
+      });
+      return json({ ok: true, ciclos });
     }
 
     // ─── PRESTAMOS ──────────────────────────────────────────────

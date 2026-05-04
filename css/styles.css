@@ -429,6 +429,40 @@ textarea.fi-w{resize:vertical;min-height:60px}
 .add-cat-btn{background:var(--accent-l);border:1px dashed var(--accent);color:var(--accent);padding:9px;border-radius:9px;font-weight:600;cursor:pointer;width:100%;font-family:var(--font);font-size:13px;transition:all .15s}
 .add-cat-btn:hover{background:var(--accent);color:#fff}
 
+/* CICLOS LIST IN MODAL */
+#ciclosList{display:flex;flex-direction:column;gap:8px;max-height:480px;overflow-y:auto;margin-bottom:14px}
+.ciclo-block{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--white)}
+.ciclo-block.expanded{border-color:var(--accent)}
+.ciclo-hdr{display:flex;align-items:center;gap:8px;padding:9px 10px;cursor:pointer;background:var(--bg);user-select:none;transition:background .15s}
+.ciclo-hdr:hover{background:var(--accent-l)}
+.ciclo-icon-inp input{width:36px;height:32px;text-align:center;font-size:17px;border:1px solid var(--border);border-radius:7px;background:var(--white);outline:none;cursor:text}
+.nivel-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.badge-gm{background:#dbeafe;color:#1d4ed8}
+.badge-gs{background:#ede9fe;color:#6d28d9}
+.ciclo-name-inp{flex:1}
+.ciclo-name-inp input{width:100%;border:1px solid transparent;border-radius:7px;padding:5px 8px;font-size:13px;font-family:var(--font);background:transparent;outline:none;transition:border .15s}
+.ciclo-name-inp input:focus{border-color:var(--accent);background:var(--white)}
+.ciclo-nmods{font-size:11px;color:var(--muted);white-space:nowrap}
+.expand-arrow{font-size:10px;color:var(--muted);width:14px;text-align:center}
+.ciclo-hdr .del-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:4px 6px;border-radius:6px;transition:background .15s}
+.ciclo-hdr .del-btn:hover{background:var(--red-l)}
+.ciclo-mods{padding:10px 12px;border-top:1px solid var(--border);background:var(--white);display:flex;flex-direction:column;gap:6px}
+.mods-hdr{display:grid;grid-template-columns:90px 1fr 68px 32px;gap:6px;font-size:11px;color:var(--muted);padding:0 2px}
+.mod-row{display:grid;grid-template-columns:90px 1fr 68px 32px;gap:6px;align-items:center}
+.mod-cod{padding:5px 7px;font-size:12px;border:1px solid var(--border);border-radius:7px;font-family:var(--font);outline:none;width:100%}
+.mod-name{padding:5px 7px;font-size:12px;border:1px solid var(--border);border-radius:7px;font-family:var(--font);outline:none;width:100%}
+.mod-horas{padding:5px 7px;font-size:12px;border:1px solid var(--border);border-radius:7px;font-family:var(--font);outline:none;width:100%}
+.mod-row .del-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:4px;border-radius:6px;transition:background .15s}
+.mod-row .del-btn:hover{background:var(--red-l)}
+/* Formulario nuevo ciclo */
+.new-ciclo-form{padding:14px;background:var(--accent-l)}
+.ncf-grid{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:12px}
+.ncf-mods{display:grid;grid-template-columns:90px 1fr 80px;gap:8px}
+.ncf-sep{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px}
+.ncf-lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+.ncf-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.ncf-grid .sinput,.ncf-mods .sinput{width:100%;box-sizing:border-box}
+
 /* DOCS EN MODAL */
 .docs-sep{border:none;border-top:1px solid var(--border);margin:18px 0 14px}
 .docs-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
