@@ -24,8 +24,7 @@ async function loadItemDocs(itemId){
 }
 
 async function addDocFiles(files){
-  const name = document.getElementById('f_name')?.value.trim() || 'item';
-  for(const f of files) docsPendientes.push(await _processFile(f, name));
+  for(const f of files) docsPendientes.push(await _processFile(f));
   renderDocList();
 }
 
@@ -59,12 +58,9 @@ function renderDocList(){
   el.innerHTML = ex + pe;
 }
 
-function _processFile(file, itemName){
+function _processFile(file){
   if(!file.type.startsWith('image/')) return Promise.resolve(file);
   const MAX = 1400, QUALITY = 0.5;
-  const safe = (itemName||'foto').toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g,'')
-    .replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').substring(0,30) || 'foto';
   return new Promise(resolve => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -79,13 +75,20 @@ function _processFile(file, itemName){
       c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
       c.toBlob(blob => {
-        const suf = Date.now().toString().slice(-5);
-        resolve(new File([blob], `${safe}_${suf}.jpg`, {type:'image/jpeg'}));
+        resolve(new File([blob], file.name, {type:'image/jpeg'}));
       }, 'image/jpeg', QUALITY);
     };
     img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
     img.src = url;
   });
+}
+
+function _imgFileName(file, itemName){
+  if(!file.type.startsWith('image/')) return file.name;
+  const safe = (itemName||'foto').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').substring(0,30) || 'foto';
+  return `${safe}_${Date.now().toString().slice(-5)}.jpg`;
 }
 
 function fileToBase64(file){
@@ -121,8 +124,7 @@ async function openDocsModal(itemId){
 function closeDocsModal(){ document.getElementById('mDocs').classList.remove('open'); _dmItem=null; _dmPendientes=[]; }
 
 async function addDocsModalFiles(files){
-  const name = _dmItem?.item || 'item';
-  for(const f of files) _dmPendientes.push(await _processFile(f, name));
+  for(const f of files) _dmPendientes.push(await _processFile(f));
   _renderDmList();
 }
 
@@ -162,10 +164,11 @@ async function saveDocsModal(){
   const aulaName = AULAS.find(a=>a.id===_dmItem.aula)?.name || _dmItem.aula;
   for(const file of [..._dmPendientes]){
     try {
-      toast(`Subiendo ${file.name}…`,'ok');
+      const fileName = _imgFileName(file, _dmItem.item);
+      toast(`Subiendo ${fileName}…`,'ok');
       const data = await fileToBase64(file);
       const res = await apiPost({action:'uploadDoc', itemId:_dmItem.id, itemNombre:_dmItem.item,
-        aulaId:_dmItem.aula, aulaName, fileName:file.name, mimeType:file.type||'application/octet-stream', data});
+        aulaId:_dmItem.aula, aulaName, fileName, mimeType:file.type||'application/octet-stream', data});
       if(!res.ok) throw new Error(res.error);
       if(res.doc) _dmActuales.push(res.doc);
     } catch(e){ toast(`Error: ${e.message}`,'err'); }
@@ -181,10 +184,11 @@ async function uploadPendingDocs(itemId, itemNombre, aulaId){
   const aulaName = AULAS.find(a=>a.id===aulaId)?.name || aulaId;
   for(const file of [...docsPendientes]){
     try{
-      toast(`Subiendo ${file.name}…`,'ok');
+      const fileName = _imgFileName(file, itemNombre);
+      toast(`Subiendo ${fileName}…`,'ok');
       const data = await fileToBase64(file);
       const res = await apiPost({action:'uploadDoc', itemId, itemNombre, aulaId, aulaName,
-        fileName:file.name, mimeType:file.type||'application/octet-stream', data});
+        fileName, mimeType:file.type||'application/octet-stream', data});
       if(!res.ok) throw new Error(res.error);
     }catch(e){ toast(`Error con ${file.name}: ${e.message}`,'err'); }
   }
