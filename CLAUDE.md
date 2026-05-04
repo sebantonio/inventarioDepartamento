@@ -95,6 +95,15 @@ NO usar `break` tras encontrar el primero. Colectar en array y usar `.join(',')`
 - `action=notificarPedido` en GAS — email al Jefe Departamento al añadir ítem al carrito 🛒
 - `action=devolver` — email al responsable del módulo + profesor que tomó prestado + CC todos los Jefes
 
+## Botón combinado Baja/Eliminar — menú desplegable (implementado 2026-05-04)
+En rTable y rCards de inventory.js, los botones ⛔ (baja) y 🗑 (eliminar) se reemplazaron por un único botón **🗑️** que abre un menú desplegable.
+- Estructura HTML: `<div class="del-wrap">` → botón 🗑️ → `<div class="del-menu" id="dm{id}">`
+- Opciones del menú: **🚮 Dar de baja** (solo si `est !== 'Baja'`) + **⛔ Eliminar definitivamente** (en rojo)
+- Funciones en inventory.js: `toggleDelMenu(id, e)` (abre/cierra), `closeDelMenu()` (cierra todos)
+- `document.addEventListener('click', closeDelMenu)` — cierra al clic fuera
+- El menú se posiciona encima del botón (`bottom: calc(100% + 6px)`) para no quedar cortado en tablas largas
+- Icono de préstamos: **⌛** en todos los botones (antes 🔁 — conflicto visual con 🔄 de recargar)
+
 ## Pantalla de carga animada (implementada 2026-05-04)
 `#loadOverlay` en index.html — overlay de pantalla completa que cubre todo mientras loadData() espera la API.
 - Muestra: logo (favicon.svg con pulso CSS), título, subtítulo, tres puntos rebotando
