@@ -95,13 +95,15 @@ NO usar `break` tras encontrar el primero. Colectar en array y usar `.join(',')`
 - `action=notificarPedido` en GAS — email al Jefe Departamento al añadir ítem al carrito 🛒
 - `action=devolver` — email al responsable del módulo + profesor que tomó prestado + CC todos los Jefes
 
-## Botón combinado Baja/Eliminar — menú desplegable (implementado 2026-05-04)
-En rTable y rCards de inventory.js, los botones ⛔ (baja) y 🗑 (eliminar) se reemplazaron por un único botón **🗑️** que abre un menú desplegable.
-- Estructura HTML: `<div class="del-wrap">` → botón 🗑️ → `<div class="del-menu" id="dm{id}">`
-- Opciones del menú: **🚮 Dar de baja** (solo si `est !== 'Baja'`) + **⛔ Eliminar definitivamente** (en rojo)
-- Funciones en inventory.js: `toggleDelMenu(id, e)` (abre/cierra), `closeDelMenu()` (cierra todos)
-- `document.addEventListener('click', closeDelMenu)` — cierra al clic fuera
-- El menú se posiciona encima del botón (`bottom: calc(100% + 6px)`) para no quedar cortado en tablas largas
+## Botón combinado Baja/Eliminar — modal picker (implementado 2026-05-04)
+En rTable y rCards de inventory.js, los botones ⛔ (baja) y 🗑 (eliminar) se reemplazaron por un único botón **🗑️** que abre el modal `#mDelPicker`.
+El modal tiene **dos pasos**:
+- **Paso 1** (`#delPickerStep1`): buscador de ítem — visible cuando se abre sin ID (botón rápido de página). `delPickerFilter()` filtra por nombre/ref; muestra ítems del contexto actual si hay `cf` activo. `delPickerSelect(id)` pasa al paso 2.
+- **Paso 2** (`#delPickerStep2`): opciones **🚮 Dar de baja** (oculto si ya está en Baja) + **⛔ Eliminar definitivamente**. Visible directamente cuando se llama con ID desde la fila/tarjeta.
+- `openDelModal(itemId?)` — acepta ID (directo a paso 2) o sin args (muestra paso 1 con buscador)
+- `closeDelModal()` cierra el modal; añadido al handler de Escape en auth.js
+- **NO usar `.del-wrap` / `.del-menu`** — ese CSS fue eliminado (el dropdown quedaba cortado por overflow de tabla)
+- Botón 🗑️ Dar de baja añadido como **acción rápida** en home hero y en el toolbar del subheader de pS
 - Icono de préstamos: **⌛** en todos los botones (antes 🔁 — conflicto visual con 🔄 de recargar)
 
 ## Pantalla de carga animada (implementada 2026-05-04)
@@ -119,7 +121,7 @@ En rTable y rCards de inventory.js, los botones ⛔ (baja) y 🗑 (eliminar) se 
 - Buscador global en topbar (atajo / o Ctrl+K)
 - Añadir/editar ítems con documentos adjuntos (base64 → GAS → Drive)
 - Bajas y pedidos (localStorage inv_pedidos); pedido notifica por email a TODOS los Jefes de Departamento
-- Préstamos: botón 🔁 combinado prestar/devolver desde inventario; ver activos/vencidos/histórico
+- Préstamos: botón ⌛ combinado prestar/devolver desde inventario; ver activos/vencidos/histórico
 - **Email automático al prestar**: GAS busca responsable del módulo en hoja Modulos (col A=código, col B=nombre módulo, col C=nombre profesor) → email al responsable + CC a todos los Jefes de Departamento
 - **Email automático al devolver**: mismo flujo, notifica la devolución
 - Módulo genérico "Departamento" disponible en todos los ítems (config.js CICLOS[4])
@@ -128,6 +130,7 @@ En rTable y rCards de inventory.js, los botones ⛔ (baja) y 🗑 (eliminar) se 
 - PWA instalable, funciona offline (cache-first sw v6)
 - Pantalla de carga animada (#loadOverlay) con logo + puntos rebotando
 - Barra de progreso animada #loadBar durante carga inicial
+- **Botón 🗑️ Dar de baja** como acción rápida en home hero y subheader pS (abre modal con buscador si no hay ítem previo)
 
 ## appscript.txt
 Contiene el código completo del backend GAS. Para actualizar el backend hay que copiar el contenido en el editor de Google Apps Script y redesplegar como aplicación web.
