@@ -23,6 +23,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 #loadBar.is-loading{opacity:1;width:75%;transition:width 2.5s cubic-bezier(.05,.1,.5,1),opacity .15s}
 #loadBar.is-done{width:100%;opacity:0;transition:width .15s ease,opacity .35s ease .1s}
 
+#loadOverlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9998;transition:opacity .45s ease}
+#loadOverlay.lo-hide{opacity:0;pointer-events:none}
+.lo-box{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.lo-logo{width:80px;height:80px;border-radius:20px;box-shadow:0 8px 32px rgba(37,99,235,.25);animation:lo-pulse 2s ease-in-out infinite}
+@keyframes lo-pulse{0%,100%{transform:scale(1);box-shadow:0 8px 32px rgba(37,99,235,.25)}50%{transform:scale(1.07);box-shadow:0 12px 40px rgba(37,99,235,.4)}}
+.lo-title{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.lo-sub{font-size:13px;color:var(--muted)}
+.lo-dots{display:flex;gap:9px;margin-top:6px}
+.lo-dots span{width:9px;height:9px;border-radius:50%;background:var(--accent);animation:lo-dot 1.4s ease-in-out infinite;opacity:.3}
+.lo-dots span:nth-child(2){animation-delay:.22s}
+.lo-dots span:nth-child(3){animation-delay:.44s}
+@keyframes lo-dot{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-11px);opacity:1}}
+
 .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 0 var(--border)}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;color:inherit}
 .brand-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--acc2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}

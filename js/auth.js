@@ -76,8 +76,15 @@ function showUserChip(){
   document.getElementById('userChip').style.display = 'flex';
 }
 
+function _hideOverlay(){
+  const ov = document.getElementById('loadOverlay');
+  if(!ov || ov.style.display==='none') return;
+  ov.classList.add('lo-hide');
+  setTimeout(()=>{ ov.style.display='none'; }, 480);
+}
+
 async function loadData(){
-  if(!SESSION){show('pLogin');setConn('','Sin sesión');return}
+  if(!SESSION){ _hideOverlay(); show('pLogin'); setConn('','Sin sesión'); return; }
   showUserChip();
   show('pH');
   setConn('loading','Cargando...');
@@ -92,6 +99,7 @@ async function loadData(){
         localStorage.removeItem('inv_session');
         SESSION = null;
         document.getElementById('userChip').style.display = 'none';
+        _hideOverlay();
         show('pLogin');
         setConn('err','Sesión expirada');
         return;
@@ -118,6 +126,7 @@ async function loadData(){
       document.getElementById('hStats').innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">⚠️</div><div class="et">No se pudo conectar.<br><small>${err.message}</small></div></div>`;
     }
   }finally{
+    _hideOverlay();
     bar.className = 'is-done';
     setTimeout(()=>{bar.className='';bar.style.width='0';}, 500);
   }
