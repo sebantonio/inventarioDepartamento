@@ -23,8 +23,9 @@ async function loadItemDocs(itemId){
   }catch(e){}
 }
 
-function addDocFiles(files){
-  for(const f of files) docsPendientes.push(f);
+async function addDocFiles(files){
+  const name = document.getElementById('f_name')?.value.trim() || 'item';
+  for(const f of files) docsPendientes.push(await _processFile(f, name));
   renderDocList();
 }
 
@@ -56,6 +57,35 @@ function renderDocList(){
       <button class="dx" onclick="removePendingDoc(${i})" title="Quitar">✕</button>
     </div>`).join('');
   el.innerHTML = ex + pe;
+}
+
+function _processFile(file, itemName){
+  if(!file.type.startsWith('image/')) return Promise.resolve(file);
+  const MAX = 1400, QUALITY = 0.5;
+  const safe = (itemName||'foto').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').substring(0,30) || 'foto';
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let w = img.width, h = img.height;
+      if(w > MAX || h > MAX){
+        if(w >= h){ h = Math.round(h*MAX/w); w = MAX; }
+        else       { w = Math.round(w*MAX/h); h = MAX; }
+      }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      c.toBlob(blob => {
+        const suf = Date.now().toString().slice(-5);
+        resolve(new File([blob], `${safe}_${suf}.jpg`, {type:'image/jpeg'}));
+      }, 'image/jpeg', QUALITY);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
 }
 
 function fileToBase64(file){
@@ -90,7 +120,11 @@ async function openDocsModal(itemId){
 
 function closeDocsModal(){ document.getElementById('mDocs').classList.remove('open'); _dmItem=null; _dmPendientes=[]; }
 
-function addDocsModalFiles(files){ for(const f of files) _dmPendientes.push(f); _renderDmList(); }
+async function addDocsModalFiles(files){
+  const name = _dmItem?.item || 'item';
+  for(const f of files) _dmPendientes.push(await _processFile(f, name));
+  _renderDmList();
+}
 
 function _renderDmList(){
   const el = document.getElementById('dm_doc_list');
