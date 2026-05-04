@@ -192,6 +192,7 @@
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">
       <button class="btn btn-p" style="padding:11px 24px;font-size:14px" onclick="openModal()">＋ Añadir ítem rápido</button>
       <button class="btn" style="padding:11px 24px;font-size:14px;border-color:var(--amber);color:var(--amber)" onclick="openPrestar()">⌛ Nuevo préstamo</button>
+      <button class="btn btn-d" style="padding:11px 24px;font-size:14px" onclick="openDelModal()">🗑️ Dar de baja</button>
       <a class="btn" href="javascript:void(0)" onclick="goDocsDpto()" style="display:inline-flex;padding:11px 24px;font-size:14px;border-color:#0891b2;color:#0891b2;text-decoration:none">📂 Documentación</a>
     </div>
     <div class="gsearch-wrap" id="gsWrap">
@@ -295,6 +296,7 @@
     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
       <button class="btn btn-p print-no" style="padding:10px 22px;font-size:13px" onclick="openModal()">＋ Añadir ítem</button>
       <button class="btn print-no" style="padding:10px 22px;font-size:13px;border-color:var(--amber);color:var(--amber)" onclick="openPrestar()">⌛ Nuevo préstamo</button>
+      <button class="btn btn-d print-no" style="padding:10px 22px;font-size:13px" onclick="openDelModal()">🗑️ Dar de baja</button>
       <button class="btn print-no" style="padding:10px 22px;font-size:13px" onclick="printInv()">🖨️ Imprimir</button>
       <button class="btn print-no" style="padding:10px 22px;font-size:13px" onclick="goHome()">🏠 Inicio</button>
     </div>
@@ -433,9 +435,15 @@
 
 <!-- MODAL PICKER BAJA / ELIMINAR -->
 <div class="mbg" id="mDelPicker" onclick="if(event.target===this)closeDelModal()">
-  <div class="modal" style="width:min(360px,100%)">
-    <div class="mh"><div class="mt">🗑️ <span id="delPickerName"></span></div><button class="mx" onclick="closeDelModal()">✕</button></div>
-    <div style="padding:4px 0 8px;display:flex;flex-direction:column;gap:10px">
+  <div class="modal" style="width:min(380px,100%)">
+    <div class="mh"><div class="mt">🗑️ <span id="delPickerName">Baja / Eliminar</span></div><button class="mx" onclick="closeDelModal()">✕</button></div>
+    <!-- Paso 1: selector de ítem (cuando se abre sin ID) -->
+    <div id="delPickerStep1" style="display:none;padding:4px 0 8px">
+      <input id="delPickerSearch" type="text" class="sinput" placeholder="Buscar ítem por nombre o referencia…" autocomplete="off" oninput="delPickerFilter()" style="width:100%;margin-bottom:10px">
+      <div id="delPickerList" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+    <!-- Paso 2: opciones baja/eliminar -->
+    <div id="delPickerStep2" style="padding:4px 0 8px;display:flex;flex-direction:column;gap:10px">
       <button id="delBtnBaja" class="btn" style="width:100%;justify-content:center;padding:13px;font-size:14px;border-color:var(--amber);color:var(--amber)" onclick="closeDelModal();openBaja(_delItemId)">🚮 Dar de baja</button>
       <button class="btn" style="width:100%;justify-content:center;padding:13px;font-size:14px;border-color:var(--red);color:var(--red)" onclick="closeDelModal();confDel(_delItemId)">⛔ Eliminar definitivamente</button>
     </div>
