@@ -75,8 +75,13 @@ function rTable(data,mc){
             ⌛
           </button>
           <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="${isPedido(x.id)?'Quitar del pedido':'Añadir al pedido'}">🛒</button>
-          ${x.est!=='Baja'?`<button class="btn btn-sm btn-baja" onclick="openBaja(${x.id})" title="Dar de baja">⛔</button>`:''}
-          <button class="btn btn-sm btn-d" onclick="confDel(${x.id})" title="Eliminar">🗑</button>
+          <div class="del-wrap">
+            <button class="btn btn-sm btn-d" onclick="toggleDelMenu(${x.id},event)" title="Baja / Eliminar">🗑️</button>
+            <div class="del-menu" id="dm${x.id}">
+              ${x.est!=='Baja'?`<button onclick="closeDelMenu();openBaja(${x.id})">🚮 Dar de baja</button>`:''}
+              <button class="del-perm" onclick="closeDelMenu();confDel(${x.id})">⛔ Eliminar definitivamente</button>
+            </div>
+          </div>
         </div></td>
       </tr>`;
     }).join('')}</tbody>
@@ -109,8 +114,13 @@ function rCards(data,mc){
         <button class="btn btn-sm" onclick="openDocsModal(${x.id})" title="Documentación">📌</button>
         <button class="btn btn-sm btn-loan" onclick="openPresDevModal(${x.id})" title="Prestar / Devolver" style="font-size:16px;line-height:1">⌛</button>
         <button class="btn btn-sm btn-pedido${isPedido(x.id)?' activo':''}" onclick="togglePedido(${x.id})" title="Pedido">🛒</button>
-        ${x.est!=='Baja'?`<button class="btn btn-sm btn-baja" onclick="openBaja(${x.id})">⛔</button>`:''}
-        <button class="btn btn-sm btn-d" onclick="confDel(${x.id})" title="Eliminar">🗑</button>
+        <div class="del-wrap">
+          <button class="btn btn-sm btn-d" onclick="toggleDelMenu(${x.id},event)" title="Baja / Eliminar">🗑️</button>
+          <div class="del-menu" id="dm${x.id}">
+            ${x.est!=='Baja'?`<button onclick="closeDelMenu();openBaja(${x.id})">🚮 Dar de baja</button>`:''}
+            <button class="del-perm" onclick="closeDelMenu();confDel(${x.id})">⛔ Eliminar definitivamente</button>
+          </div>
+        </div>
       </div>
     </div>`;
   }).join('')}</div>`;
@@ -119,6 +129,18 @@ function rCards(data,mc){
 function sv(v){view=v;document.getElementById('vT').classList.toggle('on',v==='table');document.getElementById('vC').classList.toggle('on',v==='cards');renderInv()}
 window.addEventListener('resize',()=>{if(document.getElementById('pS')?.classList.contains('active'))renderInv()});
 function sort(k){if(sk===k)sa=!sa;else{sk=k;sa=true}renderInv()}
+
+function toggleDelMenu(id,e){
+  e.stopPropagation();
+  const menu=document.getElementById('dm'+id);
+  const isOpen=menu.classList.contains('open');
+  closeDelMenu();
+  if(!isOpen) menu.classList.add('open');
+}
+function closeDelMenu(){
+  document.querySelectorAll('.del-menu.open').forEach(m=>m.classList.remove('open'));
+}
+document.addEventListener('click',closeDelMenu);
 
 // ═════════════════════════════════════════════════════════
 // EXPORT
