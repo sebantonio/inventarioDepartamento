@@ -69,6 +69,11 @@ Fuente de verdad: columna `rol` de hoja **Usuarios**. Frontend en `js/roles.js`;
 La ocultación de botones es solo UX; la protección real está en Apps Script. Si se añade una acción nueva en GAS, añadirla también a `ACTION_PERMISSIONS` en `js/roles.js` y `appscript.txt`.
 Memoria complementaria: `.claude/memory.md`.
 
+## Auditoría de acciones (implementado 2026-05-05)
+GAS crea automáticamente hoja **Log** con columnas `fecha | usuario | nombre | rol | accion | itemId | resumen`.
+Helper principal: `auditLog(ss, user, accion, itemId, resumen)` en `appscript.txt`.
+Se registran altas/ediciones/eliminaciones de ítems, importación CSV, profesores, aulas/categorías/ciclos, préstamos/devoluciones, documentos, perfil, cambio de contraseña y notificación de pedidos.
+
 ## Botón combinado Prestar/Devolver (implementado 2026-05-03)
 En rTable y rCards de inventory.js, el botón 🔁 llama a `openPresDevModal(itemId)` (en prestamos.js).
 El modal `#mPresDevPicker` muestra:

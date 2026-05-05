@@ -12,6 +12,7 @@ const SHEET_CATS       = 'Categorias';
 const SHEET_DOCS       = 'Documentos';
 const SHEET_MODULOS    = 'Modulos';
 const SHEET_CICLOS     = 'Ciclos';
+const SHEET_LOG        = 'Log';
 
 const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','obs'];
 const HEADERS_USR   = ['usuario','password','nombre','rol','email'];
@@ -21,6 +22,7 @@ const HEADERS_AULAS = ['id','name','icon','desc','th','orden'];
 const HEADERS_CATS  = ['name','c','bg','i','orden'];
 const HEADERS_DOCS   = ['id','itemId','itemNombre','aulaId','fileName','driveId','driveUrl','fecha'];
 const HEADERS_CICLOS = ['cicloId','cicloNombre','nivel','icon','th','desc','modCod','modNombre','modHoras','cicloOrden','modOrden'];
+const HEADERS_LOG    = ['fecha','usuario','nombre','rol','accion','itemId','resumen'];
 
 const CATS_DEFAULT = [
   ['Componentes electrónicos','#2563eb','#eff6ff','⚡',1],
@@ -117,6 +119,31 @@ function requireAction(user, action) {
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────
+function getLogSheet(ss) {
+  let sheet = ss.getSheetByName(SHEET_LOG);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_LOG);
+    sheet.appendRow(HEADERS_LOG);
+    sheet.getRange(1, 1, 1, HEADERS_LOG.length).setFontWeight('bold').setBackground('#e0e7ff');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function auditLog(ss, user, accion, itemId, resumen) {
+  try {
+    getLogSheet(ss).appendRow([
+      Utilities.formatDate(new Date(), Session.getScriptTimeZone() || 'Europe/Madrid', 'yyyy-MM-dd HH:mm:ss'),
+      user && user.usuario || '',
+      user && user.nombre || '',
+      user && user.rol || '',
+      accion || '',
+      itemId != null ? itemId : '',
+      String(resumen || '').substring(0, 500)
+    ]);
+  } catch(e) {}
+}
+
 function rowsToObjects(sheet, headers) {
   if (!sheet) return [];
   const data = sheet.getDataRange().getValues();
@@ -304,6 +331,7 @@ function doPost(e) {
       const it = body.item;
       it.id = nextId(sheet);
       sheet.appendRow(HEADERS_INV.map(h => it[h] != null ? it[h] : ''));
+      auditLog(ss, user, 'add', it.id, `Añadido item: ${it.item || ''} (${it.ref || 'sin ref'})`);
       return json({ ok: true, item: it });
     }
     if (action === 'update') {
@@ -311,14 +339,18 @@ function doPost(e) {
       const it = body.item;
       const r = findRowById(sheet, it.id);
       if (r < 0) return json({ ok: false, error: 'No encontrado' });
+      const old = sheet.getRange(r, 1, 1, HEADERS_INV.length).getValues()[0];
       sheet.getRange(r, 1, 1, HEADERS_INV.length).setValues([HEADERS_INV.map(h => it[h] != null ? it[h] : '')]);
+      auditLog(ss, user, 'update', it.id, `Actualizado item: ${it.item || old[4] || ''}; qty ${old[5]} -> ${it.qty}; estado ${old[9]} -> ${it.est}`);
       return json({ ok: true, item: it });
     }
     if (action === 'delete') {
       const sheet = ss.getSheetByName(SHEET_INVENTARIO);
       const r = findRowById(sheet, body.id);
       if (r < 0) return json({ ok: false, error: 'No encontrado' });
+      const old = sheet.getRange(r, 1, 1, HEADERS_INV.length).getValues()[0];
       sheet.deleteRow(r);
+      auditLog(ss, user, 'delete', body.id, `Eliminado item: ${old[4] || ''} (${old[1] || 'sin ref'})`);
       return json({ ok: true });
     }
     
@@ -342,6 +374,7 @@ function doPost(e) {
       // Inserción en bloque (mucho más rápido que appendRow uno a uno)
       const startRow = sheet.getLastRow() + 1;
       sheet.getRange(startRow, 1, rows.length, HEADERS_INV.length).setValues(rows);
+      auditLog(ss, user, 'bulkImport', '', `Importados ${rows.length} items`);
       
       return json({ ok: true, imported: rows.length, items: newItems });
     }
@@ -352,6 +385,7 @@ function doPost(e) {
       const pr = body.profesor;
       pr.id = nextId(sheet);
       sheet.appendRow(HEADERS_PROF.map(h => pr[h] != null ? pr[h] : ''));
+      auditLog(ss, user, 'profAdd', pr.id, `Añadido profesor: ${pr.nombre || ''}`);
       return json({ ok: true, profesor: pr });
     }
     if (action === 'profUpdate') {
@@ -360,13 +394,16 @@ function doPost(e) {
       const r = findRowById(sheet, pr.id);
       if (r < 0) return json({ ok: false, error: 'No encontrado' });
       sheet.getRange(r, 1, 1, HEADERS_PROF.length).setValues([HEADERS_PROF.map(h => pr[h] != null ? pr[h] : '')]);
+      auditLog(ss, user, 'profUpdate', pr.id, `Actualizado profesor: ${pr.nombre || ''}`);
       return json({ ok: true, profesor: pr });
     }
     if (action === 'profDelete') {
       const sheet = ss.getSheetByName(SHEET_PROFESORES);
       const r = findRowById(sheet, body.id);
       if (r < 0) return json({ ok: false, error: 'No encontrado' });
+      const old = sheet.getRange(r, 1, 1, HEADERS_PROF.length).getValues()[0];
       sheet.deleteRow(r);
+      auditLog(ss, user, 'profDelete', body.id, `Eliminado profesor: ${old[1] || ''}`);
       return json({ ok: true });
     }
 
@@ -382,6 +419,7 @@ function doPost(e) {
       aulas.forEach((a, i) => {
         sheet.appendRow([a.id, a.name, a.icon, a.desc, a.th, i+1]);
       });
+      auditLog(ss, user, 'aulasSync', '', `Sincronizadas ${aulas.length} aulas`);
       return json({ ok: true, aulas });
     }
 
@@ -396,6 +434,7 @@ function doPost(e) {
       cats.forEach(c => {
         sheet.appendRow([c.name, c.c, c.bg, c.i, c.orden]);
       });
+      auditLog(ss, user, 'catsSync', '', `Sincronizadas ${cats.length} categorias`);
       return json({ ok: true, cats });
     }
 
@@ -412,6 +451,7 @@ function doPost(e) {
           sheet.appendRow([c.id, c.name, c.nivel, c.icon, c.th, c.desc, String(m.cod), m.name, Number(m.horas)||0, ci+1, mi+1]);
         });
       });
+      auditLog(ss, user, 'ciclosSync', '', `Sincronizados ${ciclos.length} ciclos`);
       return json({ ok: true, ciclos });
     }
 
@@ -438,6 +478,7 @@ function doPost(e) {
       pres.cantidadDevuelta = 0;
       pres.estado = 'Activo';
       presSheet.appendRow(HEADERS_PRES.map(h => pres[h] != null ? pres[h] : ''));
+      auditLog(ss, user, 'prestar', pres.itemId, `Prestamo ${pres.id}: ${pres.cantidad} ud. de ${pres.itemNombre || ''} a ${pres.profesorNombre || ''}`);
 
       // ── Notificación email al responsable del módulo ────────────
       if (pres.moduloCod) {
@@ -532,6 +573,7 @@ function doPost(e) {
       } else {
         presSheet.getRange(rPres, 14).setValue('Parcial');
       }
+      auditLog(ss, user, 'devolver', itemId, `Devolucion prestamo ${presId}: ${cantDev} ud.; estado ${estadoFinal}`);
 
       // ── Notificación email devolución ───────────────────────────
       try {
@@ -650,6 +692,7 @@ function doPost(e) {
       const docId = nextId(sheet);
       const fecha = Utilities.formatDate(new Date(), 'GMT', 'yyyy-MM-dd');
       sheet.appendRow([docId, itemId, itemNombre, aulaId, fileName, file.getId(), file.getUrl(), fecha]);
+      auditLog(ss, user, 'uploadDoc', itemId, `Subido documento: ${fileName}`);
 
       return json({ ok: true, doc: { id: docId, itemId, fileName, driveId: file.getId(), driveUrl: file.getUrl(), fecha } });
     }
@@ -658,7 +701,9 @@ function doPost(e) {
       const { docId, driveId } = body;
       try { DriveApp.getFileById(driveId).setTrashed(true); } catch(e) {}
       const sheet = ss.getSheetByName(SHEET_DOCS);
-      if (sheet) { const r = findRowById(sheet, docId); if (r > 0) sheet.deleteRow(r); }
+      let old = null;
+      if (sheet) { const r = findRowById(sheet, docId); if (r > 0) { old = sheet.getRange(r, 1, 1, HEADERS_DOCS.length).getValues()[0]; sheet.deleteRow(r); } }
+      auditLog(ss, user, 'deleteDoc', old ? old[1] : '', `Eliminado documento: ${old ? old[4] : docId}`);
       return json({ ok: true });
     }
 
@@ -670,6 +715,7 @@ function doPost(e) {
         if (String(data[i][0]).trim() === String(user.usuario).trim()) {
           sheet.getRange(i + 1, 3).setValue(body.nombre || '');
           sheet.getRange(i + 1, 5).setValue(body.email || '');
+          auditLog(ss, user, 'updateProfile', '', `Perfil actualizado: ${body.nombre || user.usuario}`);
           return json({ ok: true });
         }
       }
@@ -684,6 +730,7 @@ function doPost(e) {
       for (let i = 1; i < data.length; i++) {
         if (String(data[i][0]).trim() === String(user.usuario).trim()) {
           sheet.getRange(i + 1, 2).setValue(body.newPassword);
+          auditLog(ss, user, 'changePassword', '', 'Contraseña cambiada');
           return json({ ok: true });
         }
       }
@@ -723,6 +770,7 @@ function doPost(e) {
           });
         }
       } catch(e) {}
+      auditLog(ss, user, 'notificarPedido', (body.item || {}).id || '', `Notificado pedido: ${(body.item || {}).item || 'material'}`);
       return json({ ok: true });
     }
 
