@@ -67,6 +67,7 @@ Fuente de verdad: columna `rol` de hoja **Usuarios**. Frontend en `js/roles.js`;
 - `profesor`: añadir/editar ítems, bajas, documentos, préstamos/devoluciones, pedidos y perfil. No puede eliminar definitivamente, importar CSV, gestionar aulas/categorías/ciclos ni gestionar profesores.
 - `consulta` / `lector`: lectura + perfil/contraseña.
 La ocultación de botones es solo UX; la protección real está en Apps Script. Si se añade una acción nueva en GAS, añadirla también a `ACTION_PERMISSIONS` en `js/roles.js` y `appscript.txt`.
+Memoria complementaria: `.claude/memory.md`.
 
 ## Botón combinado Prestar/Devolver (implementado 2026-05-03)
 En rTable y rCards de inventory.js, el botón 🔁 llama a `openPresDevModal(itemId)` (en prestamos.js).
