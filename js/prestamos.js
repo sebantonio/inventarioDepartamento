@@ -24,6 +24,7 @@ function goPrestamos(tab){
   document.getElementById('btnN').style.display='none';
   document.getElementById('btnE').style.display='none';
   _hideHomeButtons();
+  if(typeof applyRoleUI === 'function') applyRoleUI();
   document.getElementById('bc').innerHTML=`<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><strong>📋 Préstamos</strong>`;
 
   // Stats
@@ -153,6 +154,7 @@ function onPresItemChange(val){
 }
 
 function openPrestar(itemId){
+  if(!requirePerm('loans.write')) return;
   if(!profesores.length){
     if(confirm('No hay profesores registrados. ¿Quieres añadir alguno ahora?')){ openProfModal(); }
     return;
@@ -243,6 +245,7 @@ async function confirmPrestar(){
 
 // ─── DEVOLVER ────────────────────────────────────────────
 function openDevolver(presId){
+  if(!requirePerm('loans.write')) return;
   const p = prestamos.find(x=>Number(x.id)===Number(presId));
   if(!p) return;
   devolverPresId = presId;
@@ -286,6 +289,7 @@ async function confirmDevolver(){
 let profEditing = [];
 
 function openProfModal(){
+  if(!requirePerm('profesores.manage')) return;
   profEditing = JSON.parse(JSON.stringify(profesores));
   renderProfList();
   document.getElementById('mProf').classList.add('open');

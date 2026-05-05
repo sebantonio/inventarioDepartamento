@@ -4,6 +4,7 @@
 let catsEditing = [];
 
 function openCatsModal(){
+  if(!requirePerm('config.manage')) return;
   catsEditing = Object.entries(CATS).map(([name,v])=>({name, c:v.c, bg:v.bg, i:v.i}));
   renderCatsList();
   document.getElementById('mCats').classList.add('open');

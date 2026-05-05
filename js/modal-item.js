@@ -16,6 +16,7 @@ function updateModSelect(){
 }
 
 function openModal(id=null, src=null){
+  if(!requirePerm('items.write')) return;
   eid=id; fillModalSelects();
   const m = id ? items.find(x=>x.id===id) : src;
   document.getElementById('mT').textContent = id ? 'Editar ítem' : src ? '📋 Duplicar ítem' : 'Nuevo ítem';
@@ -39,6 +40,7 @@ function openModal(id=null, src=null){
 }
 
 function duplicateItem(id){
+  if(!requirePerm('items.write')) return;
   const src = items.find(x=>x.id===id);
   if(src) openModal(null, src);
 }
@@ -102,6 +104,7 @@ async function saveItem(){
 // ═════════════════════════════════════════════════════════
 let dId=null;
 function confDel(id){
+  if(!requirePerm('items.delete')) return;
   const it=items.find(x=>x.id===id);dId=id;
   document.getElementById('cTitle').textContent = '¿Eliminar ítem?';
   document.getElementById('cSub').textContent=`"${it?.item}" será eliminado permanentemente.`;
@@ -128,6 +131,7 @@ function closeConf(){document.getElementById('mConf').classList.remove('open')}
 let bajaId = null;
 
 function openBaja(id){
+  if(!requirePerm('items.write')) return;
   bajaId = id;
   const it = items.find(x=>x.id===id);
   if(!it) return;
@@ -221,6 +225,7 @@ function togglePedido(id){
 }
 
 function openPedidos(){
+  if(!requirePerm('orders.write')) return;
   renderPedidosList();
   document.getElementById('mPedidos').classList.add('open');
 }

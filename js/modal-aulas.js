@@ -4,6 +4,7 @@
 let aulasEditing = [];
 
 function openAulasModal(){
+  if(!requirePerm('config.manage')) return;
   aulasEditing = JSON.parse(JSON.stringify(AULAS)); // copia profunda
   renderAulasList();
   document.getElementById('mAulas').classList.add('open');

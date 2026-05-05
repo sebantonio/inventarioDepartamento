@@ -23,6 +23,7 @@ const CATEGORIAS_VALIDAS = () => Object.keys(CATS);
 
 function openImportModal(){
   if(!SESSION){toast('Inicia sesión primero','err');return}
+  if(!requirePerm('import.write')) return;
   impData = { rawText:'', headers:[], rows:[], mapping:{}, validRows:[], invalidRows:[] };
   impGoToStep(1);
   // Reset file input
@@ -331,4 +332,3 @@ async function impDoImport(){
     document.getElementById('impResultMsg').textContent = err.message || 'Error desconocido';
   }
 }
-

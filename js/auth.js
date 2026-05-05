@@ -74,6 +74,7 @@ function showUserChip(){
   document.getElementById('userAvatar').textContent = initials;
   document.getElementById('userName').textContent = SESSION.nombre || SESSION.usuario;
   document.getElementById('userChip').style.display = 'flex';
+  if(typeof applyRoleUI === 'function') applyRoleUI();
 }
 
 function _hideOverlay(){
@@ -116,6 +117,7 @@ async function loadData(){
     document.getElementById('btnN').style.display='flex';
     document.getElementById('btnPres').style.display='flex';
     document.getElementById('btnPed').style.display='flex';
+    if(typeof applyRoleUI === 'function') applyRoleUI();
     updatePedBadge();
     if(location.hash && location.hash.length > 1) navigateFromHash(location.hash);
     else if(cf) openSub(); else if(currentCiclo) openCiclo(currentCiclo.id); else goHome();

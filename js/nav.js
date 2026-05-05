@@ -29,6 +29,7 @@ function goHome(){
   document.getElementById('btnN').style.display='flex';
   document.getElementById('btnE').style.display='none';
   _showHomeButtons();
+  if(typeof applyRoleUI === 'function') applyRoleUI();
   gsClear();
   show('pH'); renderHome();
 }
@@ -54,6 +55,7 @@ function openCiclo(cicloId){
   document.getElementById('btnN').style.display='flex';
   document.getElementById('btnE').style.display='none';
   _hideHomeButtons();
+  if(typeof applyRoleUI === 'function') applyRoleUI();
   document.getElementById('cicloTag').textContent = `${currentCiclo.icon} ${currentCiclo.nivel}`;
   document.getElementById('cicloTitle').textContent = currentCiclo.name;
   document.getElementById('cicloMeta').textContent = currentCiclo.desc;
@@ -124,6 +126,7 @@ function openSub(){
   document.getElementById('btnN').style.display = cf.type==='lowstock' ? 'none' : 'flex';
   document.getElementById('btnE').style.display = cf.type==='lowstock' ? 'none' : 'flex';
   _hideHomeButtons();
+  if(typeof applyRoleUI === 'function') applyRoleUI();
   document.getElementById('srch').value='';
   document.getElementById('fEst').value='';
   const cats=[...new Set(all.map(x=>x.cat).filter(Boolean))].sort();

@@ -61,6 +61,13 @@ config → state → api → docs → search → home → inventory → modal-it
 - El Departamento como módulo genérico: `id:'departamento'`, módulo `cod:'dpto'` → se guarda como `departamento__dpto`
 - `Number('dpto')` = NaN → la búsqueda en hoja Modulos no encuentra nada → no se envía email de préstamo (comportamiento correcto, no tiene responsable de módulo)
 
+## Sistema de roles (implementado 2026-05-05)
+Fuente de verdad: columna `rol` de hoja **Usuarios**. Frontend en `js/roles.js`; backend en `appscript.txt` con `requireAction(user, action)`.
+- `Jefe Departamento` / `Jefe de Departamento` / `Administrador` / `admin`: acceso completo.
+- `profesor`: añadir/editar ítems, bajas, documentos, préstamos/devoluciones, pedidos y perfil. No puede eliminar definitivamente, importar CSV, gestionar aulas/categorías/ciclos ni gestionar profesores.
+- `consulta` / `lector`: lectura + perfil/contraseña.
+La ocultación de botones es solo UX; la protección real está en Apps Script. Si se añade una acción nueva en GAS, añadirla también a `ACTION_PERMISSIONS` en `js/roles.js` y `appscript.txt`.
+
 ## Botón combinado Prestar/Devolver (implementado 2026-05-03)
 En rTable y rCards de inventory.js, el botón 🔁 llama a `openPresDevModal(itemId)` (en prestamos.js).
 El modal `#mPresDevPicker` muestra:
@@ -141,4 +148,3 @@ Acciones GAS relevantes:
 - `action=ciclosSync` — sync completo hoja Ciclos (una fila por módulo: cicloId|cicloNombre|nivel|icon|th|desc|modCod|modNombre|modHoras|cicloOrden|modOrden)
 - `action=notificarPedido` — email a TODOS los Jefes de Departamento con lista de pedidos
 - `action=profAdd/profUpdate/profDelete` — CRUD de profesores prestatarios
-

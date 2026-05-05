@@ -62,6 +62,60 @@ function verificarLogin(usuario, password) {
   return null;
 }
 
+const ACTION_PERMISSIONS = {
+  add: 'items.write',
+  update: 'items.write',
+  delete: 'items.delete',
+  bulkImport: 'import.write',
+  profAdd: 'profesores.manage',
+  profUpdate: 'profesores.manage',
+  profDelete: 'profesores.manage',
+  aulasSync: 'config.manage',
+  catsSync: 'config.manage',
+  ciclosSync: 'config.manage',
+  prestar: 'loans.write',
+  devolver: 'loans.write',
+  getDocs: 'docs.read',
+  uploadDoc: 'docs.write',
+  deleteDoc: 'docs.write',
+  updateProfile: 'profile.write',
+  changePassword: 'profile.write',
+  notificarPedido: 'orders.write'
+};
+
+const ROLE_PERMISSIONS = {
+  'jefe departamento': ['*'],
+  'jefe de departamento': ['*'],
+  'administrador': ['*'],
+  'admin': ['*'],
+  'profesor': ['items.write','docs.write','loans.write','orders.write','profile.write'],
+  'consulta': ['profile.write'],
+  'lector': ['profile.write']
+};
+
+function normalizarRol(rol) {
+  return String(rol || 'consulta').trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function userCan(user, permission) {
+  if (permission === 'docs.read') return true;
+  const perms = ROLE_PERMISSIONS[normalizarRol(user && user.rol)] || ROLE_PERMISSIONS.consulta;
+  return perms.indexOf('*') >= 0 || perms.indexOf(permission) >= 0;
+}
+
+function esJefeDepartamento(rol) {
+  const r = normalizarRol(rol);
+  return r === 'jefe departamento' || r === 'jefe de departamento';
+}
+
+function requireAction(user, action) {
+  const permission = ACTION_PERMISSIONS[action];
+  if (!permission) return null;
+  if (userCan(user, permission)) return null;
+  return json({ ok: false, error: 'No tienes permisos para realizar esta accion' });
+}
+
 // ─── HELPERS ─────────────────────────────────────────────────────
 function rowsToObjects(sheet, headers) {
   if (!sheet) return [];
@@ -160,6 +214,8 @@ function doGet(e) {
     if (!user) return json({ ok: false, error: 'No autorizado' });
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const permError = requireAction(user, action);
+    if (permError) return permError;
     const items      = rowsToObjects(ss.getSheetByName(SHEET_INVENTARIO), HEADERS_INV);
     const profesores = rowsToObjects(ss.getSheetByName(SHEET_PROFESORES), HEADERS_PROF);
     const prestamos  = rowsToObjects(ss.getSheetByName(SHEET_PRESTAMOS), HEADERS_PRES);
@@ -240,6 +296,9 @@ function doPost(e) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
     // ─── ITEMS ──────────────────────────────────────────────────
+    const permError = requireAction(user, action);
+    if (permError) return permError;
+
     if (action === 'add') {
       const sheet = ss.getSheetByName(SHEET_INVENTARIO);
       const it = body.item;
@@ -406,7 +465,7 @@ function doPost(e) {
               if (responsableEmail) {
                 const jefeEmails1 = [];
                 for (let i = 1; i < usrRows.length; i++) {
-                  if (String(usrRows[i][3] || '').trim() === 'Jefe Departamento') {
+                  if (esJefeDepartamento(usrRows[i][3])) {
                     const e = String(usrRows[i][4] || '').trim();
                     if (e) jefeEmails1.push(e);
                   }
@@ -524,7 +583,7 @@ function doPost(e) {
             const rol    = String(usrRows[i][3] || '').trim();
             const email  = String(usrRows[i][4] || '').trim();
             if (responsableNombre && nombre === responsableNombre) responsableEmail = email;
-            if (rol === 'Jefe Departamento' && email) jefeEmails2.push(email);
+            if (esJefeDepartamento(rol) && email) jefeEmails2.push(email);
           }
         }
 
@@ -638,7 +697,7 @@ function doPost(e) {
         const usrRows = usrSheet.getDataRange().getValues();
         const jefeEmails3 = [];
         for (let i = 1; i < usrRows.length; i++) {
-          if (String(usrRows[i][3] || '').trim() === 'Jefe Departamento') {
+          if (esJefeDepartamento(usrRows[i][3])) {
             const e = String(usrRows[i][4] || '').trim();
             if (e) jefeEmails3.push(e);
           }

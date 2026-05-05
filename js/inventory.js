@@ -120,14 +120,17 @@ function sort(k){if(sk===k)sa=!sa;else{sk=k;sa=true}renderInv()}
 
 let _delItemId = null;
 function openDelModal(itemId){
+  if(!can('items.write') && !can('items.delete')){ requirePerm('items.write'); return; }
   const step1 = document.getElementById('delPickerStep1');
   const step2 = document.getElementById('delPickerStep2');
+  const delBtn = document.getElementById('delBtnDelete');
+  if(delBtn) delBtn.style.display = can('items.delete') ? '' : 'none';
   if(itemId !== undefined && itemId !== null){
     const item = items.find(x=>Number(x.id)===Number(itemId));
     if(!item) return;
     _delItemId = itemId;
     document.getElementById('delPickerName').textContent = item.item;
-    document.getElementById('delBtnBaja').style.display = item.est !== 'Baja' ? '' : 'none';
+    document.getElementById('delBtnBaja').style.display = item.est !== 'Baja' && can('items.write') ? '' : 'none';
     step1.style.display = 'none';
     step2.style.display = 'flex';
   } else {
@@ -164,7 +167,7 @@ function delPickerSelect(itemId){
   if(!item) return;
   _delItemId = itemId;
   document.getElementById('delPickerName').textContent = item.item;
-  document.getElementById('delBtnBaja').style.display = item.est !== 'Baja' ? '' : 'none';
+  document.getElementById('delBtnBaja').style.display = item.est !== 'Baja' && can('items.write') ? '' : 'none';
   document.getElementById('delPickerStep1').style.display = 'none';
   document.getElementById('delPickerStep2').style.display = 'flex';
 }

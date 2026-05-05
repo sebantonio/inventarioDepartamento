@@ -10,6 +10,7 @@ let cicloExpandIdx = null;
 let cicloAddingNew = false;
 
 function openCiclosModal(){
+  if(!requirePerm('config.manage')) return;
   ciclosEditing  = JSON.parse(JSON.stringify(CICLOS));
   cicloExpandIdx = null;
   cicloAddingNew = false;

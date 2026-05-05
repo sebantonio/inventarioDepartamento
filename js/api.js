@@ -17,6 +17,9 @@ async function apiGet(action){
 }
 
 async function apiPost(payload){
+  if(payload?.action && typeof canAction === 'function' && !canAction(payload.action)){
+    return {ok:false, error:'No tienes permisos para realizar esta acci\u00f3n'};
+  }
   const fullPayload = {...payload, u: SESSION?.usuario, p: SESSION?.password};
   const r = await fetch(API_URL,{method:'POST',body:JSON.stringify(fullPayload),headers:{'Content-Type':'text/plain;charset=utf-8'},redirect:'follow'});
   if(!r.ok) throw new Error('HTTP '+r.status);
