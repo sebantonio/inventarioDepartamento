@@ -3,6 +3,7 @@
 // ═════════════════════════════════════════════════════════
 let docsPendientes = [];
 let docsActuales   = [];
+let _docNameSeq = 0;
 
 const DOC_ICONS = {pdf:'📄',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',gif:'🖼️',webp:'🖼️',
   doc:'📝',docx:'📝',xls:'📊',xlsx:'📊',ppt:'📊',pptx:'📊',
@@ -24,7 +25,7 @@ async function loadItemDocs(itemId){
 }
 
 async function addDocFiles(files){
-  const name = document.getElementById('f_name')?.value.trim() || 'foto';
+  const name = document.getElementById('f_item')?.value.trim() || 'foto';
   for(const f of files) docsPendientes.push(await _processFile(f, name));
   renderDocList();
 }
@@ -79,13 +80,22 @@ function _processFile(file, itemName){
       c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
       c.toBlob(blob => {
-        const suf = Date.now().toString().slice(-5);
-        resolve(new File([blob], `${safe}_${suf}.jpg`, {type:'image/jpeg'}));
+        resolve(new File([blob], _photoFileName(safe), {type:'image/jpeg'}));
       }, 'image/jpeg', QUALITY);
     };
     img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
     img.src = url;
   });
+}
+
+function _photoFileName(base){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const ms = String(d.getMilliseconds()).padStart(3,'0');
+  _docNameSeq = (_docNameSeq + 1) % 100;
+  const seq = String(_docNameSeq).padStart(2,'0');
+  const stamp = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}_${ms}${seq}`;
+  return `${base}_${stamp}.jpg`;
 }
 
 function fileToBase64(file){
