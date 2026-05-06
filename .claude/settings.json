@@ -8,7 +8,8 @@
       "Bash(Select-Object FullName)",
       "Bash(Get-ChildItem \"c:\\\\OneDrive\\\\OneDrive - Consejería de Educación, Cultura y Deportes Castilla La-Mancha\\\\DOCUMENTOS DEL BOSCO\\\\Curso 2025-2026\\\\Pagina inventario Departamento\" -Recurse)",
       "Bash(Select-Object FullName, Length)",
-      "Bash(git commit -m 'Feat: alertas de stock bajo + historial visual por ítem *)"
+      "Bash(git commit -m 'Feat: alertas de stock bajo + historial visual por ítem *)",
+      "Bash(node -c appscript.txt)"
     ]
   }
 }
