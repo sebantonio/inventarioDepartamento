@@ -11,10 +11,11 @@ SPA de inventario para el departamento de Electricidad y Electrónica. Vanilla J
 - Repo: https://github.com/sebantonio/inventarioDepartamento.git
 
 ## Estructura de archivos JS (orden de carga en index.html)
-config → state → api → docs → search → home → inventory → modal-item → modal-aulas → modal-cats → prestamos → import → nav → docs-dpto → pwa → profile → reset → auth
+config → state → roles → api → docs → search → home → inventory → modal-item → modal-aulas → modal-cats → modal-ciclos → prestamos → import → nav → docs-dpto → pwa → profile → reset → auth
 
 - `js/config.js` — AULAS_DEFAULT, CICLOS (5 ciclos con módulos, incl. Departamento; `let` reemplazable desde backend), CATS_DEFAULT (11), findModulo()
 - `js/state.js` — API_URL, SESSION, items, cf, view, show(), setConn()
+- `js/roles.js` — permisos frontend, ACTION_PERMISSIONS, can(), applyRoleUI()
 - `js/api.js` — urlWithAuth(), apiGet(), apiPost()
 - `js/auth.js` — doLogin(), logout(), loadData() (con barra de progreso #loadBar), DOMContentLoaded
 - `js/nav.js` — goHome(), goAula(), goCat(), openCiclo(), goMod(), openSub()
@@ -35,7 +36,7 @@ config → state → api → docs → search → home → inventory → modal-it
 
 ## PWA
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
-- sw.js: VERSION='v6', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
+- sw.js: VERSION='v7', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
 - `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
 
@@ -68,6 +69,11 @@ Fuente de verdad: columna `rol` de hoja **Usuarios**. Frontend en `js/roles.js`;
 - `consulta` / `lector`: lectura + perfil/contraseña.
 La ocultación de botones es solo UX; la protección real está en Apps Script. Si se añade una acción nueva en GAS, añadirla también a `ACTION_PERMISSIONS` en `js/roles.js` y `appscript.txt`.
 Memoria complementaria: `.claude/memory.md`.
+
+## Rendimiento móvil/tablet (ajustado 2026-05-06)
+- `js/inventory.js`: el handler de `resize` solo vuelve a renderizar si cambia el modo tabla/tarjetas. En móviles, el navegador dispara `resize` al enseñar/ocultar la barra superior durante el scroll; renderizar todas las tarjetas en cada evento provoca lags y bloqueos de desplazamiento.
+- `css/styles.css`: en pantallas <=900px las tarjetas y botones desactivan animaciones/transiciones/transform hover costosos y reducen sombra para mejorar scroll en móviles/tablets.
+- Tras cambios de CSS/JS de rendimiento, subir `VERSION` en `sw.js` para que la PWA no sirva recursos antiguos desde caché.
 
 ## Auditoría de acciones (implementado 2026-05-05)
 GAS crea automáticamente hoja **Log** con columnas `fecha | usuario | nombre | rol | accion | itemId | resumen`.
@@ -125,7 +131,7 @@ El modal tiene **dos pasos**:
 - `_hideOverlay()` en auth.js: añade clase `lo-hide` (opacity:0) y tras 480ms pone `display:none`
 - Se oculta en el `finally` de loadData(), también si sesión inválida o sin sesión → login
 - NO se muestra en recargas tras login (overlay ya está `display:none`)
-- Icono 🔁 uniforme en TODOS los botones de préstamo: filas inventario Y botones "Nuevo préstamo" independientes (home hero, subpágina pS, página préstamos pPres)
+- Icono ⌛ uniforme en TODOS los botones de préstamo: filas inventario Y botones "Nuevo préstamo" independientes (home hero, subpágina pS, página préstamos pPres)
 
 ## Funcionalidades implementadas (estado 2026-05-04)
 - Login / logout / recuperación de contraseña por email (reset.js)

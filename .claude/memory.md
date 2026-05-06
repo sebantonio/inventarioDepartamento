@@ -22,8 +22,23 @@ Reglas importantes:
 - La UI oculta botones con `data-perm` y `applyRoleUI()`, pero esto es solo UX.
 - La proteccion real esta en Apps Script con `ACTION_PERMISSIONS` y `ROLE_PERMISSIONS`.
 - Si se anade una accion nueva en GAS, hay que registrarla tambien en `ACTION_PERMISSIONS` de `js/roles.js` y `appscript.txt`.
+- Orden real de scripts en `index.html`: config -> state -> roles -> api -> docs -> search -> home -> inventory -> modal-item -> modal-aulas -> modal-cats -> modal-ciclos -> prestamos -> import -> nav -> docs-dpto -> pwa -> profile -> reset -> auth.
 - Tras cambiar `appscript.txt`, copiar el contenido al editor de Google Apps Script y redesplegar la aplicacion web.
 - `sw.js` debe incluir `js/roles.js` y los JS cargados por `index.html` para que la PWA no sirva una version incompleta.
+
+## Rendimiento movil/tablet - 2026-05-06
+
+- Problema detectado: en algunos moviles/tablets el inventario en tarjetas se quedaba con lag o no desplazaba bien.
+- Causa principal probable: `resize` renderizaba todo el inventario mientras el navegador movil cambiaba la altura visible al ocultar/mostrar su barra durante el scroll.
+- Solucion aplicada: `js/inventory.js` solo re-renderiza en `resize` si cambia el modo real tabla/tarjetas.
+- CSS movil/tablet: tarjetas y botones sin animaciones/transiciones/transform hover pesados en <=900px; sombras reducidas.
+- `sw.js` subido a `VERSION='v7'` para forzar cache nueva de PWA.
+
+## Iconos y acciones combinadas - actualizado 2026-05-06
+
+- Icono uniforme de prestamos: `⌛` en filas de inventario, tarjetas y botones "Nuevo prestamo" independientes.
+- No recuperar `🔁` para prestamos; se cambio para evitar conflicto visual con `🔄` de recargar.
+- Baja/eliminar usa el picker `#mDelPicker` y `openDelModal(itemId?)`; no recuperar `.del-wrap` / `.del-menu`.
 
 ## Auditoria de acciones - 2026-05-05
 
