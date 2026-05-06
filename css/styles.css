@@ -446,6 +446,11 @@ td{padding:10px 13px;font-size:13px;max-width:180px;overflow:hidden;text-overflo
   .ccard:hover .ccard-icon{transform:none!important}
 }
 
+@media (hover:none), (pointer:coarse){
+  .vtog{display:none!important}
+  .tw{display:none!important}
+}
+
 .mbg{position:fixed;inset:0;background:rgba(15,20,40,.5);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
 .mbg.open{opacity:1;pointer-events:all}
 .modal{background:var(--white);border-radius:18px;border:1px solid var(--border);padding:30px;width:min(580px,100%);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.18);transform:translateY(16px) scale(.98);transition:transform .25s cubic-bezier(.34,1.4,.64,1)}

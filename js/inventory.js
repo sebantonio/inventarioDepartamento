@@ -56,7 +56,8 @@ let _invPage = 1;
 let _pageSize = 25;
 let _pageSig = '';
 function getInvRenderMode(){
-  return (view==='table' && window.innerWidth > 640) ? 'table' : 'cards';
+  const touchLike = matchMedia('(hover: none), (pointer: coarse)').matches;
+  return (view==='table' && window.innerWidth > 900 && !touchLike) ? 'table' : 'cards';
 }
 
 function getPageSig(data){

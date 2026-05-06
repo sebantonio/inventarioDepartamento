@@ -35,7 +35,8 @@ Reglas importantes:
 - CSS movil/tablet: tarjetas y botones sin animaciones/transiciones/transform hover pesados en <=900px; sombras reducidas.
 - No usar `contain: layout paint` en `.icard`: en Chrome/Edge/Firefox movil puede provocar tarjetas en blanco que aparecen al desplazar.
 - Ajuste tablet tactil: aplicar modo ligero tambien con `hover:none`, `pointer:coarse` y `max-width:1200px`; sin animaciones/transforms en tarjetas/cards/botones. `topbar` con `min-height`, no `height`, y login alineado arriba para evitar cortes por barras del navegador.
-- `sw.js` subido a `VERSION='v12'` para forzar cache nueva de PWA.
+- Tablets/dispositivos tactiles: forzar vista tarjetas. `getInvRenderMode()` devuelve `cards` si `(hover:none)` o `(pointer:coarse)`; CSS oculta `.vtog` y `.tw`.
+- `sw.js` subido a `VERSION='v13'` para forzar cache nueva de PWA.
 
 ## Iconos y acciones combinadas - actualizado 2026-05-06
 
