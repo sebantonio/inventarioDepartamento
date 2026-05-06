@@ -10,8 +10,11 @@ function normalizeStr(s){
 function fuzzyMatch(query, text){
   const q=normalizeStr(query);
   const t=normalizeStr(text);
-  const words=q.split(/\s+/).filter(w=>w);
-  return words.every(w=>t.includes(w));
+  const queryWords=q.split(/\s+/).filter(w=>w);
+  const textWords=t.split(/\s+/).filter(w=>w);
+  return queryWords.every(qWord=>
+    textWords.some(tWord=>tWord.startsWith(qWord))
+  );
 }
 
 function globalSearch(q){
