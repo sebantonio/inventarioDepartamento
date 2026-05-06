@@ -479,23 +479,38 @@ function doGet(e) {
     }
 
     if (action === 'getItemLog') {
-      const itemId = e.parameter.itemId;
-      const logSheet = ss.getSheetByName(SHEET_LOG);
-      if (!logSheet) return json({ ok: true, logs: [] });
-      const rows = logSheet.getDataRange().getValues();
-      const logs = [];
-      for (let i = 1; i < rows.length; i++) {
-        if (String(rows[i][5]) === String(itemId)) {
-          logs.push({
-            fecha: Utilities.formatDate(new Date(rows[i][0]), 'Europe/Madrid', 'dd/MM/yyyy HH:mm'),
-            usuario: String(rows[i][2] || rows[i][1] || ''),
-            accion: String(rows[i][4] || ''),
-            resumen: String(rows[i][6] || '')
-          });
+      try {
+        const itemId = e.parameter.itemId;
+        const logSheet = ss.getSheetByName(SHEET_LOG);
+        if (!logSheet) return json({ ok: true, logs: [] });
+        const rows = logSheet.getDataRange().getValues();
+        const logs = [];
+        for (let i = 1; i < rows.length; i++) {
+          const itemIdLog = String(rows[i][5] || '').trim();
+          const itemIdReq = String(itemId || '').trim();
+          if (itemIdLog === itemIdReq) {
+            const fechaVal = rows[i][0];
+            let fechaStr = '';
+            if (fechaVal) {
+              try {
+                fechaStr = Utilities.formatDate(new Date(fechaVal), 'Europe/Madrid', 'dd/MM/yyyy HH:mm');
+              } catch(e) {
+                fechaStr = String(fechaVal);
+              }
+            }
+            logs.push({
+              fecha: fechaStr,
+              usuario: String(rows[i][2] || rows[i][1] || '—'),
+              accion: String(rows[i][4] || '—'),
+              resumen: String(rows[i][6] || '—')
+            });
+          }
         }
+        logs.reverse();
+        return json({ ok: true, logs });
+      } catch(logErr) {
+        return json({ ok: false, error: logErr.toString() });
       }
-      logs.reverse();
-      return json({ ok: true, logs });
     }
 
     return json({ ok: true, items, profesores, prestamos, aulas, cats, ciclos, user });
