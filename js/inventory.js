@@ -23,13 +23,13 @@ function getBase(){
 }
 
 function getFiltered(){
-  const q=document.getElementById('srch').value.toLowerCase();
+  const q=document.getElementById('srch').value;
   const fc=document.getElementById('fCat').value;
   const fe=document.getElementById('fEst').value;
   return getBase().filter(x=>{
     if(fc&&x.cat!==fc)return false;
     if(fe&&x.est!==fe)return false;
-    if(q&&![x.ref,x.item,x.loc,x.util,x.obs].join(' ').toLowerCase().includes(q))return false;
+    if(q&&!fuzzyMatch(q,[x.ref,x.item,x.loc,x.util,x.obs].join(' ')))return false;
     return true;
   }).sort((a,b)=>{
     let av=a[sk]??'',bv=b[sk]??'';

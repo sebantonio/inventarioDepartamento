@@ -3,16 +3,27 @@
 // ═════════════════════════════════════════════════════════
 let gsIdx=-1;
 
+function normalizeStr(s){
+  return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+}
+
+function fuzzyMatch(query, text){
+  const q=normalizeStr(query);
+  const t=normalizeStr(text);
+  const words=q.split(/\s+/).filter(w=>w);
+  return words.every(w=>t.includes(w));
+}
+
 function globalSearch(q){
   const res=document.getElementById('gsResults');
   const clr=document.getElementById('gsClear');
   q=q.trim();
   clr.style.display=q?'block':'none';
   if(q.length<2){res.classList.remove('open');gsIdx=-1;return;}
-  const ql=q.toLowerCase();
   const matches=items.filter(x=>{
     const aulaName=AULAS.find(a=>a.id===x.aula)?.name||'';
-    return [x.ref,x.item,x.loc,x.util,x.obs,x.cat,aulaName].join(' ').toLowerCase().includes(ql);
+    const text=[x.ref,x.item,x.loc,x.util,x.obs,x.cat,aulaName].join(' ');
+    return fuzzyMatch(q,text);
   });
   gsIdx=-1;
   if(!matches.length){
