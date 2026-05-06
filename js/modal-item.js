@@ -215,6 +215,62 @@ function printItemQr(){
   w.document.close();
 }
 
+function printBulkItemQrs(){
+  const data = (typeof getFiltered === 'function' ? getFiltered() : items)
+    .filter(x => x?.id);
+  if(!data.length){
+    toast('No hay ítems para imprimir QR','err');
+    return;
+  }
+  const titulo = cf?.label || 'Inventario';
+  const fecha = new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
+  const labels = data.map(it => {
+    const url = itemUrl(it.id);
+    const aula = AULAS.find(a=>a.id===it.aula)?.name || it.aula || '';
+    const mod = findModulo(it.mod);
+    const title = `${it.ref ? it.ref + ' · ' : ''}${it.item || ''}`;
+    return `<article class="label">
+      <img src="${qrSrc(url,220)}" alt="QR">
+      <div class="info">
+        <h2>${escHtml(title)}</h2>
+        <div class="meta">${escHtml(aula)}${mod ? '<br>' + escHtml(mod.cod + ' · ' + mod.name) : ''}</div>
+        <div class="url">${escHtml(url)}</div>
+      </div>
+    </article>`;
+  }).join('');
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  <title>Etiquetas QR ${escHtml(titulo)}</title>
+  <style>
+    @page{size:A4;margin:10mm}
+    *{box-sizing:border-box}
+    body{font-family:Arial,sans-serif;margin:0;color:#111}
+    .head{margin:0 0 8mm;border-bottom:1px solid #ddd;padding-bottom:4mm}
+    .head h1{font-size:18px;margin:0 0 3px}
+    .head p{font-size:11px;margin:0;color:#555}
+    .sheet{display:grid;grid-template-columns:repeat(2,1fr);gap:6mm}
+    .label{min-height:52mm;border:1px solid #d7dce5;border-radius:4px;padding:5mm;display:flex;gap:4mm;align-items:center;break-inside:avoid;page-break-inside:avoid}
+    img{width:30mm;height:30mm;flex:0 0 30mm}
+    h2{font-size:13px;line-height:1.2;margin:0 0 3mm;overflow-wrap:anywhere}
+    .meta{font-size:10px;line-height:1.3;color:#333}
+    .url{font-size:7px;line-height:1.2;color:#666;margin-top:3mm;word-break:break-all}
+  </style></head><body>
+    <header class="head">
+      <h1>Etiquetas QR · ${escHtml(titulo)}</h1>
+      <p>IES El Bosco · ${data.length} etiquetas · ${escHtml(fecha)}</p>
+    </header>
+    <main class="sheet">${labels}</main>
+    <script>
+      const imgs=[...document.images];
+      Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(r=>{img.onload=img.onerror=r;})))
+        .then(()=>setTimeout(()=>print(),150));
+    <\/script>
+  </body></html>`;
+  const w = window.open('','_blank');
+  if(!w){ toast('El navegador ha bloqueado la ventana de impresión','err'); return; }
+  w.document.write(html);
+  w.document.close();
+}
+
 async function saveItem(){
   const name=document.getElementById('f_item').value.trim();
   if(!name){toast('El nombre es obligatorio','err');return}

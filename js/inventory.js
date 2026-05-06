@@ -135,7 +135,7 @@ function rTable(data,mc){
         <td style="max-width:220px;font-weight:600" title="${x.item}">
           <div class="item-title-line">
             <span class="item-title-text">${x.item}</span>
-            <button type="button" class="qr-name-btn" onclick="openModal(${x.id})" title="Ver QR" aria-label="Ver QR">&#9638;</button>
+            <button type="button" class="qr-name-btn" onclick="openModal(${x.id})" title="Ver QR" aria-label="Ver QR"><img class="qr-name-icon" src="icons/qr-code.svg" alt=""></button>
           </div>
         </td>
         <td><span class="qval ${low?'qlow':'qok'}">${x.qty}${low?' ⚠':''}</span></td>
@@ -171,7 +171,7 @@ function rCards(data,mc){
         <div class="card-title-wrap">
           <div class="item-title-line">
             <div class="cname">${x.item}</div>
-            <button type="button" class="qr-name-btn" onclick="openModal(${x.id})" title="Ver QR" aria-label="Ver QR">&#9638;</button>
+            <button type="button" class="qr-name-btn" onclick="openModal(${x.id})" title="Ver QR" aria-label="Ver QR"><img class="qr-name-icon" src="icons/qr-code.svg" alt=""></button>
           </div>
           <div class="cref">${x.ref||''}</div>
         </div>

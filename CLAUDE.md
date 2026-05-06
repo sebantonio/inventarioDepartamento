@@ -22,7 +22,7 @@ config → state → roles → api → docs → search → home → inventory �
 - `js/search.js` — globalSearch(), gsKey(), gsGo(), gsClear()
 - `js/home.js` — renderHome(), renderLoanBanner()
 - `js/inventory.js` — renderInv(), rTable(), rCards(), exportCSV(), toast()
-- `js/modal-item.js` — openModal(), saveItem(), pedidos
+- `js/modal-item.js` — openModal(), saveItem(), pedidos, QR individual y printBulkItemQrs()
 - `js/modal-aulas.js` — openAulasModal(), saveAulas()
 - `js/modal-cats.js` — openCatsModal(), saveCats()
 - `js/modal-ciclos.js` — openCiclosModal(), saveCiclos(), showNewCicloForm(), confirmAddCiclo(), addModuloRow(), removeModuloRow()
@@ -36,7 +36,7 @@ config → state → roles → api → docs → search → home → inventory �
 
 ## PWA
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
-- sw.js: VERSION='v24', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
+- sw.js: VERSION='v26', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
 - `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
 
@@ -161,7 +161,9 @@ El modal tiene **dos pasos**:
 ## QR por ítem (actualizado 2026-05-06)
 - Modal de ítem muestra QR solo para ítems existentes; usa URL `#item/<id>`.
 - `openItemRoute(id)` carga el contexto del aula del ítem y abre su modal. Si el usuario no tiene `items.write`, el modal queda en lectura.
-- Tabla y tarjetas muestran un botón compacto `▦` junto al nombre del ítem; llama a `openModal(id)` para acceso rápido al QR grande y a copiar/imprimir.
+- Tabla y tarjetas muestran un botón compacto con `icons/qr-code.svg` junto al nombre del ítem; llama a `openModal(id)` para acceso rápido al QR grande y a copiar/imprimir.
+- `printBulkItemQrs()` imprime etiquetas QR en A4 para los ítems del filtro actual (`getFiltered()`): aula, categoría, módulo, stock bajo, mantenimiento y búsqueda/filtros activos.
+- El SVG `./icons/qr-code.svg` está incluido en `sw.js`; subir `VERSION` si cambia el icono o la impresión QR.
 
 ## Funcionalidades implementadas (estado 2026-05-06)
 - Login / logout / recuperación de contraseña por email (reset.js)
@@ -180,7 +182,7 @@ El modal tiene **dos pasos**:
 - Pantalla de carga animada (#loadOverlay) con logo + puntos rebotando
 - Barra de progreso animada #loadBar durante carga inicial
 - **Botón 🗑️ Dar de baja** como acción rápida en home hero y subheader pS (abre modal con buscador si no hay ítem previo)
-- QR por ítem en el modal de edición/ver y botón compacto `▦` junto al nombre en tabla/tarjetas.
+- QR por ítem en el modal de edición/ver, botón compacto con `icons/qr-code.svg` junto al nombre en tabla/tarjetas e impresión masiva de etiquetas desde pS.
 - Mantenimiento/reparación por ítem: checkbox en modal, tarjeta y botón rápido en home, ruta `#maintenance`, CSV y backend con columna `mant`.
 - Foto principal por ítem: miniatura local en campo `foto`, visible en tarjetas.
 

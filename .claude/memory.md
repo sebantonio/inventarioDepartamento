@@ -46,7 +46,9 @@ Reglas importantes:
 - Modal de item muestra bloque QR solo en items existentes, porque los nuevos aun no tienen `id`.
 - URL generada: `#item/<id>`. Al abrir esa ruta, `openItemRoute(id)` carga el aula del item y abre su modal.
 - Si se abre con usuario sin permiso `items.write`, el modal queda en modo lectura y oculta Guardar/subida/borrado de documentos.
-- En inventario, tabla y tarjetas muestran un boton compacto `▦` junto al nombre del item. Llama a `openModal(id)` para acceder rapido al QR grande y acciones de copiar/imprimir.
+- En inventario, tabla y tarjetas muestran un boton compacto junto al nombre del item con `icons/qr-code.svg`. Llama a `openModal(id)` para acceder rapido al QR grande y acciones de copiar/imprimir.
+- `printBulkItemQrs()` imprime etiquetas QR en A4 para los items del filtro actual (`getFiltered()`): aula, categoria, modulo, stock bajo, mantenimiento y busqueda/filtros activos.
+- `sw.js` debe cachear `./icons/qr-code.svg` y subir `VERSION` cuando se cambie el icono o la impresion QR.
 
 ## Mantenimiento / reparacion - 2026-05-06
 
