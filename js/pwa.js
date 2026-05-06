@@ -40,15 +40,13 @@ if('serviceWorker' in navigator){
   });
 }
 
-// Toast clicable que aplica la actualizacion.
+// Toast que actualiza automáticamente en 10s o al hacer click
 function showUpdateToast(){
   if(typeof toast !== 'function') return;
-  // Creamos manualmente porque queremos que sea persistente y clicable.
   const el = document.createElement('div');
   el.className = 'toast ok';
   el.style.cursor = 'pointer';
-  el.style.animationDuration = '0.3s';
-  el.innerHTML = `<span>🔄</span><span>Nueva versión disponible — pulsa aquí para actualizar</span>`;
+  el.innerHTML = `<span>🔄</span><span>Actualización en 10s o toca aquí</span>`;
   el.onclick = () => {
     if(_waitingSW){
       _waitingSW.postMessage('SKIP_WAITING');
@@ -57,6 +55,13 @@ function showUpdateToast(){
   };
   const cont = document.getElementById('toasts');
   if(cont) cont.appendChild(el);
+
+  // Auto-actualizar después de 10 segundos
+  setTimeout(() => {
+    if(_waitingSW){
+      _waitingSW.postMessage('SKIP_WAITING');
+    }
+  }, 10000);
 }
 
 // Capturar el evento de instalación para mostrarlo cuando queramos
