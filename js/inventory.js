@@ -50,8 +50,21 @@ function renderInv(){
 }
 
 let _lastInvRenderMode = null;
+let _cardLimit = 48;
+let _cardSig = '';
 function getInvRenderMode(){
   return (view==='table' && window.innerWidth > 640) ? 'table' : 'cards';
+}
+
+function getCardSig(data){
+  return [
+    cf?.type, cf?.id,
+    document.getElementById('srch')?.value || '',
+    document.getElementById('fCat')?.value || '',
+    document.getElementById('fEst')?.value || '',
+    sk, sa ? '1' : '0',
+    data.length
+  ].join('|');
 }
 
 function th2(k,l){const i=k===sk?(sa?'▲':'▼'):'↕';return`<th onclick="sort('${k}')" class="${k===sk?'srt':''}">${l} <span style="font-size:9px;opacity:.6">${i}</span></th>`}
@@ -90,7 +103,15 @@ function rTable(data,mc){
 }
 
 function rCards(data,mc){
-  mc.innerHTML=`<div class="cgrid">${data.map(x=>{
+  const mobile = window.innerWidth <= 900;
+  const sig = getCardSig(data);
+  if(sig !== _cardSig){
+    _cardSig = sig;
+    _cardLimit = 48;
+  }
+  const visible = mobile ? data.slice(0, _cardLimit) : data;
+  const more = mobile && visible.length < data.length;
+  mc.innerHTML=`<div class="cgrid">${visible.map(x=>{
     const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280',mod=findModulo(x.mod);
     return`<div class="icard${low?' low':''}">
       <div class="ch">
@@ -118,7 +139,7 @@ function rCards(data,mc){
         <button class="btn btn-sm btn-d" onclick="openDelModal(${x.id})" title="Baja / Eliminar">🗑️</button>
       </div>
     </div>`;
-  }).join('')}</div>`;
+  }).join('')}</div>${more?`<div class="more-wrap"><button class="btn" onclick="moreCards()">Ver ${Math.min(48,data.length-visible.length)} más (${visible.length}/${data.length})</button></div>`:''}`;
 }
 
 function sv(v){view=v;document.getElementById('vT').classList.toggle('on',v==='table');document.getElementById('vC').classList.toggle('on',v==='cards');renderInv()}
@@ -128,6 +149,7 @@ window.addEventListener('resize',()=>{
   if(nextMode !== _lastInvRenderMode) renderInv();
 });
 function sort(k){if(sk===k)sa=!sa;else{sk=k;sa=true}renderInv()}
+function moreCards(){_cardLimit += 48; renderInv()}
 
 let _delItemId = null;
 function openDelModal(itemId){

@@ -36,7 +36,7 @@ config → state → roles → api → docs → search → home → inventory �
 
 ## PWA
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
-- sw.js: VERSION='v8', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
+- sw.js: VERSION='v10', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
 - `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
 
@@ -72,9 +72,8 @@ Memoria complementaria: `.claude/memory.md`.
 
 ## Rendimiento móvil/tablet (ajustado 2026-05-06)
 - `js/inventory.js`: el handler de `resize` solo vuelve a renderizar si cambia el modo tabla/tarjetas. En móviles, el navegador dispara `resize` al enseñar/ocultar la barra superior durante el scroll; renderizar todas las tarjetas en cada evento provoca lags y bloqueos de desplazamiento.
-- `js/inventory.js`: en vista tarjetas, móvil/tablet renderiza por tandas con `requestAnimationFrame` para evitar pantalla blanca o bloqueo al crear muchas tarjetas.
+- `js/inventory.js`: en vista tarjetas, móvil/tablet muestra inicialmente 48 tarjetas y añade botón "Ver más"; no usar render por tandas con `requestAnimationFrame`, porque empeoró el pintado en Chrome/Edge/Firefox.
 - `css/styles.css`: en pantallas <=900px las tarjetas y botones desactivan animaciones/transiciones/transform hover costosos y reducen sombra para mejorar scroll en móviles/tablets. No usar `contain: layout paint` en `.icard`: en Chrome/Edge/Firefox móvil puede provocar tarjetas en blanco que aparecen al desplazar.
-- `css/styles.css`: evitar `100dvh` para el alto base; usar `100vh` + `100svh` para no recalcular layout durante el scroll móvil.
 - Tras cambios de CSS/JS de rendimiento, subir `VERSION` en `sw.js` para que la PWA no sirva recursos antiguos desde caché.
 
 ## Auditoría de acciones (implementado 2026-05-05)
