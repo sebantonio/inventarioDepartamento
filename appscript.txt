@@ -69,6 +69,7 @@ const ACTION_PERMISSIONS = {
   update: 'items.write',
   delete: 'items.delete',
   bulkImport: 'import.write',
+  restoreBackup: 'import.write',
   profAdd: 'profesores.manage',
   profUpdate: 'profesores.manage',
   profDelete: 'profesores.manage',
@@ -186,6 +187,19 @@ function findRowById(sheet, id) {
     if (String(data[i][0]) === String(id)) return i + 1;
   }
   return -1;
+}
+
+function resetSheetData(sheet, headers, color) {
+  sheet.clear();
+  sheet.appendRow(headers);
+  sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground(color || '#e2e6f0');
+  sheet.setFrozenRows(1);
+}
+
+function appendRowsByHeaders(sheet, headers, rows) {
+  if (!rows || !rows.length) return;
+  const values = rows.map(row => headers.map(h => row && row[h] != null ? row[h] : ''));
+  sheet.getRange(sheet.getLastRow() + 1, 1, values.length, headers.length).setValues(values);
 }
 
 function invRowToObject(row) {
@@ -532,6 +546,76 @@ function doPost(e) {
     }
 
     // ─── PROFESORES ─────────────────────────────────────────────
+    if (action === 'restoreBackup') {
+      const backup = body.backup || {};
+      const sections = body.sections || {};
+      const restored = {};
+
+      if (sections.inventario) {
+        const sheet = ss.getSheetByName(SHEET_INVENTARIO) || ss.insertSheet(SHEET_INVENTARIO);
+        const inv = Array.isArray(backup.inventario) ? backup.inventario : [];
+        let next = 1;
+        inv.forEach(it => { if (Number(it.id) >= next) next = Number(it.id) + 1; });
+        inv.forEach(it => { if (!it.id) it.id = next++; });
+        resetSheetData(sheet, HEADERS_INV, '#e2e6f0');
+        appendRowsByHeaders(sheet, HEADERS_INV, inv);
+        restored.inventario = inv.length;
+      }
+
+      if (sections.aulas) {
+        const sheet = ss.getSheetByName(SHEET_AULAS) || ss.insertSheet(SHEET_AULAS);
+        const aulas = Array.isArray(backup.aulas) ? backup.aulas : [];
+        resetSheetData(sheet, HEADERS_AULAS, '#cffafe');
+        appendRowsByHeaders(sheet, HEADERS_AULAS, aulas.map((a, i) => ({
+          id: a.id, name: a.name, icon: a.icon, desc: a.desc, th: a.th, orden: a.orden || i + 1
+        })));
+        restored.aulas = aulas.length;
+      }
+
+      if (sections.categorias) {
+        const sheet = ss.getSheetByName(SHEET_CATS) || ss.insertSheet(SHEET_CATS);
+        const rawCats = backup.categorias || backup.cats || [];
+        const cats = Array.isArray(rawCats)
+          ? rawCats
+          : Object.keys(rawCats).map((name, i) => ({ name, c: rawCats[name].c, bg: rawCats[name].bg, i: rawCats[name].i, orden: i + 1 }));
+        resetSheetData(sheet, HEADERS_CATS, '#fef9c3');
+        appendRowsByHeaders(sheet, HEADERS_CATS, cats.map((c, i) => ({
+          name: c.name, c: c.c, bg: c.bg, i: c.i, orden: c.orden || i + 1
+        })));
+        restored.categorias = cats.length;
+      }
+
+      if (sections.ciclos) {
+        const sheet = ss.getSheetByName(SHEET_CICLOS) || ss.insertSheet(SHEET_CICLOS);
+        const ciclos = Array.isArray(backup.ciclos) ? backup.ciclos : [];
+        const rows = [];
+        ciclos.forEach((c, ci) => {
+          (c.modulos || []).forEach((m, mi) => rows.push({
+            cicloId: c.id, cicloNombre: c.name, nivel: c.nivel, icon: c.icon, th: c.th, desc: c.desc,
+            modCod: String(m.cod || ''), modNombre: m.name, modHoras: Number(m.horas) || 0,
+            cicloOrden: ci + 1, modOrden: mi + 1
+          }));
+        });
+        resetSheetData(sheet, HEADERS_CICLOS, '#d1fae5');
+        appendRowsByHeaders(sheet, HEADERS_CICLOS, rows);
+        restored.ciclos = ciclos.length;
+      }
+
+      if (sections.profesores) {
+        const sheet = ss.getSheetByName(SHEET_PROFESORES) || ss.insertSheet(SHEET_PROFESORES);
+        const profs = Array.isArray(backup.profesores) ? backup.profesores : [];
+        let next = 1;
+        profs.forEach(p => { if (Number(p.id) >= next) next = Number(p.id) + 1; });
+        profs.forEach(p => { if (!p.id) p.id = next++; });
+        resetSheetData(sheet, HEADERS_PROF, '#dcfce7');
+        appendRowsByHeaders(sheet, HEADERS_PROF, profs);
+        restored.profesores = profs.length;
+      }
+
+      auditLog(ss, user, 'restoreBackup', '', `Backup restaurado: ${Object.keys(restored).map(k => k + '=' + restored[k]).join(', ')}`);
+      return json({ ok: true, restored });
+    }
+
     if (action === 'profAdd') {
       const sheet = ss.getSheetByName(SHEET_PROFESORES);
       const pr = body.profesor;

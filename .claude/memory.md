@@ -85,6 +85,8 @@ Reglas importantes:
 - El boton superior `btnE` abre `#mExport` con `openExportModal()`, no descarga CSV directamente.
 - Opciones: CSV de vista actual (`exportCSV()`), CSV completo de items (`exportAllItemsCSV()`) y backup completo JSON (`exportFullBackup()`).
 - El backup JSON incluye `inventario`, `aulas`, `categorias`, `ciclos`, `prestamos`, `profesores` y `meta` con recuentos/usuario sin guardar password.
+- `#mImport` acepta backups `.json`, muestra previsualizacion con checks y llama a `restoreBackupJson()`.
+- Backend `action=restoreBackup` reemplaza solo secciones seleccionadas: inventario, aulas, categorias, ciclos y profesores. No restaura prestamos.
 
 ## Auditoria de acciones - 2026-05-05
 

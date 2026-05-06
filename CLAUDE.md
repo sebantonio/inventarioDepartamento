@@ -27,7 +27,7 @@ config → state → roles → api → docs → search → home → inventory �
 - `js/modal-cats.js` — openCatsModal(), saveCats()
 - `js/modal-ciclos.js` — openCiclosModal(), saveCiclos(), showNewCicloForm(), confirmAddCiclo(), addModuloRow(), removeModuloRow()
 - `js/prestamos.js` — renderPrestamos(), openPrestar(), openDevolver(), saveProfesores(), openPresDevModal(), closePresDevModal()
-- `js/import.js` — openImportModal(), parseCSV(), impDoImport()
+- `js/import.js` — openImportModal(), parseCSV(), impDoImport(), restoreBackupJson()
 - `js/docs.js` — loadItemDocs(), addDocFiles(), uploadPendingDocs(), openDocsModal(itemId), closeDocsModal(), saveDocsModal()
 - `js/docs-dpto.js` — goDocsDpto(), DOCS_DPTO_URL (SharePoint)
 - `js/pwa.js` — SW registration, beforeinstallprompt, installPWA()
@@ -36,7 +36,7 @@ config → state → roles → api → docs → search → home → inventory �
 
 ## PWA
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
-- sw.js: VERSION='v28', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
+- sw.js: VERSION='v29', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
 - `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
 
@@ -170,6 +170,8 @@ El modal tiene **dos pasos**:
 - El botón superior `btnE` muestra "Exportar" y abre el modal `#mExport` con `openExportModal()`.
 - Opciones: CSV de vista actual (`exportCSV()`), CSV completo de ítems (`exportAllItemsCSV()`) y backup completo JSON (`exportFullBackup()`).
 - El backup JSON se genera en navegador con los datos ya cargados: `inventario`, `aulas`, `categorias`, `ciclos`, `prestamos`, `profesores` y `meta`; no incluye la contraseña de sesión.
+- `#mImport` acepta `.json`; `restoreBackupJson()` previsualiza y permite restaurar secciones seleccionadas: inventario, aulas, categorías, ciclos y profesores.
+- Backend: `action=restoreBackup` reemplaza por completo solo las hojas seleccionadas y registra `restoreBackup` en auditoría. No restaura préstamos.
 - `Escape` cierra `#mExport` desde el handler global de `js/auth.js`.
 
 ## Funcionalidades implementadas (estado 2026-05-06)

@@ -25,6 +25,7 @@ const ACTION_PERMISSIONS = {
   update: 'items.write',
   delete: 'items.delete',
   bulkImport: 'import.write',
+  restoreBackup: 'import.write',
   profAdd: 'profesores.manage',
   profUpdate: 'profesores.manage',
   profDelete: 'profesores.manage',

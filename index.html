@@ -574,15 +574,36 @@
     <div class="import-step active" id="impStep1">
       <div class="import-drop" id="impDrop" onclick="document.getElementById('impFileInput').click()">
         <div class="import-drop-icon">📁</div>
-        <div class="import-drop-text">Haz clic o arrastra aquí tu archivo CSV</div>
-        <div class="import-drop-sub">Formato: separado por comas, primera fila = cabeceras</div>
+        <div class="import-drop-text">Haz clic o arrastra aquí tu archivo CSV o JSON</div>
+        <div class="import-drop-sub">CSV para añadir ítems · JSON para restaurar backup</div>
       </div>
-      <input type="file" id="impFileInput" accept=".csv,text/csv" style="display:none">
+      <input type="file" id="impFileInput" accept=".csv,.json,text/csv,application/json" style="display:none">
       <div class="import-info">
         <strong>Columnas reconocidas automáticamente:</strong><br>
         <code>Referencia</code>, <code>Aula</code>, <code>Item</code> / <code>Nombre</code>, <code>Cantidad</code>, <code>Stock mínimo</code>, <code>Categoría</code>, <code>Ubicación</code>, <code>Estado</code>, <code>Utilidad</code>, <code>Última revisión</code>, <code>Observaciones</code>
         <br><br>
         💡 Si una aula del CSV no existe en el sistema, el ítem se asignará a <strong>Departamento</strong>.
+      </div>
+      <div class="import-info">
+        <strong>Backup JSON:</strong> tambiÃ©n puedes cargar un backup completo exportado desde la app para restaurar inventario, aulas, categorÃ­as, ciclos o profesores.
+      </div>
+      <div class="backup-box" id="backupBox" style="display:none">
+        <div class="backup-head">
+          <div>
+            <strong>Backup detectado</strong>
+            <div id="backupMeta"></div>
+          </div>
+          <button class="mini-btn" onclick="clearBackupPreview()">Quitar</button>
+        </div>
+        <div class="backup-grid" id="backupSections"></div>
+        <div class="backup-warning">La restauraciÃ³n reemplaza por completo las secciones seleccionadas.</div>
+        <div class="mf" style="margin-top:14px">
+          <div></div>
+          <div class="mf-right">
+            <button class="btn" onclick="closeImport()">Cancelar</button>
+            <button class="btn btn-p" id="backupRestoreBtn" onclick="restoreBackupJson()">Restaurar selecciÃ³n</button>
+          </div>
+        </div>
       </div>
       <div class="mf" style="margin-top:18px">
         <div></div>

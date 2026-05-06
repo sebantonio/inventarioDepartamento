@@ -2,6 +2,7 @@
 // IMPORTACIÓN CSV
 // ═════════════════════════════════════════════════════════
 let impData = { rawText:'', headers:[], rows:[], mapping:{}, validRows:[], invalidRows:[] };
+let backupData = null;
 
 // Campos del inventario y sinónimos comunes para auto-detección
 const IMP_FIELDS = [
@@ -30,9 +31,11 @@ function openImportModal(){
   if(!SESSION){toast('Inicia sesión primero','err');return}
   if(!requirePerm('import.write')) return;
   impData = { rawText:'', headers:[], rows:[], mapping:{}, validRows:[], invalidRows:[] };
+  backupData = null;
   impGoToStep(1);
   // Reset file input
   document.getElementById('impFileInput').value = '';
+  clearBackupPreview();
   document.getElementById('mImport').classList.add('open');
   // Configurar drag & drop
   const drop = document.getElementById('impDrop');
@@ -48,6 +51,90 @@ function openImportModal(){
 }
 
 function closeImport(){ document.getElementById('mImport').classList.remove('open'); }
+
+function backupSectionCounts(data){
+  const cats = data?.categorias || data?.cats || {};
+  return {
+    inventario: Array.isArray(data?.inventario) ? data.inventario.length : 0,
+    aulas: Array.isArray(data?.aulas) ? data.aulas.length : 0,
+    categorias: Array.isArray(cats) ? cats.length : Object.keys(cats || {}).length,
+    ciclos: Array.isArray(data?.ciclos) ? data.ciclos.length : 0,
+    profesores: Array.isArray(data?.profesores) ? data.profesores.length : 0
+  };
+}
+
+function clearBackupPreview(){
+  backupData = null;
+  const box = document.getElementById('backupBox');
+  if(box) box.style.display = 'none';
+  const fileInput = document.getElementById('impFileInput');
+  if(fileInput) fileInput.value = '';
+}
+
+function renderBackupPreview(data){
+  backupData = data;
+  const counts = backupSectionCounts(data);
+  const exportedAt = data?.meta?.exportedAt ? new Date(data.meta.exportedAt).toLocaleString('es-ES') : 'fecha no disponible';
+  document.getElementById('backupMeta').textContent = `Exportado: ${exportedAt}`;
+  const labels = {
+    inventario: 'Inventario',
+    aulas: 'Aulas',
+    categorias: 'Categorías',
+    ciclos: 'Ciclos',
+    profesores: 'Profesores'
+  };
+  document.getElementById('backupSections').innerHTML = Object.keys(labels).map(k => `
+    <label class="backup-choice">
+      <input type="checkbox" class="backup-check" value="${k}" ${counts[k] ? 'checked' : 'disabled'}>
+      <span><strong>${labels[k]}</strong><small>${counts[k]} registro${counts[k]!==1?'s':''}</small></span>
+    </label>
+  `).join('');
+  document.getElementById('backupBox').style.display = '';
+}
+
+function impHandleBackupFile(file){
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      const counts = backupSectionCounts(data);
+      if(!Object.values(counts).some(Boolean)){
+        toast('El JSON no parece un backup válido','err');
+        return;
+      }
+      impGoToStep(1);
+      renderBackupPreview(data);
+    }catch(err){
+      toast('No se pudo leer el JSON','err');
+    }
+  };
+  reader.onerror = ()=>toast('Error al leer el archivo','err');
+  reader.readAsText(file, 'UTF-8');
+}
+
+async function restoreBackupJson(){
+  if(!backupData){ toast('Carga primero un backup JSON','err'); return; }
+  const sections = {};
+  document.querySelectorAll('.backup-check:checked').forEach(el => sections[el.value] = true);
+  if(!Object.keys(sections).length){ toast('Selecciona al menos una sección','err'); return; }
+  const names = Object.keys(sections).join(', ');
+  if(!confirm(`Se reemplazarán estas secciones: ${names}. ¿Continuar?`)) return;
+  const btn = document.getElementById('backupRestoreBtn');
+  btn.disabled = true;
+  btn.textContent = 'Restaurando...';
+  try{
+    const res = await apiPost({action:'restoreBackup', sections, backup:backupData});
+    if(!res.ok) throw new Error(res.error || 'Error al restaurar');
+    toast('Backup restaurado','ok');
+    closeImport();
+    await loadData();
+  }catch(err){
+    toast(err.message || 'Error al restaurar backup','err');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Restaurar selección';
+  }
+}
 
 function impGoToStep(n){
   for(let i=1;i<=4;i++){
@@ -98,10 +185,16 @@ function normalize(s){
 }
 
 function impHandleFile(file){
-  if(!file.name.toLowerCase().endsWith('.csv')){
-    toast('El archivo debe ser .csv','err');
+  const lower = file.name.toLowerCase();
+  if(lower.endsWith('.json')){
+    impHandleBackupFile(file);
     return;
   }
+  if(!lower.endsWith('.csv')){
+    toast('El archivo debe ser .csv o .json','err');
+    return;
+  }
+  clearBackupPreview();
   const reader = new FileReader();
   reader.onload = (e)=>{
     impData.rawText = e.target.result;
