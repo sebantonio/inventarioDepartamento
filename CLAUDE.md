@@ -10,6 +10,35 @@ SPA de inventario para el departamento de Electricidad y Electrónica. Vanilla J
 - URL producción: https://inventariodepartamento.pages.dev/
 - Repo: https://github.com/sebantonio/inventarioDepartamento.git
 
+## Memory (sincronización multi-PC)
+La carpeta `.claude/memory/` contiene notas persistentes de Claude sobre el proyecto (arquitectura, feedback, QR scanner, etc.). Se sincroniza en GitHub para acceso desde cualquier PC.
+
+**Setup en nuevo PC**:
+1. Clonar repo normalmente
+2. Ejecutar script de sincronización (bash/PowerShell):
+   ```bash
+   # Linux/Mac
+   mkdir -p ~/.claude/projects/c--OneDrive-OneDrive---Consejer-a-de-Educaci-n--Cultura-y-Deportes-Castilla-La-Mancha-DOCUMENTOS-DEL-BOSCO-Curso-2025-2026-Pagina-inventario-Departamento/memory
+   cp -r .claude/memory/* ~/.claude/projects/c--OneDrive-OneDrive---Consejer-a-de-Educaci-n--Cultura-y-Deportes-Castilla-La-Mancha-DOCUMENTOS-DEL-BOSCO-Curso-2025-2026-Pagina-inventario-Departamento/memory/
+   
+   # Windows PowerShell
+   $claude_projects = "$env:USERPROFILE\.claude\projects\c--OneDrive-OneDrive---Consejer-a-de-Educaci-n--Cultura-y-Deportes-Castilla-La-Mancha-DOCUMENTOS-DEL-BOSCO-Curso-2025-2026-Pagina-inventario-Departamento\memory"
+   mkdir $claude_projects -Force | Out-Null
+   Copy-Item -Path ".\.claude\memory\*" -Destination $claude_projects -Recurse -Force
+   ```
+
+O **manual**: copiar `.claude/memory/` del repo a `~/.claude/projects/[project-path]/memory/` en tu carpeta de usuario.
+
+**Contenido de memory**:
+- `MEMORY.md` — Índice de notas
+- `user_profile.md` — Perfil del usuario
+- `project_overview.md` — Funcionalidades y estado
+- `project_architecture.md` — Stack y estructura
+- `feedback_workflow.md` — Preferencias de trabajo
+- `qr_scanner.md` — Implementación QR scanner con detalles técnicos
+
+Cambios en memory se syncronizarán automáticamente en GitHub si editas desde `.claude/memory/` en el repo.
+
 ## Estructura de archivos JS (orden de carga en index.html)
 config → state → roles → api → docs → search → home → inventory → modal-item → modal-aulas → modal-cats → modal-ciclos → prestamos → import → nav → docs-dpto → pwa → profile → reset → auth
 
