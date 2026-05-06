@@ -14,14 +14,19 @@ function processQrCapture(files) {
   const url = URL.createObjectURL(file);
   const img = new Image();
   img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    canvas.getContext('2d').drawImage(img, 0, 0);
     URL.revokeObjectURL(url);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
 
-    const imageData = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    // Reducir a máx 1024px para que jsQR encuentre el QR con proporción adecuada
+    const MAX = 1024;
+    const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'attemptBoth' });
 
     if (code) {
       const match = code.data.match(/item\/([a-zA-Z0-9_-]+)/);
