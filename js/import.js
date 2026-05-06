@@ -7,7 +7,8 @@ let backupData = null;
 // Campos del inventario y sinónimos comunes para auto-detección
 const IMP_FIELDS = [
   {k:'item',  label:'Nombre del ítem *', synonyms:['item','articulo','producto','nombre','descripcion','material']},
-  {k:'ref',   label:'Referencia',         synonyms:['ref','referencia','codigo','code','sku']},
+  {k:'code',  label:'Código inventario',  synonyms:['code','codigo inventario','codigo qr','qr','id qr','codigo interno']},
+  {k:'ref',   label:'Referencia',         synonyms:['ref','referencia','codigo','sku']},
   {k:'aula',  label:'Aula',               synonyms:['aula','sala','ubicacion_aula','espacio','clase']},
   {k:'qty',   label:'Cantidad',           synonyms:['cantidad','qty','cant','unidades','stock','existencias']},
   {k:'min',   label:'Stock mínimo',       synonyms:['minimo','min','stock_minimo','reposicion']},

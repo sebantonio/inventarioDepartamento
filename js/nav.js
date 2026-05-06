@@ -146,7 +146,15 @@ function openSub(){
 }
 
 function openItemRoute(id){
-  const item = items.find(x=>Number(x.id)===Number(id));
+  const normRouteText = v => (typeof normalizeStr === 'function'
+    ? normalizeStr(v)
+    : String(v || '').toLowerCase()).replace(/[^a-z0-9]/g, '');
+  const norm = normRouteText(id);
+  const item = items.find(x=>
+    String(x.id) === String(id) ||
+    (typeof itemCode === 'function' && normRouteText(itemCode(x)) === norm) ||
+    normRouteText(x.ref || '') === norm
+  );
   if(!item){ goHome(); toast('Ítem no encontrado','err'); return; }
   const aula = AULAS.find(a=>a.id===item.aula);
   cf = {type:'aula', id:item.aula, label:aula?.name || item.aula, icon:aula?.icon || '📦'};

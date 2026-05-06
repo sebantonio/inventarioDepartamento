@@ -73,7 +73,15 @@ function qrResumeScan() {
 }
 
 function _showQrActions(itemId) {
-  const item = items.find(x => Number(x.id) === Number(itemId));
+  const normQrText = v => (typeof normalizeStr === 'function'
+    ? normalizeStr(v)
+    : String(v || '').toLowerCase()).replace(/[^a-z0-9]/g, '');
+  const norm = normQrText(itemId);
+  const item = items.find(x =>
+    String(x.id) === String(itemId) ||
+    (typeof itemCode === 'function' && normQrText(itemCode(x)) === norm) ||
+    normQrText(x.ref || '') === norm
+  );
   const content = document.getElementById('qrScannerContent');
   const actions = document.getElementById('qrActions');
   const result = document.getElementById('qrResult');

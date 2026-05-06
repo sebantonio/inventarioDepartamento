@@ -38,22 +38,23 @@ Reglas importantes:
 - Tablets/dispositivos tactiles: forzar vista tarjetas. `getInvRenderMode()` devuelve `cards` si `(hover:none)` o `(pointer:coarse)`; CSS oculta `.vtog` y `.tw`.
 - Modo tactil compacto: una columna de tarjetas, `topbar` sin `sticky`, paginas sin `min-height`, cards sin sombra, home grids a 2 columnas, primera carga de inventario a 10 items/pagina salvo eleccion manual del usuario.
 - En tactiles se eliminan efectos visuales secundarios: animaciones/transiciones globales, sombras, filtros, `backdrop-filter`, transforms indirectos y degradados pesados en elementos principales.
-- `sw.js` actualmente en `VERSION='v62'`; subir `VERSION` tras cambios de CSS/JS para forzar cache nueva de PWA.
+- `sw.js` actualmente en `VERSION='v63'`; subir `VERSION` tras cambios de CSS/JS para forzar cache nueva de PWA.
 - 2026-05-06: en tablets/tactiles se permite solo la animacion inicial del `#loadOverlay` con version ligera (`lo-pulse-lite` por transform/opacidad). Mantener desactivadas las animaciones/transiciones de tarjetas/listados/botones del inventario para evitar lag.
 
 ## QR por item - 2026-05-06
 
 - Modal de item muestra bloque QR solo en items existentes, porque los nuevos aun no tienen `id`.
-- URL generada: `#item/<id>`. Al abrir esa ruta, `openItemRoute(id)` carga el aula del item y abre su modal.
+- URL generada: `#item/<code>`. Al abrir esa ruta, `openItemRoute(id)` acepta id/code/ref, carga el aula del item y abre su modal.
 - Si se abre con usuario sin permiso `items.write`, el modal queda en modo lectura y oculta Guardar/subida/borrado de documentos.
 - En inventario, tabla y tarjetas muestran un boton compacto junto al nombre del item con `icons/qr-code.svg`. Llama a `openModal(id)` para acceder rapido al QR grande y acciones de copiar/imprimir.
 - `printBulkItemQrs()` imprime etiquetas QR en A4 para los items del filtro actual (`getFiltered()`): aula, categoria, modulo, stock bajo, mantenimiento y busqueda/filtros activos.
 - `sw.js` debe cachear `./icons/qr-code.svg` y subir `VERSION` cuando se cambie el icono o la impresion QR.
 - Escaner QR: al detectar un item detiene la camara y muestra acciones rapidas: abrir ficha, prestar/devolver, mantenimiento, documentos y baja.
+- Codigo manual QR: cada item usa `code` estable; si falta se deriva como `IB-00001` desde `id` con `itemCode()`. Las rutas nuevas de QR usan `#item/<code>` y `openItemRoute()` tambien acepta id, code o ref.
 
 ## Mantenimiento / reparacion - 2026-05-06
 
-- Se anadio campo persistente `mant` al inventario. `appscript.txt` usa `HEADERS_INV = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','mantFecha','mantNota','mantResp','mantEstado','mantSolicitante','mantSolicitanteEmail','foto','obs']`.
+- Se anadio campo persistente `mant` al inventario. `appscript.txt` usa `HEADERS_INV = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','mantFecha','mantNota','mantResp','mantEstado','mantSolicitante','mantSolicitanteEmail','foto','obs','code']`.
 - `ensureHeaders(sheet, headers)` en `appscript.txt` migra cabeceras existentes, inserta columnas nuevas y mantiene el orden esperado. Tras cambiar `appscript.txt`, copiarlo a Google Apps Script y redesplegar.
 - `js/state.js` define `needsMaintenance(item)`: true si `mant` es `1`/true o si `est === 'Avería'`. Esto hace compatibles datos antiguos marcados como averia.
 - Modal de item: checkbox `#f_mant` "Necesita mantenimiento o reparacion"; detalles `mantFecha`, `mantNota`, `mantResp`, `mantEstado`.

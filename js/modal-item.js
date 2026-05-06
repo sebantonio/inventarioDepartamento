@@ -19,7 +19,17 @@ function itemUrl(id){
   const base = location.protocol.startsWith('http')
     ? location.origin + location.pathname.replace(/index\.html$/,'')
     : 'https://inventariodepartamento.pages.dev/';
-  return base.replace(/#.*$/,'') + '#item/' + encodeURIComponent(id);
+  return base.replace(/#.*$/,'') + '#item/' + encodeURIComponent(itemCode(id) || id);
+}
+
+function itemCode(itemOrId){
+  const item = typeof itemOrId === 'object' ? itemOrId : items.find(x=>String(x.id)===String(itemOrId));
+  if(item?.code) return String(item.code).trim().toUpperCase();
+  const id = typeof itemOrId === 'object' ? itemOrId?.id : itemOrId;
+  const n = Number(id);
+  if(Number.isFinite(n) && n > 0) return 'IB-' + String(n).padStart(5, '0');
+  const raw = String(id || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  return raw ? 'IB-' + raw.slice(0, 8) : '';
 }
 
 function qrSrc(text, size=220){
@@ -41,9 +51,10 @@ function renderItemQr(item){
     return;
   }
   const url = itemUrl(item.id);
+  const code = itemCode(item);
   box.style.display = '';
   document.getElementById('itemQrImg').src = qrSrc(url);
-  document.getElementById('itemQrTitle').textContent = `${item.ref ? item.ref+' · ' : ''}${item.item}`;
+  document.getElementById('itemQrTitle').textContent = `${code} · ${item.ref ? item.ref+' · ' : ''}${item.item}`;
   document.getElementById('itemQrUrl').textContent = url;
 }
 
@@ -187,9 +198,10 @@ function printItemQr(){
   const it = items.find(x=>Number(x.id)===Number(eid));
   if(!it) return;
   const url = itemUrl(it.id);
+  const code = itemCode(it);
   const aula = AULAS.find(a=>a.id===it.aula)?.name || it.aula || '';
   const mod = findModulo(it.mod);
-  const title = `${it.ref ? it.ref + ' · ' : ''}${it.item}`;
+  const title = `${code} · ${it.ref ? it.ref + ' · ' : ''}${it.item}`;
   const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
   <title>QR ${escHtml(it.ref || it.item)}</title>
   <style>
@@ -206,7 +218,7 @@ function printItemQr(){
       <div>
         <h1>${escHtml(title)}</h1>
         <div class="meta">${escHtml(aula)}${mod ? '<br>' + escHtml(mod.cod + ' · ' + mod.name) : ''}</div>
-        <div class="url">${escHtml(url)}</div>
+        <div class="url">${escHtml(code)} · ${escHtml(url)}</div>
       </div>
     </div>
     <script>const img=document.querySelector('img');img.onload=()=>setTimeout(()=>print(),100);<\/script>
@@ -228,15 +240,16 @@ function printBulkItemQrs(){
   const fecha = new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
   const labels = data.map(it => {
     const url = itemUrl(it.id);
+    const code = itemCode(it);
     const aula = AULAS.find(a=>a.id===it.aula)?.name || it.aula || '';
     const mod = findModulo(it.mod);
-    const title = `${it.ref ? it.ref + ' · ' : ''}${it.item || ''}`;
+    const title = `${code} · ${it.ref ? it.ref + ' · ' : ''}${it.item || ''}`;
     return `<article class="label">
       <img src="${qrSrc(url,220)}" alt="QR">
       <div class="info">
         <h2>${escHtml(title)}</h2>
         <div class="meta">${escHtml(aula)}${mod ? '<br>' + escHtml(mod.cod + ' · ' + mod.name) : ''}</div>
-        <div class="url">${escHtml(url)}</div>
+        <div class="url">${escHtml(code)} · ${escHtml(url)}</div>
       </div>
     </article>`;
   }).join('');
@@ -280,6 +293,7 @@ async function saveItem(){
   if(!document.getElementById('f_mod').value){toast('El módulo es obligatorio','err');return}
   const refRaw = document.getElementById('f_ref').value.trim();
   const v={
+    code: eid ? itemCode(items.find(x=>x.id===eid) || eid) : '',
     ref: refRaw || _autoRef(name),
     aula:document.getElementById('f_aula').value,
     item:name,

@@ -29,7 +29,7 @@ function getFiltered(){
   return getBase().filter(x=>{
     if(fc&&x.cat!==fc)return false;
     if(fe&&x.est!==fe)return false;
-    if(q&&!fuzzyMatch(q,[x.ref,x.item,x.loc].join(' ')))return false;
+    if(q&&!fuzzyMatch(q,[typeof itemCode === 'function' ? itemCode(x) : x.code,x.ref,x.item,x.loc].join(' ')))return false;
     return true;
   }).sort((a,b)=>{
     let av=a[sk]??'',bv=b[sk]??'';

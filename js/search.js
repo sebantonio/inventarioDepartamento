@@ -17,14 +17,47 @@ function fuzzyMatch(query, text){
   );
 }
 
+function extractItemLookup(raw){
+  const value = String(raw || '').trim();
+  if(!value) return '';
+  const itemMatch = value.match(/(?:#|\/)item\/([^/?#\s]+)/i);
+  return decodeURIComponent(itemMatch ? itemMatch[1] : value).trim();
+}
+
+function findItemByManualCode(raw){
+  const lookup = extractItemLookup(raw);
+  if(!lookup) return null;
+  const norm = normalizeStr(lookup).replace(/[^a-z0-9]/g, '');
+  return items.find(x => {
+    const id = String(x.id || '');
+    const code = typeof itemCode === 'function' ? itemCode(x) : (x.code || '');
+    return normalizeStr(id).replace(/[^a-z0-9]/g, '') === norm ||
+      normalizeStr(code).replace(/[^a-z0-9]/g, '') === norm ||
+      normalizeStr(x.ref || '').replace(/[^a-z0-9]/g, '') === norm;
+  }) || null;
+}
+
 function globalSearch(q){
   const res=document.getElementById('gsResults');
   const clr=document.getElementById('gsClear');
   q=q.trim();
   clr.style.display=q?'block':'none';
   if(q.length<2){res.classList.remove('open');gsIdx=-1;return;}
+  const exact = findItemByManualCode(q);
+  if(exact){
+    res.innerHTML=`<div class="gsr-header">Código encontrado</div>
+      <div class="gsr-item" tabindex="-1" role="option" data-idx="0" onclick="gsOpenItem('${String(exact.id).replace(/'/g,"\\'")}')">
+        <span class="cpill" style="background:#eff6ff;color:#2563eb;flex-shrink:0;font-size:11px">${typeof itemCode === 'function' ? itemCode(exact) : (exact.code || exact.id)}</span>
+        <span class="gsr-name">${exact.item}</span>
+        <span class="gsr-aula">📍 ${AULAS.find(a=>a.id===exact.aula)?.name||exact.aula||'—'}</span>
+        <span class="gsr-qty">${exact.qty}</span>
+      </div>`;
+    res.classList.add('open');
+    gsIdx=-1;
+    return;
+  }
   const matches=items.filter(x=>{
-    const text=[x.ref,x.item,x.loc].join(' ');
+    const text=[typeof itemCode === 'function' ? itemCode(x) : x.code,x.ref,x.item,x.loc].join(' ');
     return fuzzyMatch(q,text);
   });
   gsIdx=-1;
@@ -63,6 +96,11 @@ function gsGo(aulaId,term){
   gsClear();
   goAula(aulaId);
   setTimeout(()=>{const s=document.getElementById('srch');if(s){s.value=term;renderInv();}},60);
+}
+
+function gsOpenItem(id){
+  gsClear();
+  openItemRoute(id);
 }
 
 function gsClear(){

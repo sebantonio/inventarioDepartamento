@@ -14,7 +14,7 @@ const SHEET_MODULOS    = 'Modulos';
 const SHEET_CICLOS     = 'Ciclos';
 const SHEET_LOG        = 'Log';
 
-const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','mantFecha','mantNota','mantResp','mantEstado','mantSolicitante','mantSolicitanteEmail','foto','obs'];
+const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','mantFecha','mantNota','mantResp','mantEstado','mantSolicitante','mantSolicitanteEmail','foto','obs','code'];
 const HEADERS_USR   = ['usuario','password','nombre','rol','email'];
 const HEADERS_PROF  = ['id','nombre','departamento','email'];
 const HEADERS_PRES  = ['id','itemId','itemNombre','cantidad','aulaOrigen','aulaDestino','profesorId','profesorNombre','gestionadoPor','fechaPrestamo','fechaPrevista','fechaDevolucion','cantidadDevuelta','estado','obs'];
@@ -179,6 +179,18 @@ function nextId(sheet) {
   let maxId = 0;
   for (let i = 1; i < data.length; i++) if (Number(data[i][0]) > maxId) maxId = Number(data[i][0]);
   return maxId + 1;
+}
+
+function itemCodeFromId(id) {
+  const n = Number(id);
+  if (!isNaN(n) && n > 0) return 'IB-' + String(n).padStart(5, '0');
+  const raw = String(id || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  return raw ? 'IB-' + raw.substring(0, 8) : '';
+}
+
+function ensureItemCode(item) {
+  if (item && !item.code && item.id) item.code = itemCodeFromId(item.id);
+  return item;
 }
 
 function findRowById(sheet, id) {
@@ -566,6 +578,7 @@ function doPost(e) {
       ensureHeaders(sheet, HEADERS_INV);
       const it = body.item;
       it.id = nextId(sheet);
+      ensureItemCode(it);
       prepareMaintenanceRequester(it, {}, user);
       sheet.appendRow(HEADERS_INV.map(h => it[h] != null ? it[h] : ''));
       auditLog(ss, user, 'add', it.id, `Añadido item: ${it.item || ''} (${it.ref || 'sin ref'})`);
@@ -577,6 +590,7 @@ function doPost(e) {
       const sheet = ss.getSheetByName(SHEET_INVENTARIO);
       ensureHeaders(sheet, HEADERS_INV);
       const it = body.item;
+      ensureItemCode(it);
       const r = findRowById(sheet, it.id);
       if (r < 0) return json({ ok: false, error: 'No encontrado' });
       const old = sheet.getRange(r, 1, 1, HEADERS_INV.length).getValues()[0];
@@ -614,6 +628,7 @@ function doPost(e) {
       // Preparar todas las filas
       const rows = newItems.map(it => {
         it.id = ++maxId;
+        ensureItemCode(it);
         return HEADERS_INV.map(h => it[h] != null ? it[h] : '');
       });
       
@@ -637,6 +652,7 @@ function doPost(e) {
         let next = 1;
         inv.forEach(it => { if (Number(it.id) >= next) next = Number(it.id) + 1; });
         inv.forEach(it => { if (!it.id) it.id = next++; });
+        inv.forEach(ensureItemCode);
         resetSheetData(sheet, HEADERS_INV, '#e2e6f0');
         appendRowsByHeaders(sheet, HEADERS_INV, inv);
         restored.inventario = inv.length;

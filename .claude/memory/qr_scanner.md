@@ -36,6 +36,7 @@ Escaneo QR en tiempo real implementado 2026-05-06. Detecta códigos QR con la c�
 - jsQR opciones: `{ inversionAttempts: 'attemptBoth' }` (detecta QR en luz clara/oscura)
 - Patrón QR: regex `item/([a-zA-Z0-9_-]+)` busca en datos QR
 - Acciones rápidas: abrir ficha, prestar/devolver, mantenimiento, documentos y baja
+- Los QR nuevos apuntan a `#item/<code>`; los QR antiguos con `#item/<id>` siguen funcionando. `itemCode()` deriva `IB-00001` si el campo `code` aun no existe.
 - Modal abierto: requiere `classList.add('open')` NO `display:flex` (cambio reciente CSS)
 - Cierre modal: `classList.remove('open')` + parar tracks de stream
 
@@ -46,7 +47,7 @@ Escaneo QR en tiempo real implementado 2026-05-06. Detecta códigos QR con la c�
 
 ## Service Worker
 - Incluido en CACHE_SHELL (`sw.js`)
-- VERSION actual: v62
+- VERSION actual: v63
 - Cambios en `qr-scanner.js` requieren subir VERSION para forzar caché actualizado
 
 ## Gotchas solucionados (2026-05-06)
