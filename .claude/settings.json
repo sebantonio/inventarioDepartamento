@@ -12,7 +12,12 @@
       "Bash(node -c appscript.txt)",
       "Bash(git commit -m 'Fix: mejorar robustez de getItemLog en GAS *)",
       "Bash(git commit -m 'Fix: apiGet soporta parámetros adicionales para getItemLog *)",
-      "Bash(git commit -m 'Bump: VERSION v58 → v59 para invalidar cache *)"
+      "Bash(git commit -m 'Bump: VERSION v58 → v59 para invalidar cache *)",
+      "Bash(git commit -m 'Docs: actualizar memoria con alertas de stock + historial visual *)",
+      "Bash(cp \"C:\\\\Users\\\\seban\\\\.claude\\\\projects\\\\c--OneDrive-OneDrive---Consejer-a-de-Educaci-n--Cultura-y-Deportes-Castilla-La-Mancha-DOCUMENTOS-DEL-BOSCO-Curso-2025-2026-Pagina-inventario-Departamento\\\\memory\\\\alerts_and_history.md\" \"c:\\\\OneDrive\\\\OneDrive - Consejería de Educación, Cultura y Deportes Castilla La-Mancha\\\\DOCUMENTOS DEL BOSCO\\\\Curso 2025-2026\\\\Pagina inventario Departamento\\\\.claude\\\\memory\\\\alerts_and_history.md\")"
+    ],
+    "additionalDirectories": [
+      "c:\\OneDrive\\OneDrive - Consejería de Educación, Cultura y Deportes Castilla La-Mancha\\DOCUMENTOS DEL BOSCO\\Curso 2025-2026\\Pagina inventario Departamento\\.claude\\memory"
     ]
   }
 }

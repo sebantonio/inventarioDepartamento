@@ -5,7 +5,10 @@
       "Bash(git add *)",
       "Bash(git commit -m 'Añade modo escáner QR para inventario físico *)",
       "Bash(git push *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(cp \"C:\\\\Users\\\\seban\\\\.claude\\\\projects\\\\c--OneDrive-OneDrive---Consejer-a-de-Educaci-n--Cultura-y-Deportes-Castilla-La-Mancha-DOCUMENTOS-DEL-BOSCO-Curso-2025-2026-Pagina-inventario-Departamento\\\\memory\\\\project_overview.md\" \"c:\\\\OneDrive\\\\OneDrive - Consejería de Educación, Cultura y Deportes Castilla La-Mancha\\\\DOCUMENTOS DEL BOSCO\\\\Curso 2025-2026\\\\Pagina inventario Departamento\\\\.claude\\\\memory\\\\project_overview.md\")",
+      "Bash(cp \"C:\\\\Users\\\\seban\\\\.claude\\\\projects\\\\c--OneDrive-OneDrive---Consejer-a-de-Educaci-n--Cultura-y-Deportes-Castilla-La-Mancha-DOCUMENTOS-DEL-BOSCO-Curso-2025-2026-Pagina-inventario-Departamento\\\\memory\\\\MEMORY.md\" \"c:\\\\OneDrive\\\\OneDrive - Consejería de Educación, Cultura y Deportes Castilla La-Mancha\\\\DOCUMENTOS DEL BOSCO\\\\Curso 2025-2026\\\\Pagina inventario Departamento\\\\.claude\\\\memory\\\\MEMORY.md\")",
+      "Bash(git commit -m 'Docs: actualizar memoria con alertas de stock + historial visual *)"
     ]
   }
 }
