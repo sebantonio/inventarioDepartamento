@@ -365,9 +365,32 @@
       <div><label class="fl">Utilidad</label><input class="fi-w" id="f_util" placeholder="Para qué se usa"></div>
       <div><label class="fl">Última revisión</label><input class="fi-w" id="f_fecha" type="date"></div>
       <label class="check-row full">
-        <input type="checkbox" id="f_mant">
+        <input type="checkbox" id="f_mant" onchange="toggleMaintFields()">
         <span><strong>Necesita mantenimiento o reparación</strong><small>Márcalo para que aparezca en el acceso rápido de mantenimiento.</small></span>
       </label>
+      <div class="maint-fields full" id="maintFields">
+        <div>
+          <label class="fl">Fecha de aviso</label>
+          <input class="fi-w" id="f_mantFecha" type="date">
+        </div>
+        <div>
+          <label class="fl">Estado mantenimiento</label>
+          <select class="fi-w" id="f_mantEstado">
+            <option>Pendiente</option>
+            <option>En reparación</option>
+            <option>Resuelto</option>
+          </select>
+        </div>
+        <div>
+          <label class="fl">Responsable</label>
+          <input class="fi-w" id="f_mantResp" list="mantRespList" placeholder="Profesor/a o responsable">
+          <datalist id="mantRespList"></datalist>
+        </div>
+        <div class="full">
+          <label class="fl">Motivo / nota de reparación</label>
+          <textarea class="fi-w" id="f_mantNota" placeholder="Qué ocurre, qué revisar, piezas necesarias..."></textarea>
+        </div>
+      </div>
       <div class="full"><label class="fl">Observaciones</label><textarea class="fi-w" id="f_obs" placeholder="Notas, proveedor, nº serie..."></textarea></div>
       <div class="full" id="itemQrBox" style="display:none">
         <hr class="docs-sep">

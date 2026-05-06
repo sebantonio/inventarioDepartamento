@@ -24,5 +24,7 @@ function setConn(state, txt){
 function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active')}
 
 function needsMaintenance(item){
+  const status = String(item?.mantEstado || '').trim().toLowerCase();
+  if(status === 'resuelto') return false;
   return item?.mant === true || item?.mant === 1 || String(item?.mant || '').trim() === '1' || item?.est === 'Avería';
 }

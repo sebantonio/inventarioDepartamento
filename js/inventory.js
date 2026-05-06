@@ -123,7 +123,7 @@ function rTable(data,mc){
   mc.innerHTML=`<div class="tw"><div class="tw-scroll"><table>
     <thead><tr><th>Foto</th>${th2('ref','Ref.')}${th2('aula','Aula')}${th2('item','Ítem')}${th2('qty','Cant.')}<th>Mín.</th>${th2('cat','Categoría')}${th2('loc','Ubicación')}${th2('est','Estado')}${th2('util','Utilidad')}<th>Acciones</th></tr></thead>
     <tbody>${data.map(x=>{
-      const low=Number(x.qty)<=Number(x.min),mant=needsMaintenance(x),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280';
+      const low=Number(x.qty)<=Number(x.min),mant=needsMaintenance(x),mantInfo=[x.mantEstado,x.mantFecha,x.mantResp].filter(Boolean).join(' · '),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280';
       return`<tr>
         <td>${x.foto?`<img class="table-photo" src="${x.foto}" alt="">`:'<span class="table-photo empty">📷</span>'}</td>
         <td><span class="rbadge">${x.ref||'—'}</span></td>
@@ -139,7 +139,7 @@ function rTable(data,mc){
         <td>${x.cat?`<span class="cpill" style="background:${cat.bg};color:${cat.c}">${cat.i} ${x.cat}</span>`:'—'}</td>
         <td style="color:var(--muted);font-size:12px" title="${x.loc}">${x.loc||'—'}</td>
         <td>${x.est?`<span class="edot"><span class="dot" style="background:${ec}"></span>${x.est}</span>`:'—'}</td>
-        <td style="color:var(--muted);font-size:12px" title="${x.util}">${mant?'🛠️ ':''}${x.util||'—'}</td>
+        <td style="color:var(--muted);font-size:12px" title="${mantInfo || x.util || ''}">${mant?`🛠️ ${mantInfo || ''} `:''}${x.util||'—'}</td>
         <td><div style="display:flex;gap:6px">
           <button class="btn btn-sm" onclick="openModal(${x.id})" title="Editar">✏️</button>
           <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">⧉</button>
@@ -160,7 +160,7 @@ function rTable(data,mc){
 
 function rCards(data,mc){
   mc.innerHTML=`<div class="cgrid">${data.map(x=>{
-    const low=Number(x.qty)<=Number(x.min),mant=needsMaintenance(x),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280',mod=findModulo(x.mod);
+    const low=Number(x.qty)<=Number(x.min),mant=needsMaintenance(x),mantStatus=x.mantEstado||'Pendiente',cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280',mod=findModulo(x.mod);
     return`<div class="icard${low?' low':''}">
       ${x.foto?`<img class="card-photo" src="${x.foto}" alt="Foto de ${x.item}">`:''}
       <div class="ch">
@@ -176,7 +176,7 @@ function rCards(data,mc){
       <div class="cpills">
         ${x.cat?`<span class="cpill" style="background:${cat.bg};color:${cat.c};font-size:11px">${cat.i} ${x.cat}</span>`:''}
         ${x.est?`<span class="edot" style="font-size:12px"><span class="dot" style="background:${ec}"></span>${x.est}</span>`:''}
-        ${mant?`<span class="cpill maintenance-pill">🛠️ Mantenimiento</span>`:''}
+        ${mant?`<span class="cpill maintenance-pill">🛠️ ${mantStatus}</span>`:''}
         ${mod?`<span class="cpill" style="background:#eff6ff;color:#1d4ed8;font-size:11px">${mod.ciclo.icon||'📚'} ${mod.name}</span>`:''}
       </div>
       <div class="cfg">
@@ -185,6 +185,10 @@ function rCards(data,mc){
         <div><div class="cfl">Utilidad</div><div class="cfv" style="font-size:11px">${x.util||'—'}</div></div>
         <div><div class="cfl">Revisión</div><div class="cfv" style="font-family:var(--mono);font-size:11px">${x.fecha||'—'}</div></div>
       </div>
+      ${mant?`<div class="maint-note">
+        <strong>${mantStatus}</strong>${x.mantFecha?` · ${x.mantFecha}`:''}${x.mantResp?` · ${x.mantResp}`:''}
+        ${x.mantNota?`<br>${x.mantNota}`:''}
+      </div>`:''}
       ${x.obs?`<div class="cobs">💬 ${x.obs}</div>`:''}
       <div class="cfoot">
         <button class="btn btn-sm" onclick="openModal(${x.id})" title="Editar">✏️</button>
@@ -267,10 +271,10 @@ function delPickerSelect(itemId){
 // ═════════════════════════════════════════════════════════
 function exportCSV(){
   const data=getFiltered();
-  const h='Referencia,Aula,Módulo,Ítem,Cantidad,Mínimo,Categoría,Ubicación,Estado,Mantenimiento,Utilidad,Revisión,Observaciones';
+  const h='Referencia,Aula,Módulo,Ítem,Cantidad,Mínimo,Categoría,Ubicación,Estado,Mantenimiento,Fecha aviso mant.,Estado mant.,Responsable mant.,Nota mant.,Utilidad,Revisión,Observaciones';
   const rows=data.map(x=>{
     const m = findModulo(x.mod);
-    return [x.ref,AULAS.find(a=>a.id===x.aula)?.name||x.aula,m?`${m.cod} ${m.name}`:'',x.item,x.qty,x.min,x.cat,x.loc,x.est,needsMaintenance(x)?'Sí':'',x.util,x.fecha,x.obs].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',');
+    return [x.ref,AULAS.find(a=>a.id===x.aula)?.name||x.aula,m?`${m.cod} ${m.name}`:'',x.item,x.qty,x.min,x.cat,x.loc,x.est,needsMaintenance(x)?'Sí':'',x.mantFecha,x.mantEstado,x.mantResp,x.mantNota,x.util,x.fecha,x.obs].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',');
   });
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent([h,...rows].join('\n'));a.download='inventario.csv';a.click();
   toast('CSV exportado','ok');

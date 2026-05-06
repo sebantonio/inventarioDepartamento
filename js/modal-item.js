@@ -56,6 +56,30 @@ function renderMainPhoto(src){
   preview.classList.toggle('has-photo', !!src);
 }
 
+function isMaintenanceMarked(item){
+  return item?.mant === true || item?.mant === 1 || String(item?.mant || '').trim() === '1' || item?.est === 'Avería';
+}
+
+function fillMaintenanceResponsibles(){
+  const list = document.getElementById('mantRespList');
+  if(!list) return;
+  list.innerHTML = profesores
+    .map(p => p.nombre ? `<option value="${escHtml(p.nombre)}">${escHtml(p.departamento || '')}</option>` : '')
+    .join('');
+}
+
+function toggleMaintFields(){
+  const checked = document.getElementById('f_mant')?.checked;
+  const box = document.getElementById('maintFields');
+  if(box) box.classList.toggle('show', !!checked);
+  if(checked){
+    const fecha = document.getElementById('f_mantFecha');
+    const estado = document.getElementById('f_mantEstado');
+    if(fecha && !fecha.value) fecha.value = new Date().toISOString().split('T')[0];
+    if(estado && !estado.value) estado.value = 'Pendiente';
+  }
+}
+
 function setMainPhotoFromFile(file){
   if(!file || !file.type.startsWith('image/')) return Promise.resolve(false);
   const MAX = 360, QUALITY = 0.45;
@@ -83,7 +107,7 @@ function setMainPhotoFromFile(file){
 function setItemModalReadonly(readonly){
   const modal = document.querySelector('#mItem .modal');
   modal?.classList.toggle('item-readonly', !!readonly);
-  ['f_ref','f_aula','f_item','f_qty','f_min','f_cat','f_ciclo','f_mod','f_loc','f_est','f_util','f_fecha','f_mant','f_obs']
+  ['f_ref','f_aula','f_item','f_qty','f_min','f_cat','f_ciclo','f_mod','f_loc','f_est','f_util','f_fecha','f_mant','f_mantFecha','f_mantEstado','f_mantResp','f_mantNota','f_obs']
     .forEach(id => {
       const el = document.getElementById(id);
       if(el) el.disabled = !!readonly;
@@ -98,6 +122,7 @@ function openModal(id=null, src=null){
   const m = existing ? items.find(x=>Number(x.id)===Number(id)) : src;
   if(existing && !m) return;
   const readonly = existing && !can('items.write');
+  fillMaintenanceResponsibles();
   document.getElementById('mT').textContent = existing ? (readonly ? 'Ver ítem' : 'Editar ítem') : src ? '📋 Duplicar ítem' : 'Nuevo ítem';
   document.getElementById('f_ref').value = id ? (m?.ref||'') : '';
   document.getElementById('f_aula').value=m?.aula||(cf?.type==='aula'?cf.id:AULAS[0]?.id);
@@ -114,7 +139,12 @@ function openModal(id=null, src=null){
   document.getElementById('f_est').value=m?.est||'Bueno';
   document.getElementById('f_util').value=m?.util||'';
   document.getElementById('f_fecha').value=m?.fecha||new Date().toISOString().split('T')[0];
-  document.getElementById('f_mant').checked=needsMaintenance(m);
+  document.getElementById('f_mant').checked=isMaintenanceMarked(m);
+  document.getElementById('f_mantFecha').value=m?.mantFecha||'';
+  document.getElementById('f_mantEstado').value=m?.mantEstado||'Pendiente';
+  document.getElementById('f_mantResp').value=m?.mantResp||'';
+  document.getElementById('f_mantNota').value=m?.mantNota||'';
+  toggleMaintFields();
   document.getElementById('f_obs').value=m?.obs||'';
   initDocSection(id);
   renderItemQr(existing ? m : null);
@@ -205,6 +235,10 @@ async function saveItem(){
     util:document.getElementById('f_util').value.trim(),
     fecha:document.getElementById('f_fecha').value,
     mant:document.getElementById('f_mant').checked ? '1' : '',
+    mantFecha:document.getElementById('f_mantFecha').value,
+    mantNota:document.getElementById('f_mantNota').value.trim(),
+    mantResp:document.getElementById('f_mantResp').value.trim(),
+    mantEstado:document.getElementById('f_mantEstado').value,
     obs:document.getElementById('f_obs').value.trim(),
   };
   const btn = document.getElementById('btnSave');

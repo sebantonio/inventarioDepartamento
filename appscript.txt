@@ -14,7 +14,7 @@ const SHEET_MODULOS    = 'Modulos';
 const SHEET_CICLOS     = 'Ciclos';
 const SHEET_LOG        = 'Log';
 
-const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','foto','obs'];
+const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','mantFecha','mantNota','mantResp','mantEstado','foto','obs'];
 const HEADERS_USR   = ['usuario','password','nombre','rol','email'];
 const HEADERS_PROF  = ['id','nombre','departamento','email'];
 const HEADERS_PRES  = ['id','itemId','itemNombre','cantidad','aulaOrigen','aulaDestino','profesorId','profesorNombre','gestionadoPor','fechaPrestamo','fechaPrevista','fechaDevolucion','cantidadDevuelta','estado','obs'];

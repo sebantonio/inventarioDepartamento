@@ -14,6 +14,10 @@ const IMP_FIELDS = [
   {k:'loc',   label:'Ubicación',          synonyms:['ubicacion','localizacion','localizado','sitio','estanteria']},
   {k:'est',   label:'Estado',             synonyms:['estado','condicion','status']},
   {k:'mant',  label:'Mantenimiento',      synonyms:['mantenimiento','reparacion','reparación','averia','avería','mant']},
+  {k:'mantFecha',  label:'Fecha aviso mant.', synonyms:['fecha_mantenimiento','fecha_reparacion','aviso_mantenimiento','mant_fecha']},
+  {k:'mantEstado', label:'Estado mant.',       synonyms:['estado_mantenimiento','estado_reparacion','mant_estado']},
+  {k:'mantResp',   label:'Responsable mant.',  synonyms:['responsable_mantenimiento','responsable_reparacion','mant_responsable']},
+  {k:'mantNota',   label:'Nota mant.',         synonyms:['nota_mantenimiento','nota_reparacion','motivo_reparacion','mant_nota']},
   {k:'util',  label:'Utilidad',           synonyms:['utilidad','uso','funcion','para_que']},
   {k:'fecha', label:'Última revisión',    synonyms:['fecha','revision','ultima_revision','actualizado']},
   {k:'obs',   label:'Observaciones',      synonyms:['observaciones','obs','notas','comentarios','comentario']},
@@ -184,6 +188,16 @@ function impRenderPreview(){
       } else if(f.k === 'mant'){
         const nv = normalize(val);
         item.mant = ['1','si','sí','s','true','x','ok','reparacion','reparación','mantenimiento','averia','avería'].some(v => normalize(v) === nv) ? '1' : '';
+      } else if(f.k === 'mantEstado'){
+        const nv = normalize(val);
+        const estados = ['Pendiente','En reparación','Resuelto'];
+        item.mantEstado = estados.find(e => normalize(e) === nv) || (val || 'Pendiente');
+      } else if(f.k === 'mantFecha'){
+        if(/^\d{4}-\d{2}-\d{2}$/.test(val)) item.mantFecha = val;
+        else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)){
+          const [d,m,y] = val.split('/');
+          item.mantFecha = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        } else item.mantFecha = val;
       } else if(f.k === 'cat'){
         const nv = normalize(val);
         const match = CATEGORIAS_VALIDAS().find(c => normalize(c) === nv);

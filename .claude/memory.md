@@ -38,7 +38,7 @@ Reglas importantes:
 - Tablets/dispositivos tactiles: forzar vista tarjetas. `getInvRenderMode()` devuelve `cards` si `(hover:none)` o `(pointer:coarse)`; CSS oculta `.vtog` y `.tw`.
 - Modo tactil compacto: una columna de tarjetas, `topbar` sin `sticky`, paginas sin `min-height`, cards sin sombra, home grids a 2 columnas, primera carga de inventario a 10 items/pagina salvo eleccion manual del usuario.
 - En tactiles se eliminan efectos visuales secundarios: animaciones/transiciones globales, sombras, filtros, `backdrop-filter`, transforms indirectos y degradados pesados en elementos principales.
-- `sw.js` subido a `VERSION='v22'` para forzar cache nueva de PWA.
+- `sw.js` subido a `VERSION='v23'` para forzar cache nueva de PWA.
 - 2026-05-06: en tablets/tactiles se permite solo la animacion inicial del `#loadOverlay` con version ligera (`lo-pulse-lite` por transform/opacidad). Mantener desactivadas las animaciones/transiciones de tarjetas/listados/botones del inventario para evitar lag.
 
 ## QR por item - 2026-05-06
@@ -50,14 +50,15 @@ Reglas importantes:
 
 ## Mantenimiento / reparacion - 2026-05-06
 
-- Se anadio campo persistente `mant` al inventario. `appscript.txt` usa `HEADERS_INV = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','foto','obs']`.
+- Se anadio campo persistente `mant` al inventario. `appscript.txt` usa `HEADERS_INV = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','mantFecha','mantNota','mantResp','mantEstado','foto','obs']`.
 - `ensureHeaders(sheet, headers)` en `appscript.txt` migra cabeceras existentes, inserta columnas nuevas y mantiene el orden esperado. Tras cambiar `appscript.txt`, copiarlo a Google Apps Script y redesplegar.
 - `js/state.js` define `needsMaintenance(item)`: true si `mant` es `1`/true o si `est === 'Avería'`. Esto hace compatibles datos antiguos marcados como averia.
-- Modal de item: checkbox `#f_mant` "Necesita mantenimiento o reparacion"; `saveItem()` guarda `mant:'1'` o cadena vacia.
+- Modal de item: checkbox `#f_mant` "Necesita mantenimiento o reparacion"; detalles `mantFecha`, `mantNota`, `mantResp`, `mantEstado`.
+- Estados de mantenimiento: `Pendiente`, `En reparación`, `Resuelto`. `needsMaintenance()` excluye los resueltos de la cola aunque conserva los datos si `mant` sigue marcado.
 - Home: la tarjeta "espacios" fue eliminada y sustituida por tarjeta "mantenimiento"; boton rapido `🛠️ Mantenimiento` llama a `goMaintenance()`.
 - Navegacion: ruta `#maintenance`, `goMaintenance()` y `cf.type === 'maintenance'` filtran items mediante `needsMaintenance()`.
-- Listado: tarjetas muestran pill `🛠️ Mantenimiento`; tabla antepone `🛠️` en la columna Utilidad.
-- Import/Export CSV incluyen columna `Mantenimiento`. Import acepta `1`, `si/sí`, `true`, `x`, `ok`, `reparacion`, `mantenimiento`, `averia`.
+- Listado: tarjetas muestran pill con estado y bloque `.maint-note` con fecha/responsable/nota; tabla antepone resumen en Utilidad.
+- Import/Export CSV incluyen `Mantenimiento`, `Fecha aviso mant.`, `Estado mant.`, `Responsable mant.`, `Nota mant.`. Import acepta `1`, `si/sí`, `true`, `x`, `ok`, `reparacion`, `mantenimiento`, `averia`.
 
 ## Foto principal por item - 2026-05-06
 
