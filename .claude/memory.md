@@ -38,7 +38,7 @@ Reglas importantes:
 - Tablets/dispositivos tactiles: forzar vista tarjetas. `getInvRenderMode()` devuelve `cards` si `(hover:none)` o `(pointer:coarse)`; CSS oculta `.vtog` y `.tw`.
 - Modo tactil compacto: una columna de tarjetas, `topbar` sin `sticky`, paginas sin `min-height`, cards sin sombra, home grids a 2 columnas, primera carga de inventario a 10 items/pagina salvo eleccion manual del usuario.
 - En tactiles se eliminan efectos visuales secundarios: animaciones/transiciones globales, sombras, filtros, `backdrop-filter`, transforms indirectos y degradados pesados en elementos principales.
-- `sw.js` subido a `VERSION='v23'` para forzar cache nueva de PWA.
+- `sw.js` subido a `VERSION='v24'` para forzar cache nueva de PWA.
 - 2026-05-06: en tablets/tactiles se permite solo la animacion inicial del `#loadOverlay` con version ligera (`lo-pulse-lite` por transform/opacidad). Mantener desactivadas las animaciones/transiciones de tarjetas/listados/botones del inventario para evitar lag.
 
 ## QR por item - 2026-05-06
@@ -64,6 +64,7 @@ Reglas importantes:
 
 - Campo persistente `foto` en `HEADERS_INV`, guardado como miniatura `data:image/jpeg` en el propio item.
 - La miniatura principal se genera automaticamente al hacer/subir una imagen en documentacion: `addDocFiles()` llama a `setMainPhotoFromFile()`.
+- Si el item ya tiene fotos adjuntas pero `foto` esta vacia, `loadItemDocs()` llama a `syncMainPhotoFromDocs()` y usa la primera imagen de Drive con `driveThumbSrc(driveId)`.
 - `setMainPhotoFromFile()` en `js/modal-item.js` reduce la imagen a max 360px y calidad 0.45 antes de guardarla. Mantener este limite para no inflar Google Sheets/API.
 - Modal: `#f_foto` y `#f_foto_preview`; no usar flujo manual separado de "elegir foto principal".
 - Tarjetas: `x.foto` se muestra como `.card-photo` con `aspect-ratio:16/9` y `object-fit:cover`. Tabla: miniatura `.table-photo`.

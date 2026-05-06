@@ -10,6 +10,8 @@ const DOC_ICONS = {pdf:'📄',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',gif:'�
   zip:'🗜️',rar:'🗜️',mp4:'🎬',mp3:'🎵',txt:'📋',svg:'🖼️'};
 
 function docIcon(name){ return DOC_ICONS[(name||'').split('.').pop().toLowerCase()]||'📎'; }
+function isImageDocName(name){ return ['jpg','jpeg','png','gif','webp','svg'].includes((name||'').split('.').pop().toLowerCase()); }
+function driveThumbSrc(driveId, size=360){ return `https://drive.google.com/thumbnail?id=${encodeURIComponent(driveId)}&sz=w${size}`; }
 
 function initDocSection(itemId){
   docsPendientes = []; docsActuales = [];
@@ -20,8 +22,19 @@ function initDocSection(itemId){
 async function loadItemDocs(itemId){
   try{
     const res = await apiPost({action:'getDocs', itemId});
-    if(res.ok){ docsActuales = res.docs||[]; renderDocList(); }
+    if(res.ok){
+      docsActuales = res.docs||[];
+      renderDocList();
+      syncMainPhotoFromDocs();
+    }
   }catch(e){}
+}
+
+function syncMainPhotoFromDocs(){
+  const input = document.getElementById('f_foto');
+  if(!input || input.value) return;
+  const imgDoc = docsActuales.find(d => d.driveId && isImageDocName(d.fileName));
+  if(imgDoc && typeof renderMainPhoto === 'function') renderMainPhoto(driveThumbSrc(imgDoc.driveId));
 }
 
 async function addDocFiles(files){
@@ -43,6 +56,8 @@ async function deleteExistingDoc(docId, driveId){
     const res = await apiPost({action:'deleteDoc', docId, driveId});
     if(!res.ok) throw new Error(res.error);
     docsActuales = docsActuales.filter(d=>d.id!==docId);
+    const fotoInput = document.getElementById('f_foto');
+    if(fotoInput?.value && String(fotoInput.value).includes(String(driveId))) renderMainPhoto('');
     renderDocList(); toast('Documento eliminado','ok');
   }catch(e){ toast('Error: '+e.message,'err'); }
 }
