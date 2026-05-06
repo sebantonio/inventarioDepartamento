@@ -47,10 +47,46 @@ function renderItemQr(item){
   document.getElementById('itemQrUrl').textContent = url;
 }
 
+function renderMainPhoto(src){
+  const input = document.getElementById('f_foto');
+  const preview = document.getElementById('f_foto_preview');
+  if(input) input.value = src || '';
+  if(!preview) return;
+  preview.innerHTML = src ? `<img src="${src}" alt="Foto principal">` : '<span>📷</span>';
+  preview.classList.toggle('has-photo', !!src);
+}
+
+function selectMainPhoto(files){
+  const file = files && files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ toast('Selecciona una imagen','err'); return; }
+  const MAX = 360, QUALITY = 0.45;
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    let w = img.width, h = img.height;
+    if(w > MAX || h > MAX){
+      if(w >= h){ h = Math.round(h*MAX/w); w = MAX; }
+      else       { w = Math.round(w*MAX/h); h = MAX; }
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    renderMainPhoto(canvas.toDataURL('image/jpeg', QUALITY));
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast('No se pudo leer la imagen','err'); };
+  img.src = url;
+}
+
+function clearMainPhoto(){
+  renderMainPhoto('');
+}
+
 function setItemModalReadonly(readonly){
   const modal = document.querySelector('#mItem .modal');
   modal?.classList.toggle('item-readonly', !!readonly);
-  ['f_ref','f_aula','f_item','f_qty','f_min','f_cat','f_ciclo','f_mod','f_loc','f_est','f_util','f_fecha','f_mant','f_obs']
+  ['f_ref','f_aula','f_item','f_foto_input','f_qty','f_min','f_cat','f_ciclo','f_mod','f_loc','f_est','f_util','f_fecha','f_mant','f_obs']
     .forEach(id => {
       const el = document.getElementById(id);
       if(el) el.disabled = !!readonly;
@@ -69,6 +105,7 @@ function openModal(id=null, src=null){
   document.getElementById('f_ref').value = id ? (m?.ref||'') : '';
   document.getElementById('f_aula').value=m?.aula||(cf?.type==='aula'?cf.id:AULAS[0]?.id);
   document.getElementById('f_item').value=m?.item||'';
+  renderMainPhoto(m?.foto||'');
   document.getElementById('f_qty').value = id ? (m?.qty??1) : 1;
   document.getElementById('f_min').value=m?.min??0;
   document.getElementById('f_cat').value=m?.cat||Object.keys(CATS)[0]||'Componentes electrónicos';
@@ -161,6 +198,7 @@ async function saveItem(){
     ref: refRaw || _autoRef(name),
     aula:document.getElementById('f_aula').value,
     item:name,
+    foto:document.getElementById('f_foto').value,
     qty:parseInt(document.getElementById('f_qty').value)||0,
     min:parseInt(document.getElementById('f_min').value)||0,
     cat:document.getElementById('f_cat').value,

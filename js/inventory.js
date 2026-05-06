@@ -161,6 +161,7 @@ function rCards(data,mc){
   mc.innerHTML=`<div class="cgrid">${data.map(x=>{
     const low=Number(x.qty)<=Number(x.min),mant=needsMaintenance(x),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280',mod=findModulo(x.mod);
     return`<div class="icard${low?' low':''}">
+      ${x.foto?`<img class="card-photo" src="${x.foto}" alt="Foto de ${x.item}">`:''}
       <div class="ch">
         <div class="card-title-wrap">
           <div class="item-title-line">

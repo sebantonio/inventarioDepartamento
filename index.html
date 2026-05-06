@@ -337,6 +337,18 @@
       <div><label class="fl">Referencia</label><input class="fi-w" id="f_ref" placeholder="ej. R-10K"></div>
       <div><label class="fl">Aula</label><select class="fi-w" id="f_aula"></select></div>
       <div class="full"><label class="fl">Nombre del ítem *</label><input class="fi-w" id="f_item" placeholder="Nombre del material o equipo"></div>
+      <div class="full">
+        <label class="fl">Foto principal</label>
+        <input type="hidden" id="f_foto">
+        <input type="file" id="f_foto_input" accept="image/*" capture="environment" style="display:none" onchange="selectMainPhoto(this.files);this.value=''">
+        <div class="photo-picker">
+          <div class="photo-preview" id="f_foto_preview"><span>📷</span></div>
+          <div class="photo-actions">
+            <button type="button" class="btn" onclick="document.getElementById('f_foto_input').click()">📷 Elegir foto</button>
+            <button type="button" class="btn btn-d" onclick="clearMainPhoto()">Quitar</button>
+          </div>
+        </div>
+      </div>
       <div><label class="fl">Cantidad</label><input class="fi-w" id="f_qty" type="number" min="0" value="1"></div>
       <div><label class="fl">Stock mínimo</label><input class="fi-w" id="f_min" type="number" min="0" value="5"></div>
       <div><label class="fl">Categoría</label>
