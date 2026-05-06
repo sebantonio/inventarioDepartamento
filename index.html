@@ -440,7 +440,9 @@
       </div>
     </div>
     <div class="mf">
-      <div></div>
+      <div>
+        <button class="btn" id="btnHistorial" style="display:none" onclick="openHistorial()">📋 Historial</button>
+      </div>
       <div class="mf-right">
         <button class="btn" onclick="closeM()">Cancelar</button>
         <button class="btn btn-p" id="btnSave" onclick="saveItem()">💾 Guardar</button>
@@ -465,6 +467,20 @@
     <div class="mf">
       <button class="btn" onclick="closeDocsModal()">Cerrar</button>
       <button class="btn btn-p" id="btnDocsSave" onclick="saveDocsModal()">💾 Guardar documentos</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL -->
+<div class="mbg" id="mHistorial" onclick="if(event.target===this)closeHistorial()">
+  <div class="modal" style="width:min(600px,100%)">
+    <div class="mh">
+      <div class="mt" id="histModalTitle">📋 Historial del ítem</div>
+      <button class="mx" onclick="closeHistorial()">✕</button>
+    </div>
+    <div class="mb" id="histBody" style="padding:16px;min-height:120px"></div>
+    <div class="mf">
+      <button class="btn" onclick="closeHistorial()">Cerrar</button>
     </div>
   </div>
 </div>

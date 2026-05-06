@@ -149,6 +149,8 @@ function openModal(id=null, src=null){
   initDocSection(id);
   renderItemQr(existing ? m : null);
   setItemModalReadonly(readonly);
+  const btnH = document.getElementById('btnHistorial');
+  if (btnH) btnH.style.display = existing ? '' : 'none';
   document.getElementById('mItem').classList.add('open');
 }
 
@@ -536,4 +538,38 @@ function printPedidos(){
   w.document.write(html);
   w.document.close();
   w.print();
+}
+
+async function openHistorial(){
+  if(!eid) return;
+  const it = items.find(x=>Number(x.id)===Number(eid));
+  document.getElementById('histModalTitle').textContent = `📋 Historial — ${it ? it.item : '#' + eid}`;
+  document.getElementById('histBody').innerHTML = '<p style="color:var(--muted);text-align:center">Cargando...</p>';
+  document.getElementById('mHistorial').classList.add('open');
+  try {
+    const res = await apiGet({ action: 'getItemLog', itemId: eid });
+    const logs = res.logs || [];
+    if (!logs.length) {
+      document.getElementById('histBody').innerHTML = '<p style="color:var(--muted);text-align:center">Sin historial para este ítem.</p>';
+      return;
+    }
+    document.getElementById('histBody').innerHTML =
+      `<table class="tw" style="width:100%">
+        <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead>
+        <tbody>${logs.map(l =>
+          `<tr>
+            <td style="white-space:nowrap;font-size:12px">${l.fecha}</td>
+            <td style="font-size:13px">${l.usuario}</td>
+            <td style="font-size:12px">${l.accion}</td>
+            <td style="font-size:12px;word-break:break-word">${l.resumen}</td>
+          </tr>`
+        ).join('')}</tbody>
+      </table>`;
+  } catch (e) {
+    document.getElementById('histBody').innerHTML = `<p style="color:var(--danger)">Error al cargar historial.</p>`;
+  }
+}
+
+function closeHistorial(){
+  document.getElementById('mHistorial').classList.remove('open');
 }

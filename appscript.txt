@@ -344,6 +344,49 @@ function notifyMaintenanceChange(ss, user, it, oldItem) {
   } catch(emailErr) {}
 }
 
+function notifyStockAlert(ss, it, oldItem, user) {
+  try {
+    const qty = Number(it.qty);
+    const min = Number(it.min);
+    if (!min || min <= 0) return;
+    if (qty > min) return;
+    const oldQty = Number(oldItem && oldItem.qty != null ? oldItem.qty : qty + 1);
+    if (oldQty <= min) return;
+
+    const modInfo = findModuloResponsable(ss, it);
+    if (!modInfo.responsableEmail) return;
+
+    const usrSheet = ss.getSheetByName(SHEET_USUARIOS);
+    const jefeEmails = [];
+    if (usrSheet) {
+      const rows = usrSheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i][3] === 'Jefe Departamento' && rows[i][4]) jefeEmails.push(rows[i][4]);
+      }
+    }
+
+    const appUrl = 'https://inventariodepartamento.pages.dev/';
+    MailApp.sendEmail({
+      to: modInfo.responsableEmail,
+      cc: jefeEmails.join(','),
+      subject: `⚠️ Stock bajo — ${it.item || it.ref || 'Ítem #' + it.id}`,
+      htmlBody: `
+        <p>El siguiente ítem ha alcanzado el stock mínimo:</p>
+        <table style="border-collapse:collapse;margin:12px 0">
+          <tr><td style="padding:4px 12px 4px 0;font-weight:bold">Ítem:</td><td>${it.item || ''}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;font-weight:bold">Referencia:</td><td>${it.ref || '—'}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;font-weight:bold">Cantidad actual:</td><td><strong>${qty}</strong></td></tr>
+          <tr><td style="padding:4px 12px 4px 0;font-weight:bold">Mínimo:</td><td>${min}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;font-weight:bold">Módulo:</td><td>${modInfo.moduloNombre || '—'}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;font-weight:bold">Registrado por:</td><td>${user && user.nombre || user && user.usuario || '—'}</td></tr>
+        </table>
+        <p><a href="${appUrl}">Abrir inventario</a></p>
+      `
+    });
+    auditLog(ss, user, 'stockAlert', it.id, `Stock bajo: ${it.item || ''} → ${qty}/${min}`);
+  } catch(emailErr) {}
+}
+
 // ─── GET ─────────────────────────────────────────────────────────
 function doGet(e) {
   try {
@@ -435,6 +478,26 @@ function doGet(e) {
       ciclos = cicloOrder.map(id => cicloMap[id]);
     }
 
+    if (action === 'getItemLog') {
+      const itemId = e.parameter.itemId;
+      const logSheet = ss.getSheetByName(SHEET_LOG);
+      if (!logSheet) return json({ ok: true, logs: [] });
+      const rows = logSheet.getDataRange().getValues();
+      const logs = [];
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][5]) === String(itemId)) {
+          logs.push({
+            fecha: Utilities.formatDate(new Date(rows[i][0]), 'Europe/Madrid', 'dd/MM/yyyy HH:mm'),
+            usuario: String(rows[i][2] || rows[i][1] || ''),
+            accion: String(rows[i][4] || ''),
+            resumen: String(rows[i][6] || '')
+          });
+        }
+      }
+      logs.reverse();
+      return json({ ok: true, logs });
+    }
+
     return json({ ok: true, items, profesores, prestamos, aulas, cats, ciclos, user });
   } catch (err) {
     return json({ ok: false, error: err.toString() });
@@ -492,6 +555,7 @@ function doPost(e) {
       sheet.appendRow(HEADERS_INV.map(h => it[h] != null ? it[h] : ''));
       auditLog(ss, user, 'add', it.id, `Añadido item: ${it.item || ''} (${it.ref || 'sin ref'})`);
       notifyMaintenanceChange(ss, user, it, {});
+      notifyStockAlert(ss, it, {}, user);
       return json({ ok: true, item: it });
     }
     if (action === 'update') {
@@ -506,6 +570,7 @@ function doPost(e) {
       sheet.getRange(r, 1, 1, HEADERS_INV.length).setValues([HEADERS_INV.map(h => it[h] != null ? it[h] : '')]);
       auditLog(ss, user, 'update', it.id, `Actualizado item: ${it.item || old[4] || ''}; qty ${old[5]} -> ${it.qty}; estado ${old[9]} -> ${it.est}`);
       notifyMaintenanceChange(ss, user, it, oldItem);
+      notifyStockAlert(ss, it, oldItem, user);
       return json({ ok: true, item: it });
     }
     if (action === 'delete') {
