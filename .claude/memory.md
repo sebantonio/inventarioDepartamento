@@ -36,7 +36,9 @@ Reglas importantes:
 - No usar `contain: layout paint` en `.icard`: en Chrome/Edge/Firefox movil puede provocar tarjetas en blanco que aparecen al desplazar.
 - Ajuste tablet tactil: aplicar modo ligero tambien con `hover:none`, `pointer:coarse` y `max-width:1200px`; sin animaciones/transforms en tarjetas/cards/botones. `topbar` con `min-height`, no `height`, y login alineado arriba para evitar cortes por barras del navegador.
 - Tablets/dispositivos tactiles: forzar vista tarjetas. `getInvRenderMode()` devuelve `cards` si `(hover:none)` o `(pointer:coarse)`; CSS oculta `.vtog` y `.tw`.
-- `sw.js` subido a `VERSION='v13'` para forzar cache nueva de PWA.
+- Modo tactil compacto: una columna de tarjetas, `topbar` sin `sticky`, paginas sin `min-height`, cards sin sombra, home grids a 2 columnas, primera carga de inventario a 10 items/pagina salvo eleccion manual del usuario.
+- En tactiles se eliminan efectos visuales secundarios: animaciones/transiciones globales, sombras, filtros, `backdrop-filter`, transforms indirectos y degradados pesados en elementos principales.
+- `sw.js` subido a `VERSION='v15'` para forzar cache nueva de PWA.
 
 ## Iconos y acciones combinadas - actualizado 2026-05-06
 

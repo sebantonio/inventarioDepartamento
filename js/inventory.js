@@ -54,10 +54,13 @@ function renderInv(){
 let _lastInvRenderMode = null;
 let _invPage = 1;
 let _pageSize = 25;
+let _pageSizeUserSet = false;
 let _pageSig = '';
+function isTouchLike(){
+  return matchMedia('(hover: none), (pointer: coarse)').matches;
+}
 function getInvRenderMode(){
-  const touchLike = matchMedia('(hover: none), (pointer: coarse)').matches;
-  return (view==='table' && window.innerWidth > 900 && !touchLike) ? 'table' : 'cards';
+  return (view==='table' && window.innerWidth > 900 && !isTouchLike()) ? 'table' : 'cards';
 }
 
 function getPageSig(data){
@@ -76,11 +79,13 @@ function getInvPage(data){
   if(sig !== _pageSig){
     _pageSig = sig;
     _invPage = 1;
+    if(!_pageSizeUserSet) _pageSize = isTouchLike() ? 10 : 25;
   }
-  const totalPages = Math.max(1, Math.ceil(data.length / _pageSize));
+  const pageSize = _pageSize;
+  const totalPages = Math.max(1, Math.ceil(data.length / pageSize));
   _invPage = Math.min(Math.max(1, _invPage), totalPages);
-  const start = (_invPage - 1) * _pageSize;
-  const end = Math.min(start + _pageSize, data.length);
+  const start = (_invPage - 1) * pageSize;
+  const end = Math.min(start + pageSize, data.length);
   return {
     items: data.slice(start, end),
     start,
@@ -92,6 +97,7 @@ function getInvPage(data){
 }
 
 function renderPager(mc,page){
+  const sizes = isTouchLike() ? [10,25,30,50] : [10,25,30,50];
   mc.insertAdjacentHTML('beforeend',`
     <div class="pager">
       <div class="pager-info">Mostrando ${page.start+1}-${page.end} de ${page.total}</div>
@@ -102,7 +108,7 @@ function renderPager(mc,page){
         <label class="pager-size">
           <span>Ítems</span>
           <select onchange="setPageSize(this.value)">
-            ${[10,25,30,50].map(n=>`<option value="${n}" ${n===_pageSize?'selected':''}>${n}</option>`).join('')}
+            ${sizes.map(n=>`<option value="${n}" ${n===_pageSize?'selected':''}>${n}</option>`).join('')}
           </select>
         </label>
       </div>
@@ -185,7 +191,7 @@ window.addEventListener('resize',()=>{
 });
 function sort(k){if(sk===k)sa=!sa;else{sk=k;sa=true}renderInv()}
 function goInvPage(page){_invPage=page;renderInv();document.getElementById('pS')?.scrollIntoView({block:'start'})}
-function setPageSize(v){_pageSize=Number(v)||25;_invPage=1;renderInv()}
+function setPageSize(v){_pageSize=Number(v)||25;_pageSizeUserSet=true;_invPage=1;renderInv()}
 
 let _delItemId = null;
 function openDelModal(itemId){

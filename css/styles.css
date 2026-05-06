@@ -447,8 +447,34 @@ td{padding:10px 13px;font-size:13px;max-width:180px;overflow:hidden;text-overflo
 }
 
 @media (hover:none), (pointer:coarse){
+  *,*::before,*::after{
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+  .topbar{position:static!important}
+  .page{min-height:0!important}
+  .sub-header{padding:16px 14px!important}
+  .sub-body,.home-body,.ciclo-body{max-width:none!important;padding:14px!important}
+  .home-hero{padding:22px 14px 16px!important}
+  .stats-strip{grid-template-columns:1fr 1fr!important;margin-bottom:18px!important}
+  .choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  .cgrid{display:flex!important;flex-direction:column!important;gap:12px!important}
+  .icard,.ccard,.scard,.login-card,.modal,.cbox,.gsearch,.gsr,.docs-card,.pres-card,.loan-banner,.tw,.pager,.profile-section{
+    box-shadow:none!important;
+    filter:none!important;
+    backdrop-filter:none!important;
+  }
+  .icard{border-radius:10px!important;padding:14px!important}
+  .cfg{grid-template-columns:1fr 1fr}
+  .cfoot{overflow-x:auto;padding-bottom:2px}
+  .cfoot .btn{flex:0 0 auto}
   .vtog{display:none!important}
   .tw{display:none!important}
+  .mbg{backdrop-filter:none!important}
+  .brand-logo,.login-icon,.profile-avatar-big,.user-avatar,#loadBar{
+    background:var(--accent)!important;
+  }
 }
 
 .mbg{position:fixed;inset:0;background:rgba(15,20,40,.5);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
