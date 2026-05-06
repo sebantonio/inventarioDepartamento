@@ -78,6 +78,12 @@ Reglas importantes:
 - No recuperar `🔁` para prestamos; se cambio para evitar conflicto visual con `🔄` de recargar.
 - Baja/eliminar usa el picker `#mDelPicker` y `openDelModal(itemId?)`; no recuperar `.del-wrap` / `.del-menu`.
 
+## Exportacion / backup - 2026-05-06
+
+- El boton superior `btnE` abre `#mExport` con `openExportModal()`, no descarga CSV directamente.
+- Opciones: CSV de vista actual (`exportCSV()`), CSV completo de items (`exportAllItemsCSV()`) y backup completo JSON (`exportFullBackup()`).
+- El backup JSON incluye `inventario`, `aulas`, `categorias`, `ciclos`, `prestamos`, `profesores` y `meta` con recuentos/usuario sin guardar password.
+
 ## Auditoria de acciones - 2026-05-05
 
 Se implemento auditoria en `appscript.txt`.

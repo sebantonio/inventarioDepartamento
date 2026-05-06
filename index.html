@@ -45,7 +45,7 @@
       <button class="tbtn" id="btnN" style="display:none" onclick="openModal()">＋ Nuevo ítem</button>
       <button class="tbtn" id="btnPres" style="display:none" onclick="goPrestamos()">⌛ Préstamos</button>
       <button class="tbtn" id="btnPed" style="display:none" onclick="openPedidos()">🛒 Pedidos<span class="pedido-badge" id="pedBadge" style="display:none">0</span></button>
-      <button class="tbtn" id="btnE" style="display:none" onclick="exportCSV()">📥 CSV</button>
+      <button class="tbtn" id="btnE" style="display:none" onclick="openExportModal()">📥 Exportar</button>
       <button class="tbtn" id="btnImp" onclick="openImportModal()">📤 Importar</button>
       <button class="tbtn" id="btnInstall" style="display:none" onclick="installPWA()" title="Instalar app">📲 Instalar</button>
       <button class="tbtn" id="btnReload" onclick="loadData()" title="Recargar">🔄</button>
@@ -529,6 +529,27 @@
         <button class="btn" onclick="closeDevolver()">Cancelar</button>
         <button class="btn btn-return" id="btnDevolverSave" onclick="confirmDevolver()">📥 Confirmar devolución</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EXPORTAR -->
+<div class="mbg" id="mExport" onclick="if(event.target===this)closeExportModal()">
+  <div class="modal" style="width:min(560px,100%)">
+    <div class="mh"><div class="mt">📥 Exportar datos</div><button class="mx" onclick="closeExportModal()">✕</button></div>
+    <div class="export-options">
+      <button class="export-option" onclick="exportCSV();closeExportModal()">
+        <span class="export-option-ico">📄</span>
+        <span><strong>CSV de esta vista</strong><small id="expFilteredCount">Ítems filtrados por aula, categoría, módulo o búsqueda.</small></span>
+      </button>
+      <button class="export-option" onclick="exportAllItemsCSV()">
+        <span class="export-option-ico">📋</span>
+        <span><strong>CSV de todo el inventario</strong><small id="expAllItemsCount">Todos los ítems, sin filtros.</small></span>
+      </button>
+      <button class="export-option primary" onclick="exportFullBackup()">
+        <span class="export-option-ico">🗄️</span>
+        <span><strong>Backup completo JSON</strong><small id="expBackupCount">Inventario, aulas, categorías, ciclos, préstamos y profesores.</small></span>
+      </button>
     </div>
   </div>
 </div>

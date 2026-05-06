@@ -287,6 +287,79 @@ function exportCSV(){
 // ═════════════════════════════════════════════════════════
 // IMPRIMIR
 // ═════════════════════════════════════════════════════════
+function openExportModal(){
+  if(!requirePerm('import.write')) return;
+  const filtered = cf ? getFiltered().length : items.length;
+  document.getElementById('expFilteredCount').textContent = `${filtered} ítem${filtered!==1?'s':''} de la vista actual.`;
+  document.getElementById('expAllItemsCount').textContent = `${items.length} ítem${items.length!==1?'s':''} en total.`;
+  document.getElementById('expBackupCount').textContent =
+    `${items.length} ítems · ${AULAS.length} aulas · ${Object.keys(CATS).length} categorías · ${CICLOS.length} ciclos · ${prestamos.length} préstamos · ${profesores.length} profesores.`;
+  document.getElementById('mExport').classList.add('open');
+}
+
+function closeExportModal(){
+  document.getElementById('mExport')?.classList.remove('open');
+}
+
+function csvCell(v){
+  return `"${String(v ?? '').replace(/"/g,'""')}"`;
+}
+
+function downloadText(filename, mime, text){
+  const blob = new Blob([text], {type: mime});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 800);
+}
+
+function inventoryCsvRows(data){
+  const h='Referencia,Aula,MÃ³dulo,Ãtem,Cantidad,MÃ­nimo,CategorÃ­a,UbicaciÃ³n,Estado,Mantenimiento,Fecha aviso mant.,Estado mant.,Responsable mant.,Nota mant.,Utilidad,RevisiÃ³n,Observaciones';
+  const rows=data.map(x=>{
+    const m = findModulo(x.mod);
+    return [x.ref,AULAS.find(a=>a.id===x.aula)?.name||x.aula,m?`${m.cod} ${m.name}`:'',x.item,x.qty,x.min,x.cat,x.loc,x.est,needsMaintenance(x)?'SÃ­':'',x.mantFecha,x.mantEstado,x.mantResp,x.mantNota,x.util,x.fecha,x.obs].map(csvCell).join(',');
+  });
+  return '\uFEFF' + [h,...rows].join('\n');
+}
+
+function exportAllItemsCSV(){
+  const data = items.slice().sort((a,b)=>String(a.item||'').localeCompare(String(b.item||'')));
+  downloadText('inventario-completo.csv', 'text/csv;charset=utf-8', inventoryCsvRows(data));
+  closeExportModal();
+  toast('CSV completo exportado','ok');
+}
+
+function exportFullBackup(){
+  if(!requirePerm('import.write')) return;
+  const now = new Date();
+  const backup = {
+    meta: {
+      app: 'Inventario Taller FP',
+      exportedAt: now.toISOString(),
+      exportedBy: SESSION ? {usuario: SESSION.usuario, nombre: SESSION.nombre, rol: SESSION.rol, email: SESSION.email} : null,
+      counts: {
+        items: items.length,
+        aulas: AULAS.length,
+        categorias: Object.keys(CATS).length,
+        ciclos: CICLOS.length,
+        prestamos: prestamos.length,
+        profesores: profesores.length
+      }
+    },
+    inventario: items,
+    aulas: AULAS,
+    categorias: CATS,
+    ciclos: CICLOS,
+    prestamos,
+    profesores
+  };
+  const stamp = now.toISOString().slice(0,19).replace(/[:T]/g,'-');
+  downloadText(`backup-inventario-${stamp}.json`, 'application/json;charset=utf-8', JSON.stringify(backup, null, 2));
+  closeExportModal();
+  toast('Backup completo exportado','ok');
+}
+
 function printInv(){
   const titulo = cf?.label || 'Inventario';
   const total = getBase().length;

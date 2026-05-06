@@ -21,7 +21,7 @@ config → state → roles → api → docs → search → home → inventory �
 - `js/nav.js` — goHome(), goAula(), goCat(), goLowStock(), goMaintenance(), openCiclo(), goMod(), openSub()
 - `js/search.js` — globalSearch(), gsKey(), gsGo(), gsClear()
 - `js/home.js` — renderHome(), renderLoanBanner()
-- `js/inventory.js` — renderInv(), rTable(), rCards(), exportCSV(), toast()
+- `js/inventory.js` — renderInv(), rTable(), rCards(), openExportModal(), exportCSV(), exportAllItemsCSV(), exportFullBackup(), toast()
 - `js/modal-item.js` — openModal(), saveItem(), pedidos, QR individual y printBulkItemQrs()
 - `js/modal-aulas.js` — openAulasModal(), saveAulas()
 - `js/modal-cats.js` — openCatsModal(), saveCats()
@@ -36,7 +36,7 @@ config → state → roles → api → docs → search → home → inventory �
 
 ## PWA
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
-- sw.js: VERSION='v26', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
+- sw.js: VERSION='v27', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
 - `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
 
@@ -165,6 +165,12 @@ El modal tiene **dos pasos**:
 - `printBulkItemQrs()` imprime etiquetas QR en A4 para los ítems del filtro actual (`getFiltered()`): aula, categoría, módulo, stock bajo, mantenimiento y búsqueda/filtros activos.
 - El SVG `./icons/qr-code.svg` está incluido en `sw.js`; subir `VERSION` si cambia el icono o la impresión QR.
 
+## Exportación / backup (implementado 2026-05-06)
+- El botón superior `btnE` muestra "Exportar" y abre el modal `#mExport` con `openExportModal()`.
+- Opciones: CSV de vista actual (`exportCSV()`), CSV completo de ítems (`exportAllItemsCSV()`) y backup completo JSON (`exportFullBackup()`).
+- El backup JSON se genera en navegador con los datos ya cargados: `inventario`, `aulas`, `categorias`, `ciclos`, `prestamos`, `profesores` y `meta`; no incluye la contraseña de sesión.
+- `Escape` cierra `#mExport` desde el handler global de `js/auth.js`.
+
 ## Funcionalidades implementadas (estado 2026-05-06)
 - Login / logout / recuperación de contraseña por email (reset.js)
 - Perfil de usuario: editar nombre, email, cambiar contraseña (profile.js)
@@ -185,6 +191,7 @@ El modal tiene **dos pasos**:
 - QR por ítem en el modal de edición/ver, botón compacto con `icons/qr-code.svg` junto al nombre en tabla/tarjetas e impresión masiva de etiquetas desde pS.
 - Mantenimiento/reparación por ítem: checkbox en modal, tarjeta y botón rápido en home, ruta `#maintenance`, CSV y backend con columna `mant`.
 - Foto principal por ítem: miniatura local en campo `foto`, visible en tarjetas.
+- Exportación con modal de opciones: CSV filtrado, CSV completo y backup JSON completo.
 
 ## appscript.txt
 Contiene el código completo del backend GAS. Para actualizar el backend hay que copiar el contenido en el editor de Google Apps Script y redesplegar como aplicación web.
