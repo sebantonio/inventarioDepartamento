@@ -421,7 +421,12 @@ td{padding:10px 13px;font-size:13px;max-width:180px;overflow:hidden;text-overflo
 .pager-size{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600}
 .pager-size select{padding:6px 10px;font-size:12px;border-radius:8px}
 .ch{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
-.cname{font-size:14px;font-weight:700;line-height:1.3}
+.card-title-wrap{min-width:0}
+.item-title-line{display:flex;align-items:center;gap:7px;min-width:0}
+.item-title-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qr-name-btn{width:24px;height:24px;flex:0 0 24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--accent);font-size:15px;font-weight:800;line-height:1;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.qr-name-btn:hover{background:var(--accent-l);border-color:var(--accent);color:#1d4ed8}
+.cname{font-size:14px;font-weight:700;line-height:1.3;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .cref{font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:2px}
 .cqbox{text-align:right;flex-shrink:0}
 .cqbig{font-size:25px;font-weight:800;font-family:var(--mono);line-height:1}

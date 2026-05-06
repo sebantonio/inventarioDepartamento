@@ -126,7 +126,12 @@ function rTable(data,mc){
       return`<tr>
         <td><span class="rbadge">${x.ref||'—'}</span></td>
         <td style="font-size:12px;color:var(--muted)">${AULAS.find(a=>a.id===x.aula)?.name||x.aula}</td>
-        <td style="max-width:200px;font-weight:600" title="${x.item}">${x.item}</td>
+        <td style="max-width:220px;font-weight:600" title="${x.item}">
+          <div class="item-title-line">
+            <span class="item-title-text">${x.item}</span>
+            <button type="button" class="qr-name-btn" onclick="openModal(${x.id})" title="Ver QR" aria-label="Ver QR">&#9638;</button>
+          </div>
+        </td>
         <td><span class="qval ${low?'qlow':'qok'}">${x.qty}${low?' ⚠':''}</span></td>
         <td style="color:var(--muted);font-family:var(--mono);font-size:12px">${x.min}</td>
         <td>${x.cat?`<span class="cpill" style="background:${cat.bg};color:${cat.c}">${cat.i} ${x.cat}</span>`:'—'}</td>
@@ -156,7 +161,13 @@ function rCards(data,mc){
     const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280',mod=findModulo(x.mod);
     return`<div class="icard${low?' low':''}">
       <div class="ch">
-        <div><div class="cname">${x.item}</div><div class="cref">${x.ref||''}</div></div>
+        <div class="card-title-wrap">
+          <div class="item-title-line">
+            <div class="cname">${x.item}</div>
+            <button type="button" class="qr-name-btn" onclick="openModal(${x.id})" title="Ver QR" aria-label="Ver QR">&#9638;</button>
+          </div>
+          <div class="cref">${x.ref||''}</div>
+        </div>
         <div class="cqbox"><div class="cqbig" style="color:${low?'var(--red)':'var(--green)'}">${x.qty}</div><div class="cqmin">mín. ${x.min}</div></div>
       </div>
       <div class="cpills">
