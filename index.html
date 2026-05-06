@@ -831,6 +831,23 @@
       <div id="qrResult" style="font-size:13px;color:var(--muted);margin:16px 0;text-align:center">Apunta la cámara a un código QR...</div>
     </div>
     <div id="qrError" style="display:none;padding:16px;background:var(--red-light);border-radius:8px;color:var(--red);font-size:13px"></div>
+    <div class="qr-actions" id="qrActions" style="display:none">
+      <div class="qr-actions-head">
+        <div class="qr-actions-photo" id="qrActionsPhoto">📦</div>
+        <div>
+          <div class="qr-actions-title" id="qrActionsTitle"></div>
+          <div class="qr-actions-meta" id="qrActionsMeta"></div>
+        </div>
+      </div>
+      <div class="qr-actions-grid">
+        <button class="btn btn-p" onclick="qrQuickAction('open')">Abrir ficha</button>
+        <button class="btn btn-loan" id="qrActLoan" onclick="qrQuickAction('loan')">⌛ Prestar</button>
+        <button class="btn" id="qrActMaint" onclick="qrQuickAction('maintenance')" style="border-color:var(--amber);color:var(--amber)">🛠️ Mantenimiento</button>
+        <button class="btn" onclick="qrQuickAction('docs')">📌 Documentos</button>
+        <button class="btn btn-d" id="qrActDelete" onclick="qrQuickAction('delete')">🗑️ Baja</button>
+      </div>
+      <button class="mini-btn" onclick="qrResumeScan()">Escanear otro QR</button>
+    </div>
     <div class="mf" style="margin-top:16px">
       <button class="btn" onclick="closeQrScanner()">Cerrar</button>
     </div>

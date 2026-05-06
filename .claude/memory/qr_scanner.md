@@ -4,7 +4,7 @@ description: Escaneo QR live con getUserMedia + jsQR v1.4.0, botones en topbar y
 type: project
 ---
 
-Escaneo QR en tiempo real implementado 2026-05-06. Detecta códigos QR con la cámara para navegar a ítems del inventario.
+Escaneo QR en tiempo real implementado 2026-05-06. Detecta códigos QR con la cámara y muestra acciones rápidas del ítem escaneado.
 
 ## Stack
 - **Librería**: `jsQR` v1.4.0 desde CDN (index.html, sin `defer` para carga síncrona)
@@ -28,13 +28,14 @@ Escaneo QR en tiempo real implementado 2026-05-06. Detecta códigos QR con la c�
 3. `getUserMedia({ video: { facingMode: 'environment' } })` inicia cámara trasera
 4. `video.onloadedmetadata` → `video.play()` → `_startQrProcessing(video)`
 5. Loop en `requestAnimationFrame()` dibuja frames en canvas + jsQR detecta
-6. Si detecta patrón `item/[id]`: muestra toast, cierra modal, abre ítem automáticamente
+6. Si detecta patrón `item/[id]`: detiene la cámara y muestra acciones rápidas
 7. Si error: muestra en `#qrError` (librería no cargó, cámara denegada, etc.)
 
 ## Detalles técnicos
 - Canvas context: `{ willReadFrequently: true }` (optimización para lectura frecuente)
 - jsQR opciones: `{ inversionAttempts: 'attemptBoth' }` (detecta QR en luz clara/oscura)
 - Patrón QR: regex `item/([a-zA-Z0-9_-]+)` busca en datos QR
+- Acciones rápidas: abrir ficha, prestar, mantenimiento, documentos y baja
 - Modal abierto: requiere `classList.add('open')` NO `display:flex` (cambio reciente CSS)
 - Cierre modal: `classList.remove('open')` + parar tracks de stream
 
@@ -45,7 +46,7 @@ Escaneo QR en tiempo real implementado 2026-05-06. Detecta códigos QR con la c�
 
 ## Service Worker
 - Incluido en CACHE_SHELL (`sw.js`)
-- VERSION actual: v59
+- VERSION actual: v60
 - Cambios en `qr-scanner.js` requieren subir VERSION para forzar caché actualizado
 
 ## Gotchas solucionados (2026-05-06)

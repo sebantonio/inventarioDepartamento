@@ -66,7 +66,7 @@ config → state → roles → api → docs → search → home → inventory �
 
 ## PWA
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
-- sw.js: VERSION='v59', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
+- sw.js: VERSION='v60', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
 - `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
 - pwa.js: actualización automática tras 5 segundos o al hacer clic en notificación (SKIP_WAITING)
@@ -204,7 +204,8 @@ El modal tiene **dos pasos**:
 - `js/qr-scanner.js`:
   - `openQrScanner()` activa `getUserMedia` (cámara trasera `facingMode: 'environment'`)
   - `_startQrProcessing(video)` procesa frames en `requestAnimationFrame` con canvas + jsQR
-  - Detecta patrones `item/[a-zA-Z0-9_-]+` en datos QR y llama `openItemRoute(id)` automáticamente
+  - Detecta patrones `item/[a-zA-Z0-9_-]+` en datos QR, detiene la cámara y muestra acciones rápidas
+  - Acciones rápidas: abrir ficha, prestar, marcar mantenimiento, documentos y baja
   - `closeQrScanner()` detiene tracks de stream y cierra modal removiendo clase `'open'`
   - jsQR usa `inversionAttempts: 'attemptBoth'` para mejor detección en diferentes condiciones de luz
 - Modal muestra video en vivo; funciona en Android/tablets con cámara; iOS tiene restricciones en `getUserMedia`
@@ -231,7 +232,7 @@ El modal tiene **dos pasos**:
 - Módulo genérico "Departamento" disponible en todos los ítems (config.js CICLOS[4])
 - Importar CSV con mapeo de columnas
 - Documentación del departamento: iframe SharePoint + botón externo
-- PWA instalable, funciona offline (cache-first sw v59)
+- PWA instalable, funciona offline (cache-first sw v60)
 - Pantalla de carga animada (#loadOverlay) con logo + puntos rebotando
 - Barra de progreso animada #loadBar durante carga inicial
 - **Botón 🗑️ Dar de baja** como acción rápida en home hero y subheader pS (abre modal con buscador si no hay ítem previo)

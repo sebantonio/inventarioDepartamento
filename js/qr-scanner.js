@@ -1,21 +1,32 @@
 let _qrStream = null;
 let _qrScanning = false;
 let _qrProcessingFrame = false;
+let _qrDetectedItemId = null;
 
 function openQrScanner() {
   const modal = document.getElementById('mQrScanner');
   const content = document.getElementById('qrScannerContent');
   const error = document.getElementById('qrError');
   const result = document.getElementById('qrResult');
+  const actions = document.getElementById('qrActions');
+  const video = document.getElementById('qrVideo');
 
   modal.classList.add('open');
   content.style.display = 'block';
   error.style.display = 'none';
+  if(actions) actions.style.display = 'none';
+  _qrDetectedItemId = null;
   result.textContent = 'Apunta la cámara a un código QR...';
   result.style.color = 'var(--muted)';
-
-  const video = document.getElementById('qrVideo');
   _qrScanning = true;
+
+  if(!navigator.mediaDevices?.getUserMedia){
+    _qrScanning = false;
+    error.style.display = 'block';
+    content.style.display = 'none';
+    error.textContent = 'Este navegador no permite acceder a la cámara desde aquí.';
+    return;
+  }
 
   navigator.mediaDevices.getUserMedia({
     video: { facingMode: 'environment' },
@@ -43,11 +54,89 @@ function openQrScanner() {
 
 function closeQrScanner() {
   _qrScanning = false;
+  _stopQrStream();
+  document.getElementById('mQrScanner').classList.remove('open');
+}
+
+function _stopQrStream() {
   if (_qrStream) {
     _qrStream.getTracks().forEach(track => track.stop());
     _qrStream = null;
   }
-  document.getElementById('mQrScanner').classList.remove('open');
+  const video = document.getElementById('qrVideo');
+  if(video) video.srcObject = null;
+}
+
+function qrResumeScan() {
+  closeQrScanner();
+  setTimeout(openQrScanner, 120);
+}
+
+function _showQrActions(itemId) {
+  const item = items.find(x => Number(x.id) === Number(itemId));
+  const content = document.getElementById('qrScannerContent');
+  const actions = document.getElementById('qrActions');
+  const result = document.getElementById('qrResult');
+  if(!item){
+    result.textContent = 'QR detectado, pero el ítem no existe en los datos cargados.';
+    result.style.color = 'var(--red)';
+    return;
+  }
+
+  _qrDetectedItemId = item.id;
+  content.style.display = 'none';
+  actions.style.display = 'block';
+  document.getElementById('qrActionsTitle').textContent = `${item.ref ? item.ref + ' · ' : ''}${item.item}`;
+  const aula = AULAS.find(a => a.id === item.aula)?.name || item.aula || 'Sin aula';
+  const mod = findModulo(item.mod);
+  document.getElementById('qrActionsMeta').textContent = `${aula}${mod ? ' · ' + mod.name : ''} · Stock ${item.qty}`;
+  document.getElementById('qrActionsPhoto').innerHTML = item.foto ? `<img src="${item.foto}" alt="">` : '📦';
+
+  const loan = document.getElementById('qrActLoan');
+  if(loan) {
+    loan.disabled = !can('loans.write') || Number(item.qty) <= 0;
+    loan.title = Number(item.qty) <= 0 ? 'Sin stock disponible' : '';
+  }
+  const maint = document.getElementById('qrActMaint');
+  if(maint) maint.disabled = !can('items.write');
+  const del = document.getElementById('qrActDelete');
+  if(del) del.disabled = !can('items.write') && !can('items.delete');
+}
+
+function qrQuickAction(action) {
+  const id = _qrDetectedItemId;
+  if(!id) return;
+  if(action === 'open'){
+    closeQrScanner();
+    openItemRoute(id);
+    return;
+  }
+  if(action === 'loan'){
+    closeQrScanner();
+    openPrestar(id);
+    return;
+  }
+  if(action === 'docs'){
+    closeQrScanner();
+    openDocsModal(id);
+    return;
+  }
+  if(action === 'delete'){
+    closeQrScanner();
+    openDelModal(id);
+    return;
+  }
+  if(action === 'maintenance'){
+    if(!can('items.write')){ toast('No tienes permisos para editar mantenimiento','err'); return; }
+    closeQrScanner();
+    openItemRoute(id);
+    setTimeout(() => {
+      const chk = document.getElementById('f_mant');
+      if(chk && !chk.checked) chk.checked = true;
+      if(typeof toggleMaintFields === 'function') toggleMaintFields();
+      document.getElementById('f_mantNota')?.focus();
+    }, 50);
+  }
 }
 
 function _startQrProcessing(video) {
@@ -65,7 +154,6 @@ function _startQrProcessing(video) {
     }
 
     _qrProcessingFrame = true;
-
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -78,26 +166,14 @@ function _startQrProcessing(video) {
     const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'attemptBoth' });
 
     if (code) {
-      const data = code.data;
-      const itemMatch = data.match(/item\/([a-zA-Z0-9_-]+)/);
-
+      const itemMatch = code.data.match(/item\/([a-zA-Z0-9_-]+)/);
       if (itemMatch) {
         const itemId = itemMatch[1];
         _qrScanning = false;
-
         document.getElementById('qrResult').textContent = 'QR detectado: ' + itemId;
         document.getElementById('qrResult').style.color = 'var(--green)';
-
-        if (_qrStream) {
-          _qrStream.getTracks().forEach(track => track.stop());
-          _qrStream = null;
-        }
-
-        setTimeout(() => {
-          closeQrScanner();
-          openItemRoute(itemId);
-        }, 300);
-
+        _stopQrStream();
+        _showQrActions(itemId);
         _qrProcessingFrame = false;
         return;
       }
