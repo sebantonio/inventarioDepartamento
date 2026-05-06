@@ -3,15 +3,27 @@
 // ═════════════════════════════════════════════════════════
 
 // Construye URL con credenciales para GET
-function urlWithAuth(action){
+function urlWithAuth(action, params={}){
   const u = encodeURIComponent(SESSION?.usuario||'');
   const p = encodeURIComponent(SESSION?.password||'');
   const sep = API_URL.includes('?') ? '&' : '?';
-  return `${API_URL}${sep}u=${u}&p=${p}${action?'&action='+action:''}`;
+  let url = `${API_URL}${sep}u=${u}&p=${p}`;
+  if (action) url += `&action=${encodeURIComponent(action)}`;
+  for (const [key, val] of Object.entries(params)) {
+    if (val != null) url += `&${encodeURIComponent(key)}=${encodeURIComponent(val)}`;
+  }
+  return url;
 }
 
-async function apiGet(action){
-  const r = await fetch(urlWithAuth(action));
+async function apiGet(action, params={}){
+  let actionStr = action;
+  let paramsObj = params;
+  if (typeof action === 'object') {
+    actionStr = action.action || '';
+    paramsObj = { ...action };
+    delete paramsObj.action;
+  }
+  const r = await fetch(urlWithAuth(actionStr, paramsObj));
   if(!r.ok) throw new Error('HTTP '+r.status);
   return await r.json();
 }
