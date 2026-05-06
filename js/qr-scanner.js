@@ -1,77 +1,82 @@
+let _qrStream = null;
+let _qrScanning = false;
+
 function openQrScanner() {
-  document.getElementById('qr_cam_input').click();
+  const modal = document.getElementById('mQrScanner');
+  const content = document.getElementById('qrScannerContent');
+  const error = document.getElementById('qrError');
+
+  modal.style.display = 'flex';
+  content.style.display = 'block';
+  error.style.display = 'none';
+
+  const video = document.getElementById('qrVideo');
+  _qrScanning = true;
+
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment' }
+  }).then(stream => {
+    _qrStream = stream;
+    video.srcObject = stream;
+    video.play().catch(e => console.error('play error:', e));
+    setTimeout(() => _startQrScan(video), 500);
+  }).catch(err => {
+    _qrScanning = false;
+    error.style.display = 'block';
+    content.style.display = 'none';
+    error.textContent = 'Error: ' + (err.name === 'NotAllowedError' ? 'Permiso denegado' : err.message);
+  });
 }
 
-function processQrCapture(files) {
-  if (!files || !files.length) return;
+function closeQrScanner() {
+  _qrScanning = false;
+  if (_qrStream) {
+    _qrStream.getTracks().forEach(t => t.stop());
+    _qrStream = null;
+  }
+  document.getElementById('mQrScanner').style.display = 'none';
+}
 
-  const file = files[0];
-  const reader = new FileReader();
+function _startQrScan(video) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
 
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
+  function scan() {
+    if (!_qrScanning) return;
 
-      canvas.width = img.width;
-      canvas.height = img.height;
-      context.drawImage(img, 0, 0);
-
-      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-      if (typeof jsQR === 'undefined') {
-        toast('jsQR no está disponible');
+    try {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      if (canvas.width === 0) {
+        requestAnimationFrame(scan);
         return;
       }
 
-      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      ctx.drawImage(video, 0, 0);
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-      if (code && code.data) {
-        const data = code.data;
-        console.log('[QR] Detectado:', data);
-
-        let itemId = null;
-        // Buscar #item/<id>
-        let match = data.match(/#item\/([^\/?]+)/);
-        if (match) itemId = match[1];
-        // Buscar item/<id> sin #
-        if (!itemId) {
-          match = data.match(/item\/([^\/?]+)/);
-          if (match) itemId = match[1];
-        }
-        // Buscar solo el ID si la URL completa contiene /item/
-        if (!itemId && data.includes('/item/')) {
-          match = data.match(/\/item\/([a-zA-Z0-9_-]+)/);
-          if (match) itemId = match[1];
-        }
-
-        if (itemId) {
-          console.log('[QR] ID extraído:', itemId);
-          toast('✅ QR detectado: ' + itemId);
-          setTimeout(() => openItemRoute(itemId), 300);
-          return;
-        } else {
-          console.log('[QR] Dato detectado pero no es un QR de ítem');
-          toast('⚠️ QR detectado pero no es de un ítem. Contenido: ' + data.substring(0, 50));
-          return;
+      if (typeof jsQR !== 'undefined') {
+        const code = jsQR(imgData.data, imgData.width, imgData.height);
+        if (code && code.data) {
+          const match = code.data.match(/item\/([a-zA-Z0-9_-]+)/);
+          if (match) {
+            _qrScanning = false;
+            toast('✅ QR detectado');
+            _qrStream.getTracks().forEach(t => t.stop());
+            setTimeout(() => {
+              closeQrScanner();
+              openItemRoute(match[1]);
+            }, 200);
+            return;
+          }
         }
       }
+    } catch (e) {
+      console.error('scan error:', e);
+    }
 
-      console.log('[QR] No se detectó ningún QR');
-      toast('❌ No se detectó código QR. Asegúrate de que sea un QR válido y clara la foto.');
-    };
+    requestAnimationFrame(scan);
+  }
 
-    img.onerror = () => {
-      toast('Error al procesar la imagen');
-    };
-
-    img.src = e.target.result;
-  };
-
-  reader.onerror = () => {
-    toast('Error al leer la imagen');
-  };
-
-  reader.readAsDataURL(file);
+  scan();
 }
