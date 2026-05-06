@@ -118,6 +118,10 @@ function renderPager(mc,page){
 }
 
 function th2(k,l){const i=k===sk?(sa?'▲':'▼'):'↕';return`<th onclick="sort('${k}')" class="${k===sk?'srt':''}">${l} <span style="font-size:9px;opacity:.6">${i}</span></th>`}
+function shortText(v,max=15){
+  const s = String(v || '');
+  return s.length > max ? s.slice(0, max - 1) + '…' : s;
+}
 
 function rTable(data,mc){
   mc.innerHTML=`<div class="tw"><div class="tw-scroll"><table>
@@ -139,7 +143,7 @@ function rTable(data,mc){
         <td>${x.cat?`<span class="cpill" style="background:${cat.bg};color:${cat.c}">${cat.i} ${x.cat}</span>`:'—'}</td>
         <td style="color:var(--muted);font-size:12px" title="${x.loc}">${x.loc||'—'}</td>
         <td>${x.est?`<span class="edot"><span class="dot" style="background:${ec}"></span>${x.est}</span>`:'—'}</td>
-        <td style="color:var(--muted);font-size:12px" title="${mantInfo || x.util || ''}">${mant?`🛠️ ${mantInfo || ''} `:''}${x.util||'—'}</td>
+        <td style="color:var(--muted);font-size:12px" title="${mantInfo || x.util || ''}">${mant?`🛠️ ${shortText(mantInfo)} `:''}${shortText(x.util)||'—'}</td>
         <td><div style="display:flex;gap:6px">
           <button class="btn btn-sm" onclick="openModal(${x.id})" title="Editar">✏️</button>
           <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">⧉</button>
@@ -182,7 +186,7 @@ function rCards(data,mc){
       <div class="cfg">
         <div><div class="cfl">Aula</div><div class="cfv">${AULAS.find(a=>a.id===x.aula)?.name||x.aula}</div></div>
         <div><div class="cfl">Ubicación</div><div class="cfv">${x.loc||'—'}</div></div>
-        <div><div class="cfl">Utilidad</div><div class="cfv" style="font-size:11px">${x.util||'—'}</div></div>
+        <div><div class="cfl">Utilidad</div><div class="cfv" style="font-size:11px" title="${x.util||''}">${shortText(x.util)||'—'}</div></div>
         <div><div class="cfl">Revisión</div><div class="cfv" style="font-family:var(--mono);font-size:11px">${x.fecha||'—'}</div></div>
       </div>
       ${mant?`<div class="maint-note">
