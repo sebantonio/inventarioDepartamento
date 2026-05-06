@@ -50,6 +50,7 @@ function renderInv(){
 }
 
 let _lastInvRenderMode = null;
+let _cardsRenderJob = 0;
 function getInvRenderMode(){
   return (view==='table' && window.innerWidth > 640) ? 'table' : 'cards';
 }
@@ -57,6 +58,7 @@ function getInvRenderMode(){
 function th2(k,l){const i=k===sk?(sa?'▲':'▼'):'↕';return`<th onclick="sort('${k}')" class="${k===sk?'srt':''}">${l} <span style="font-size:9px;opacity:.6">${i}</span></th>`}
 
 function rTable(data,mc){
+  _cardsRenderJob++;
   mc.innerHTML=`<div class="tw"><div class="tw-scroll"><table>
     <thead><tr>${th2('ref','Ref.')}${th2('aula','Aula')}${th2('item','Ítem')}${th2('qty','Cant.')}<th>Mín.</th>${th2('cat','Categoría')}${th2('loc','Ubicación')}${th2('est','Estado')}${th2('util','Utilidad')}<th>Acciones</th></tr></thead>
     <tbody>${data.map(x=>{
@@ -89,10 +91,9 @@ function rTable(data,mc){
   </table></div></div>`;
 }
 
-function rCards(data,mc){
-  mc.innerHTML=`<div class="cgrid">${data.map(x=>{
-    const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280',mod=findModulo(x.mod);
-    return`<div class="icard${low?' low':''}">
+function cardHtml(x){
+  const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280',mod=findModulo(x.mod);
+  return`<div class="icard${low?' low':''}">
       <div class="ch">
         <div><div class="cname">${x.item}</div><div class="cref">${x.ref||''}</div></div>
         <div class="cqbox"><div class="cqbig" style="color:${low?'var(--red)':'var(--green)'}">${x.qty}</div><div class="cqmin">mín. ${x.min}</div></div>
@@ -118,7 +119,25 @@ function rCards(data,mc){
         <button class="btn btn-sm btn-d" onclick="openDelModal(${x.id})" title="Baja / Eliminar">🗑️</button>
       </div>
     </div>`;
-  }).join('')}</div>`;
+}
+
+function rCards(data,mc){
+  const job = ++_cardsRenderJob;
+  mc.innerHTML='<div class="cgrid"></div>';
+  const grid = mc.querySelector('.cgrid');
+  const chunkSize = window.innerWidth <= 900 ? 24 : data.length;
+  let idx = 0;
+
+  function addChunk(){
+    if(job !== _cardsRenderJob) return;
+    const end = Math.min(idx + chunkSize, data.length);
+    let html = '';
+    for(; idx < end; idx++) html += cardHtml(data[idx]);
+    grid.insertAdjacentHTML('beforeend', html);
+    if(idx < data.length) requestAnimationFrame(addChunk);
+  }
+
+  addChunk();
 }
 
 function sv(v){view=v;document.getElementById('vT').classList.toggle('on',v==='table');document.getElementById('vC').classList.toggle('on',v==='cards');renderInv()}
