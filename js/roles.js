@@ -92,7 +92,7 @@ function applyRoleUI(){
     ['btnImp', 'import.write'],
     ['btnPres', 'loans.write'],
     ['btnPed', 'orders.write'],
-    ['btnQr', null]
+    ['gsQr', null]
   ];
   rules.forEach(([id, permission]) => {
     const el = document.getElementById(id);
