@@ -38,7 +38,7 @@ Reglas importantes:
 - Tablets/dispositivos tactiles: forzar vista tarjetas. `getInvRenderMode()` devuelve `cards` si `(hover:none)` o `(pointer:coarse)`; CSS oculta `.vtog` y `.tw`.
 - Modo tactil compacto: una columna de tarjetas, `topbar` sin `sticky`, paginas sin `min-height`, cards sin sombra, home grids a 2 columnas, primera carga de inventario a 10 items/pagina salvo eleccion manual del usuario.
 - En tactiles se eliminan efectos visuales secundarios: animaciones/transiciones globales, sombras, filtros, `backdrop-filter`, transforms indirectos y degradados pesados en elementos principales.
-- `sw.js` subido a `VERSION='v24'` para forzar cache nueva de PWA.
+- `sw.js` actualmente en `VERSION='v59'`; subir `VERSION` tras cambios de CSS/JS para forzar cache nueva de PWA.
 - 2026-05-06: en tablets/tactiles se permite solo la animacion inicial del `#loadOverlay` con version ligera (`lo-pulse-lite` por transform/opacidad). Mantener desactivadas las animaciones/transiciones de tarjetas/listados/botones del inventario para evitar lag.
 
 ## QR por item - 2026-05-06
@@ -109,6 +109,7 @@ Helper:
 
 Acciones registradas:
 - `add`, `update`, `delete`, `bulkImport`
+- `restoreBackup`, `stockAlert`, `getItemLog`
 - `profAdd`, `profUpdate`, `profDelete`
 - `aulasSync`, `catsSync`, `ciclosSync`
 - `prestar`, `devolver`

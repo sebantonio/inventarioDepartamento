@@ -66,7 +66,7 @@ config → state → roles → api → docs → search → home → inventory �
 
 ## PWA
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
-- sw.js: VERSION='v56', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
+- sw.js: VERSION='v59', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
 - `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
 - pwa.js: actualización automática tras 5 segundos o al hacer clic en notificación (SKIP_WAITING)
@@ -231,7 +231,7 @@ El modal tiene **dos pasos**:
 - Módulo genérico "Departamento" disponible en todos los ítems (config.js CICLOS[4])
 - Importar CSV con mapeo de columnas
 - Documentación del departamento: iframe SharePoint + botón externo
-- PWA instalable, funciona offline (cache-first sw v24)
+- PWA instalable, funciona offline (cache-first sw v59)
 - Pantalla de carga animada (#loadOverlay) con logo + puntos rebotando
 - Barra de progreso animada #loadBar durante carga inicial
 - **Botón 🗑️ Dar de baja** como acción rápida en home hero y subheader pS (abre modal con buscador si no hay ítem previo)

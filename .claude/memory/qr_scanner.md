@@ -44,9 +44,9 @@ Escaneo QR en tiempo real implementado 2026-05-06. Detecta códigos QR con la c�
 - **Escritorio**: funciona con cámara integrada
 
 ## Service Worker
-- Incluido en CACHE_SHELL (sw.js línea 39)
-- VERSION: v56 (actualizado 2026-05-06)
-- Cambios en qr-scanner.js requieren subir VERSION para forzar caché actualizado
+- Incluido en CACHE_SHELL (`sw.js`)
+- VERSION actual: v59
+- Cambios en `qr-scanner.js` requieren subir VERSION para forzar caché actualizado
 
 ## Gotchas solucionados (2026-05-06)
 - ❌ qr-scanner.min.js lanzaba "Unexpected token 'export'" (ES module incompatible)

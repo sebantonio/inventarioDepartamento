@@ -18,19 +18,20 @@ originSessionId: 97fd2f19-db29-4e74-997b-cfdd7054b186
 - `api.js` — apiGet(), apiPost(), urlWithAuth()
 - `auth.js` — doLogin(), logout(), showUserChip(), loadData(), DOMContentLoaded init
 - `nav.js` — goHome(), goAula(), goCat(), openCiclo(), goMod(), openSub(), hash routing, toggleMobMenu(), closeMobMenu()
-- `inventory.js` — renderInv(), rTable(), rCards(), sv(), sort(), exportCSV(), printInv()
+- `inventory.js` — renderInv(), rTable(), rCards(), sv(), sort(), openExportModal(), exportCSV(), exportAllItemsCSV(), exportFullBackup(), printInv()
 - `home.js` — renderHome()
 - `search.js` — búsqueda global
 - `modal-item.js` — openModal(), saveItem(), closeM(), togglePedido() (envía email al añadir)
 - `modal-aulas.js` — gestión aulas
 - `modal-cats.js` — gestión categorías
 - `prestamos.js` — goPrestamos(), openPrestar(), confirmPrestar(), devolver; pres incluye moduloCod+moduloNombre
-- `import.js` — importación CSV masiva
+- `import.js` — importación CSV masiva y restauración selectiva de backup JSON (`restoreBackupJson()`)
 - `docs.js` — documentos adjuntos a ítems + modal independiente openDocsModal()/closeDocsModal()/saveDocsModal()
 - `docs-dpto.js` — página documentación departamento
 - `pwa.js` — service worker, instalación PWA
 - `profile.js` — goProfile(), saveProfile(), doChangePassword()
 - `reset.js` — showRecovery(), requestReset(), showResetPage(), doResetPassword(), goBackToLogin()
+- `qr-scanner.js` — openQrScanner(), closeQrScanner(), escaneo con jsQR
 
 **Páginas (divs .page en index.html):**
 - `pLogin` — login (con vista recoveryForm para recuperar contraseña)
@@ -77,6 +78,9 @@ originSessionId: 97fd2f19-db29-4e74-997b-cfdd7054b186
 - `getDocs`, `uploadDoc`, `deleteDoc` — documentos Drive
 - `updateProfile`, `changePassword` — perfil usuario
 - `notificarPedido` — email al Jefe Departamento al añadir ítem a lista de compra
+- `restoreBackup` — restaura secciones seleccionadas de backup JSON
+- `getItemLog` — historial visual del ítem
+- `stockAlert` — registro de alerta de stock bajo
 - `resetPassword` — sin autenticación (antes de verificarLogin)
 
 **Restricciones del Workspace educativo:**

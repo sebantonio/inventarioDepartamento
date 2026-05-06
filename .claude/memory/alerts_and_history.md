@@ -4,7 +4,7 @@ description: Alertas automáticas por stock bajo y modal de historial de cambios
 type: project
 originSessionId: da5a826b-54a5-4fb6-842d-dc5adc382f11
 ---
-Implementadas 2026-05-07. Alertas de stock bajo envían email automático al responsable del módulo cuando qty cruza el umbral mínimo. Historial visual muestra tabla de cambios por ítem.
+Implementadas 2026-05-06. Alertas de stock bajo envían email automático al responsable del módulo cuando qty cruza el umbral mínimo. Historial visual muestra tabla de cambios por ítem.
 
 ## Alertas de stock bajo
 
