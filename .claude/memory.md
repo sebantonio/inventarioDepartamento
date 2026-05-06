@@ -31,10 +31,10 @@ Reglas importantes:
 - Problema detectado: en algunos moviles/tablets el inventario en tarjetas se quedaba con lag o no desplazaba bien.
 - Causa principal probable: `resize` renderizaba todo el inventario mientras el navegador movil cambiaba la altura visible al ocultar/mostrar su barra durante el scroll.
 - Solucion aplicada: `js/inventory.js` solo re-renderiza en `resize` si cambia el modo real tabla/tarjetas.
-- Solucion adicional: tarjetas en movil/tablet muestran 48 iniciales y boton "Ver mas"; no usar render por tandas con `requestAnimationFrame`, empeoro el pintado en Chrome/Edge/Firefox.
+- Solucion adicional: listado de inventario paginado en tabla y tarjetas. Valor inicial 25 items/pagina; selector disponible 10, 25, 30 y 50. No usar render por tandas con `requestAnimationFrame`, empeoro el pintado en Chrome/Edge/Firefox.
 - CSS movil/tablet: tarjetas y botones sin animaciones/transiciones/transform hover pesados en <=900px; sombras reducidas.
 - No usar `contain: layout paint` en `.icard`: en Chrome/Edge/Firefox movil puede provocar tarjetas en blanco que aparecen al desplazar.
-- `sw.js` subido a `VERSION='v10'` para forzar cache nueva de PWA.
+- `sw.js` subido a `VERSION='v11'` para forzar cache nueva de PWA.
 
 ## Iconos y acciones combinadas - actualizado 2026-05-06
 

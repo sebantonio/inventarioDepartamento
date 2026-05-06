@@ -46,17 +46,20 @@ function renderInv(){
   if(!data.length){mc.innerHTML=`<div class="empty"><div class="ei">🔍</div><div class="et">No hay ítems con estos filtros.</div></div>`;return}
   const mode = getInvRenderMode();
   _lastInvRenderMode = mode;
-  mode === 'table' ? rTable(data,mc) : rCards(data,mc);
+  const page = getInvPage(data);
+  mode === 'table' ? rTable(page.items,mc) : rCards(page.items,mc);
+  renderPager(mc,page);
 }
 
 let _lastInvRenderMode = null;
-let _cardLimit = 48;
-let _cardSig = '';
+let _invPage = 1;
+let _pageSize = 25;
+let _pageSig = '';
 function getInvRenderMode(){
   return (view==='table' && window.innerWidth > 640) ? 'table' : 'cards';
 }
 
-function getCardSig(data){
+function getPageSig(data){
   return [
     cf?.type, cf?.id,
     document.getElementById('srch')?.value || '',
@@ -65,6 +68,45 @@ function getCardSig(data){
     sk, sa ? '1' : '0',
     data.length
   ].join('|');
+}
+
+function getInvPage(data){
+  const sig = getPageSig(data);
+  if(sig !== _pageSig){
+    _pageSig = sig;
+    _invPage = 1;
+  }
+  const totalPages = Math.max(1, Math.ceil(data.length / _pageSize));
+  _invPage = Math.min(Math.max(1, _invPage), totalPages);
+  const start = (_invPage - 1) * _pageSize;
+  const end = Math.min(start + _pageSize, data.length);
+  return {
+    items: data.slice(start, end),
+    start,
+    end,
+    total: data.length,
+    page: _invPage,
+    totalPages
+  };
+}
+
+function renderPager(mc,page){
+  mc.insertAdjacentHTML('beforeend',`
+    <div class="pager">
+      <div class="pager-info">Mostrando ${page.start+1}-${page.end} de ${page.total}</div>
+      <div class="pager-controls">
+        <button class="btn btn-sm" onclick="goInvPage(${page.page-1})" ${page.page<=1?'disabled':''}>‹ Anterior</button>
+        <span class="pager-page">Página ${page.page} / ${page.totalPages}</span>
+        <button class="btn btn-sm" onclick="goInvPage(${page.page+1})" ${page.page>=page.totalPages?'disabled':''}>Siguiente ›</button>
+        <label class="pager-size">
+          <span>Ítems</span>
+          <select onchange="setPageSize(this.value)">
+            ${[10,25,30,50].map(n=>`<option value="${n}" ${n===_pageSize?'selected':''}>${n}</option>`).join('')}
+          </select>
+        </label>
+      </div>
+    </div>
+  `);
 }
 
 function th2(k,l){const i=k===sk?(sa?'▲':'▼'):'↕';return`<th onclick="sort('${k}')" class="${k===sk?'srt':''}">${l} <span style="font-size:9px;opacity:.6">${i}</span></th>`}
@@ -103,15 +145,7 @@ function rTable(data,mc){
 }
 
 function rCards(data,mc){
-  const mobile = window.innerWidth <= 900;
-  const sig = getCardSig(data);
-  if(sig !== _cardSig){
-    _cardSig = sig;
-    _cardLimit = 48;
-  }
-  const visible = mobile ? data.slice(0, _cardLimit) : data;
-  const more = mobile && visible.length < data.length;
-  mc.innerHTML=`<div class="cgrid">${visible.map(x=>{
+  mc.innerHTML=`<div class="cgrid">${data.map(x=>{
     const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280',mod=findModulo(x.mod);
     return`<div class="icard${low?' low':''}">
       <div class="ch">
@@ -139,7 +173,7 @@ function rCards(data,mc){
         <button class="btn btn-sm btn-d" onclick="openDelModal(${x.id})" title="Baja / Eliminar">🗑️</button>
       </div>
     </div>`;
-  }).join('')}</div>${more?`<div class="more-wrap"><button class="btn" onclick="moreCards()">Ver ${Math.min(48,data.length-visible.length)} más (${visible.length}/${data.length})</button></div>`:''}`;
+  }).join('')}</div>`;
 }
 
 function sv(v){view=v;document.getElementById('vT').classList.toggle('on',v==='table');document.getElementById('vC').classList.toggle('on',v==='cards');renderInv()}
@@ -149,7 +183,8 @@ window.addEventListener('resize',()=>{
   if(nextMode !== _lastInvRenderMode) renderInv();
 });
 function sort(k){if(sk===k)sa=!sa;else{sk=k;sa=true}renderInv()}
-function moreCards(){_cardLimit += 48; renderInv()}
+function goInvPage(page){_invPage=page;renderInv();document.getElementById('pS')?.scrollIntoView({block:'start'})}
+function setPageSize(v){_pageSize=Number(v)||25;_invPage=1;renderInv()}
 
 let _delItemId = null;
 function openDelModal(itemId){
