@@ -638,6 +638,14 @@ textarea.fi-w{resize:vertical;min-height:60px}
 .docs-link{display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;color:var(--accent);font-size:13px;font-weight:600;border-radius:8px;transition:background .12s}
 .docs-link:hover{background:var(--accent-l)}
 .docs-link-arrow{color:var(--muted);font-weight:700;font-size:12px}
+.qr-panel{display:flex;gap:16px;align-items:center;border:1px solid var(--border);border-radius:12px;background:var(--surface2);padding:14px}
+.qr-img{width:148px;height:148px;flex:0 0 auto;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:8px;object-fit:contain}
+.qr-info{min-width:0;flex:1}
+.qr-title{font-weight:800;font-size:14px;margin-bottom:6px}
+.qr-url{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.45;overflow-wrap:anywhere;margin-bottom:12px}
+.qr-actions{display:flex;gap:8px;flex-wrap:wrap}
+.item-readonly .fi-w,.item-readonly select,.item-readonly textarea{background:var(--surface2);color:var(--muted)}
+.item-readonly .doc-drop,.item-readonly .dx,.item-readonly #btnSave{display:none!important}
 
 @media(max-width:640px){
   /* ── TOPBAR ── */
@@ -702,6 +710,9 @@ textarea.fi-w{resize:vertical;min-height:60px}
   .docs-card{padding:14px}
   .docs-card-icon{font-size:24px}
   .docs-card-title{font-size:13px}
+  .qr-panel{align-items:flex-start;gap:12px}
+  .qr-img{width:112px;height:112px;padding:6px}
+  .qr-actions .btn{flex:1 1 140px;justify-content:center}
 
   /* ── TOASTS ── */
   .toasts{bottom:16px;right:12px;left:12px}

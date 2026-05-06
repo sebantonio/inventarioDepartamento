@@ -356,6 +356,21 @@
       <div><label class="fl">Utilidad</label><input class="fi-w" id="f_util" placeholder="Para qué se usa"></div>
       <div><label class="fl">Última revisión</label><input class="fi-w" id="f_fecha" type="date"></div>
       <div class="full"><label class="fl">Observaciones</label><textarea class="fi-w" id="f_obs" placeholder="Notas, proveedor, nº serie..."></textarea></div>
+      <div class="full" id="itemQrBox" style="display:none">
+        <hr class="docs-sep">
+        <div class="docs-lbl">▦ Código QR del ítem</div>
+        <div class="qr-panel">
+          <img id="itemQrImg" class="qr-img" alt="Código QR del ítem">
+          <div class="qr-info">
+            <div class="qr-title" id="itemQrTitle"></div>
+            <div class="qr-url" id="itemQrUrl"></div>
+            <div class="qr-actions">
+              <button type="button" class="btn" onclick="copyItemQrUrl()">📋 Copiar enlace</button>
+              <button type="button" class="btn btn-p" onclick="printItemQr()">🖨️ Imprimir QR</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="full">
         <hr class="docs-sep">
         <div class="docs-lbl">📎 Documentación adjunta</div>

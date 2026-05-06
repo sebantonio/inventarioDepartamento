@@ -38,7 +38,13 @@ Reglas importantes:
 - Tablets/dispositivos tactiles: forzar vista tarjetas. `getInvRenderMode()` devuelve `cards` si `(hover:none)` o `(pointer:coarse)`; CSS oculta `.vtog` y `.tw`.
 - Modo tactil compacto: una columna de tarjetas, `topbar` sin `sticky`, paginas sin `min-height`, cards sin sombra, home grids a 2 columnas, primera carga de inventario a 10 items/pagina salvo eleccion manual del usuario.
 - En tactiles se eliminan efectos visuales secundarios: animaciones/transiciones globales, sombras, filtros, `backdrop-filter`, transforms indirectos y degradados pesados en elementos principales.
-- `sw.js` subido a `VERSION='v16'` para forzar cache nueva de PWA.
+- `sw.js` subido a `VERSION='v17'` para forzar cache nueva de PWA.
+
+## QR por item - 2026-05-06
+
+- Modal de item muestra bloque QR solo en items existentes, porque los nuevos aun no tienen `id`.
+- URL generada: `#item/<id>`. Al abrir esa ruta, `openItemRoute(id)` carga el aula del item y abre su modal.
+- Si se abre con usuario sin permiso `items.write`, el modal queda en modo lectura y oculta Guardar/subida/borrado de documentos.
 
 ## Iconos y acciones combinadas - actualizado 2026-05-06
 

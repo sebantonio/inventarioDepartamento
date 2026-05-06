@@ -15,11 +15,57 @@ function updateModSelect(){
   sel.innerHTML='<option value="">Sin asignar</option>'+c.modulos.map(m=>`<option value="${cId}__${m.cod}">${m.cod} — ${m.name}</option>`).join('');
 }
 
+function itemUrl(id){
+  const base = location.protocol.startsWith('http')
+    ? location.origin + location.pathname.replace(/index\.html$/,'')
+    : 'https://inventariodepartamento.pages.dev/';
+  return base.replace(/#.*$/,'') + '#item/' + encodeURIComponent(id);
+}
+
+function qrSrc(text, size=220){
+  return 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size +
+    '&margin=10&data=' + encodeURIComponent(text);
+}
+
+function escHtml(v){
+  return String(v ?? '').replace(/[&<>"']/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[ch]));
+}
+
+function renderItemQr(item){
+  const box = document.getElementById('itemQrBox');
+  if(!box) return;
+  if(!item?.id){
+    box.style.display = 'none';
+    return;
+  }
+  const url = itemUrl(item.id);
+  box.style.display = '';
+  document.getElementById('itemQrImg').src = qrSrc(url);
+  document.getElementById('itemQrTitle').textContent = `${item.ref ? item.ref+' · ' : ''}${item.item}`;
+  document.getElementById('itemQrUrl').textContent = url;
+}
+
+function setItemModalReadonly(readonly){
+  const modal = document.querySelector('#mItem .modal');
+  modal?.classList.toggle('item-readonly', !!readonly);
+  ['f_ref','f_aula','f_item','f_qty','f_min','f_cat','f_ciclo','f_mod','f_loc','f_est','f_util','f_fecha','f_obs']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.disabled = !!readonly;
+    });
+}
+
 function openModal(id=null, src=null){
-  if(!requirePerm('items.write')) return;
+  const existing = id !== null && id !== undefined;
+  if(!existing && !requirePerm('items.write')) return;
+  if(existing && !SESSION) return;
   eid=id; fillModalSelects();
-  const m = id ? items.find(x=>x.id===id) : src;
-  document.getElementById('mT').textContent = id ? 'Editar ítem' : src ? '📋 Duplicar ítem' : 'Nuevo ítem';
+  const m = existing ? items.find(x=>Number(x.id)===Number(id)) : src;
+  if(existing && !m) return;
+  const readonly = existing && !can('items.write');
+  document.getElementById('mT').textContent = existing ? (readonly ? 'Ver ítem' : 'Editar ítem') : src ? '📋 Duplicar ítem' : 'Nuevo ítem';
   document.getElementById('f_ref').value = id ? (m?.ref||'') : '';
   document.getElementById('f_aula').value=m?.aula||(cf?.type==='aula'?cf.id:AULAS[0]?.id);
   document.getElementById('f_item').value=m?.item||'';
@@ -36,6 +82,8 @@ function openModal(id=null, src=null){
   document.getElementById('f_fecha').value=m?.fecha||new Date().toISOString().split('T')[0];
   document.getElementById('f_obs').value=m?.obs||'';
   initDocSection(id);
+  renderItemQr(existing ? m : null);
+  setItemModalReadonly(readonly);
   document.getElementById('mItem').classList.add('open');
 }
 
@@ -54,7 +102,53 @@ function _autoRef(name){
   const nums = items.filter(x=>x.id!==eid).map(x=>x.ref||'').filter(r=>pat.test(r)).map(r=>parseInt(r.split('-')[1])||0);
   return cap + '-' + (nums.length ? Math.max(...nums)+1 : 1);
 }
-function closeM(){document.getElementById('mItem').classList.remove('open')}
+function closeM(){document.getElementById('mItem').classList.remove('open');setItemModalReadonly(false)}
+
+async function copyItemQrUrl(){
+  const url = document.getElementById('itemQrUrl')?.textContent || '';
+  if(!url) return;
+  try{
+    await navigator.clipboard.writeText(url);
+    toast('Enlace del ítem copiado','ok');
+  }catch(e){
+    prompt('Copia el enlace del ítem:', url);
+  }
+}
+
+function printItemQr(){
+  if(!eid) return;
+  const it = items.find(x=>Number(x.id)===Number(eid));
+  if(!it) return;
+  const url = itemUrl(it.id);
+  const aula = AULAS.find(a=>a.id===it.aula)?.name || it.aula || '';
+  const mod = findModulo(it.mod);
+  const title = `${it.ref ? it.ref + ' · ' : ''}${it.item}`;
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  <title>QR ${escHtml(it.ref || it.item)}</title>
+  <style>
+    @page{size:80mm 55mm;margin:6mm}
+    body{font-family:Arial,sans-serif;margin:0;color:#111}
+    .label{display:flex;gap:12px;align-items:center}
+    img{width:132px;height:132px}
+    h1{font-size:15px;margin:0 0 5px;line-height:1.2}
+    .meta{font-size:11px;line-height:1.35;color:#333}
+    .url{font-size:8px;line-height:1.25;color:#666;margin-top:7px;word-break:break-all}
+  </style></head><body>
+    <div class="label">
+      <img src="${qrSrc(url,260)}" alt="QR">
+      <div>
+        <h1>${escHtml(title)}</h1>
+        <div class="meta">${escHtml(aula)}${mod ? '<br>' + escHtml(mod.cod + ' · ' + mod.name) : ''}</div>
+        <div class="url">${escHtml(url)}</div>
+      </div>
+    </div>
+    <script>const img=document.querySelector('img');img.onload=()=>setTimeout(()=>print(),100);<\/script>
+  </body></html>`;
+  const w = window.open('','_blank');
+  if(!w){ toast('El navegador ha bloqueado la ventana de impresión','err'); return; }
+  w.document.write(html);
+  w.document.close();
+}
 
 async function saveItem(){
   const name=document.getElementById('f_item').value.trim();

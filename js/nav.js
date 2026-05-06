@@ -134,6 +134,16 @@ function openSub(){
   show('pS'); renderInv(); renderSubStats(all,low);
 }
 
+function openItemRoute(id){
+  const item = items.find(x=>Number(x.id)===Number(id));
+  if(!item){ goHome(); toast('Ítem no encontrado','err'); return; }
+  const aula = AULAS.find(a=>a.id===item.aula);
+  cf = {type:'aula', id:item.aula, label:aula?.name || item.aula, icon:aula?.icon || '📦'};
+  currentCiclo = null;
+  openSub();
+  openModal(item.id);
+}
+
 // ─── HASH ROUTING ─────────────────────────────────────────
 function navigateFromHash(hash){
   if(!hash || hash === '#' || hash === '#home') { goHome(); return; }
@@ -148,6 +158,7 @@ function navigateFromHash(hash){
   if(seg === 'cat'  && id) { goCat(id); return; }
   if(seg === 'ciclo'&& id) { openCiclo(id); return; }
   if(seg === 'mod'  && id) { goMod(id); return; }
+  if(seg === 'item' && id) { openItemRoute(id); return; }
   goHome();
 }
 
