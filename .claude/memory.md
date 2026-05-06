@@ -38,7 +38,7 @@ Reglas importantes:
 - Tablets/dispositivos tactiles: forzar vista tarjetas. `getInvRenderMode()` devuelve `cards` si `(hover:none)` o `(pointer:coarse)`; CSS oculta `.vtog` y `.tw`.
 - Modo tactil compacto: una columna de tarjetas, `topbar` sin `sticky`, paginas sin `min-height`, cards sin sombra, home grids a 2 columnas, primera carga de inventario a 10 items/pagina salvo eleccion manual del usuario.
 - En tactiles se eliminan efectos visuales secundarios: animaciones/transiciones globales, sombras, filtros, `backdrop-filter`, transforms indirectos y degradados pesados en elementos principales.
-- `sw.js` actualmente en `VERSION='v63'`; subir `VERSION` tras cambios de CSS/JS para forzar cache nueva de PWA.
+- `sw.js` actualmente en `VERSION='v64'`; subir `VERSION` tras cambios de CSS/JS para forzar cache nueva de PWA.
 - 2026-05-06: en tablets/tactiles se permite solo la animacion inicial del `#loadOverlay` con version ligera (`lo-pulse-lite` por transform/opacidad). Mantener desactivadas las animaciones/transiciones de tarjetas/listados/botones del inventario para evitar lag.
 
 ## QR por item - 2026-05-06
@@ -46,7 +46,7 @@ Reglas importantes:
 - Modal de item muestra bloque QR solo en items existentes, porque los nuevos aun no tienen `id`.
 - URL generada: `#item/<code>`. Al abrir esa ruta, `openItemRoute(id)` acepta id/code/ref, carga el aula del item y abre su modal.
 - Si se abre con usuario sin permiso `items.write`, el modal queda en modo lectura y oculta Guardar/subida/borrado de documentos.
-- En inventario, tabla y tarjetas muestran un boton compacto junto al nombre del item con `icons/qr-code.svg`. Llama a `openModal(id)` para acceder rapido al QR grande y acciones de copiar/imprimir.
+- En inventario, tabla y tarjetas muestran un boton compacto junto al nombre del item con `icons/qr-code.svg`. Llama a `openItemQr(id)` para abrir directamente el QR grande y acciones de copiar/imprimir, sin entrar en editar.
 - `printBulkItemQrs()` imprime etiquetas QR en A4 para los items del filtro actual (`getFiltered()`): aula, categoria, modulo, stock bajo, mantenimiento y busqueda/filtros activos.
 - `sw.js` debe cachear `./icons/qr-code.svg` y subir `VERSION` cuando se cambie el icono o la impresion QR.
 - Escaner QR: al detectar un item detiene la camara y muestra acciones rapidas: abrir ficha, prestar/devolver, mantenimiento, documentos y baja.

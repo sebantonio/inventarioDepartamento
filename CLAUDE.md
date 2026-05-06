@@ -66,7 +66,7 @@ config → state → roles → api → docs → search → home → inventory �
 
 ## PWA
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
-- sw.js: VERSION='v63', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
+- sw.js: VERSION='v64', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
 - `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
 - pwa.js: actualización automática tras 5 segundos o al hacer clic en notificación (SKIP_WAITING)
@@ -193,7 +193,7 @@ El modal tiene **dos pasos**:
 ## QR por ítem (actualizado 2026-05-06)
 - Modal de ítem muestra QR solo para ítems existentes; usa URL `#item/<code>` con código estable `code` o `IB-00001` derivado de `id`.
 - `openItemRoute(id)` acepta id, code o ref, carga el contexto del aula del ítem y abre su modal. Si el usuario no tiene `items.write`, el modal queda en lectura.
-- Tabla y tarjetas muestran un botón compacto con `icons/qr-code.svg` junto al nombre del ítem; llama a `openModal(id)` para acceso rápido al QR grande y a copiar/imprimir.
+- Tabla y tarjetas muestran un botón compacto con `icons/qr-code.svg` junto al nombre del ítem; llama a `openItemQr(id)` para abrir directamente el QR sin entrar en edición.
 - `printBulkItemQrs()` imprime etiquetas QR en A4 para los ítems del filtro actual (`getFiltered()`): aula, categoría, módulo, stock bajo, mantenimiento y búsqueda/filtros activos.
 - El SVG `./icons/qr-code.svg` está incluido en `sw.js`; subir `VERSION` si cambia el icono o la impresión QR.
 

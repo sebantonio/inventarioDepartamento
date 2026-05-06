@@ -451,6 +451,24 @@
   </div>
 </div>
 
+<!-- MODAL QR ITEM -->
+<div class="mbg" id="mItemQr" onclick="if(event.target===this)closeItemQr()">
+  <div class="modal" style="width:min(460px,100%)">
+    <div class="mh"><div class="mt">Código QR</div><button class="mx" onclick="closeItemQr()">✕</button></div>
+    <div class="qr-panel" style="margin-top:12px">
+      <img id="quickQrImg" class="qr-img" alt="Código QR del ítem">
+      <div class="qr-info">
+        <div class="qr-title" id="quickQrTitle"></div>
+        <div class="qr-url" id="quickQrUrl"></div>
+        <div class="qr-actions">
+          <button type="button" class="btn" onclick="copyQuickItemQrUrl()">📋 Copiar enlace</button>
+          <button type="button" class="btn btn-p" onclick="printQuickItemQr()">🖨️ Imprimir QR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL DOCS -->
 <div class="mbg" id="mDocs" onclick="if(event.target===this)closeDocsModal()">
   <div class="modal" style="width:min(520px,100%)">

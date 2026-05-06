@@ -47,7 +47,7 @@ Escaneo QR en tiempo real implementado 2026-05-06. Detecta códigos QR con la c�
 
 ## Service Worker
 - Incluido en CACHE_SHELL (`sw.js`)
-- VERSION actual: v63
+- VERSION actual: v64
 - Cambios en `qr-scanner.js` requieren subir VERSION para forzar caché actualizado
 
 ## Gotchas solucionados (2026-05-06)

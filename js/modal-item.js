@@ -58,6 +58,40 @@ function renderItemQr(item){
   document.getElementById('itemQrUrl').textContent = url;
 }
 
+let _quickQrItemId = null;
+
+function openItemQr(id){
+  const item = items.find(x=>Number(x.id)===Number(id));
+  if(!item) return;
+  _quickQrItemId = item.id;
+  const url = itemUrl(item.id);
+  const code = itemCode(item);
+  document.getElementById('quickQrImg').src = qrSrc(url);
+  document.getElementById('quickQrTitle').textContent = `${code} · ${item.ref ? item.ref+' · ' : ''}${item.item}`;
+  document.getElementById('quickQrUrl').textContent = url;
+  document.getElementById('mItemQr').classList.add('open');
+}
+
+function closeItemQr(){
+  document.getElementById('mItemQr')?.classList.remove('open');
+}
+
+async function copyQuickItemQrUrl(){
+  const url = document.getElementById('quickQrUrl')?.textContent || '';
+  if(!url) return;
+  try{
+    await navigator.clipboard.writeText(url);
+    toast('Enlace del ítem copiado','ok');
+  }catch(e){
+    prompt('Copia el enlace del ítem:', url);
+  }
+}
+
+function printQuickItemQr(){
+  if(!_quickQrItemId) return;
+  printItemQr(_quickQrItemId);
+}
+
 function renderMainPhoto(src){
   const input = document.getElementById('f_foto');
   const preview = document.getElementById('f_foto_preview');
@@ -193,9 +227,9 @@ async function copyItemQrUrl(){
   }
 }
 
-function printItemQr(){
-  if(!eid) return;
-  const it = items.find(x=>Number(x.id)===Number(eid));
+function printItemQr(itemId=eid){
+  if(!itemId) return;
+  const it = items.find(x=>Number(x.id)===Number(itemId));
   if(!it) return;
   const url = itemUrl(it.id);
   const code = itemCode(it);
