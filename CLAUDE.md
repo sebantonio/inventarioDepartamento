@@ -36,7 +36,7 @@ config → state → roles → api → docs → search → home → inventory �
 
 ## PWA
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
-- sw.js: VERSION='v11', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
+- sw.js: VERSION='v12', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
 - `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
 
@@ -74,6 +74,7 @@ Memoria complementaria: `.claude/memory.md`.
 - `js/inventory.js`: el handler de `resize` solo vuelve a renderizar si cambia el modo tabla/tarjetas. En móviles, el navegador dispara `resize` al enseñar/ocultar la barra superior durante el scroll; renderizar todas las tarjetas en cada evento provoca lags y bloqueos de desplazamiento.
 - `js/inventory.js`: listado de inventario paginado en tabla y tarjetas. Valor inicial 25 ítems/página; selector disponible 10, 25, 30 y 50. No usar render por tandas con `requestAnimationFrame`, porque empeoró el pintado en Chrome/Edge/Firefox.
 - `css/styles.css`: en pantallas <=900px las tarjetas y botones desactivan animaciones/transiciones/transform hover costosos y reducen sombra para mejorar scroll en móviles/tablets. No usar `contain: layout paint` en `.icard`: en Chrome/Edge/Firefox móvil puede provocar tarjetas en blanco que aparecen al desplazar.
+- `css/styles.css`: tablets táctiles y pantallas <=1200px usan modo ligero (`hover:none`, `pointer:coarse`, `max-width:1200px`) sin animaciones/transforms en tarjetas, botones y cards. `topbar` usa `min-height` en vez de `height` para no cortar contenido si la barra se adapta. Login alineado arriba para no quedar cortado por barras del navegador.
 - Tras cambios de CSS/JS de rendimiento, subir `VERSION` en `sw.js` para que la PWA no sirva recursos antiguos desde caché.
 
 ## Auditoría de acciones (implementado 2026-05-05)

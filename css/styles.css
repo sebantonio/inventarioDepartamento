@@ -16,12 +16,13 @@
   --shh:0 4px 12px rgba(0,0,0,.10),0 12px 32px rgba(0,0,0,.10);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:auto}
 body{ 
   background:var(--bg);
   color:var(--text);
   font-family:var(--font);
-  min-height:100dvh;
+  min-height:100vh;
+  min-height:100svh;
 }
 
 #loadBar{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--accent),var(--acc2));z-index:9999;opacity:0;border-radius:0 2px 2px 0;pointer-events:none}
@@ -41,10 +42,10 @@ body{
 .lo-dots span:nth-child(3){animation-delay:.44s}
 @keyframes lo-dot{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-11px);opacity:1}}
 
-.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 0 var(--border)}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:8px 28px;min-height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 0 var(--border)}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;color:inherit}
 .brand-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--acc2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.brand-name{font-size:15px;font-weight:700}
+.brand-name{font-size:15px;font-weight:700;line-height:1.2}
 .topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .topbar-btns{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mob-menu-btn{display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:20px;cursor:pointer;font-weight:700;line-height:1}
@@ -65,7 +66,8 @@ body{
 
 .page{
   display:none;
-  min-height:calc(100dvh - 58px);
+  min-height:calc(100vh - 58px);
+  min-height:calc(100svh - 58px);
   animation:pgIn .28s ease;
 }
 @media (max-width: 900px){
@@ -91,7 +93,7 @@ body{
 .setup-help code{background:var(--white);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:11px;border:1px solid var(--border)}
 
 /* LOGIN */
-.login-wrap{min-height:calc(100dvh - 58px);display:flex;align-items:center;justify-content:center;padding:24px}
+.login-wrap{min-height:calc(100vh - 58px);min-height:calc(100svh - 58px);display:flex;align-items:flex-start;justify-content:center;padding:42px 24px 72px}
 .login-card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:36px 32px;width:min(420px,100%);box-shadow:var(--shh)}
 .login-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--acc2));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 18px}
 .login-card h1{font-size:22px;font-weight:800;text-align:center;margin-bottom:6px;letter-spacing:-.3px}
@@ -431,6 +433,19 @@ td{padding:10px 13px;font-size:13px;max-width:180px;overflow:hidden;text-overflo
 .cobs{font-size:11px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
 .cfoot{display:flex;gap:8px;margin-top:10px}
 
+@media (hover:none), (pointer:coarse), (max-width:1200px){
+  .page,.icard,.toast,.gsr{animation:none!important}
+  .icard,.ccard,.scard,.mod-card,.pres-card,.docs-card,.btn,.tbtn{
+    transition:none!important;
+  }
+  .icard:hover,.ccard:hover,.scard-alert:hover,.mod-card:hover,.pres-card:hover,.docs-card:hover,.btn:hover{
+    transform:none!important;
+  }
+  .icard{box-shadow:0 1px 2px rgba(0,0,0,.07)!important}
+  .ccard-icon{transition:none!important}
+  .ccard:hover .ccard-icon{transform:none!important}
+}
+
 .mbg{position:fixed;inset:0;background:rgba(15,20,40,.5);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
 .mbg.open{opacity:1;pointer-events:all}
 .modal{background:var(--white);border-radius:18px;border:1px solid var(--border);padding:30px;width:min(580px,100%);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.18);transform:translateY(16px) scale(.98);transition:transform .25s cubic-bezier(.34,1.4,.64,1)}
@@ -660,6 +675,13 @@ textarea.fi-w{resize:vertical;min-height:60px}
   /* ── TOASTS ── */
   .toasts{bottom:16px;right:12px;left:12px}
   .toast{max-width:100%}
+}
+
+@media (max-width:1200px){
+  .topbar{padding:8px 14px;gap:10px}
+  .brand{min-width:0}
+  .brand-name{max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .topbar-right{min-width:0;justify-content:flex-end}
 }
 
 /* ── IMPRESIÓN ─────────────────────────────────────────── */
