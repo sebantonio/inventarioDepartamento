@@ -24,8 +24,7 @@ function globalSearch(q){
   clr.style.display=q?'block':'none';
   if(q.length<2){res.classList.remove('open');gsIdx=-1;return;}
   const matches=items.filter(x=>{
-    const aulaName=AULAS.find(a=>a.id===x.aula)?.name||'';
-    const text=[x.ref,x.item,x.loc,x.util,x.obs,x.cat,aulaName].join(' ');
+    const text=[x.ref,x.item,x.loc].join(' ');
     return fuzzyMatch(q,text);
   });
   gsIdx=-1;
