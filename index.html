@@ -798,6 +798,9 @@
   </div>
 </div>
 
+<!-- ══ INPUT ESCÁNER QR ══ -->
+<input type="file" id="qr_cam_input" accept="image/*" capture="environment" style="display:none" onchange="processQrCapture(this.files);this.value=''">
+
 <!-- ══ ESCÁNER QR ══ -->
 <div class="mbg" id="mQrScanner" onclick="if(event.target===this)closeQrScanner()">
   <div class="modal" style="max-width:600px">
