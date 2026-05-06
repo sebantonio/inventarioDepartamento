@@ -46,7 +46,7 @@ function showUpdateToast(){
   const el = document.createElement('div');
   el.className = 'toast ok';
   el.style.cursor = 'pointer';
-  el.innerHTML = `<span>🔄</span><span>Actualización en 10s o toca aquí</span>`;
+  el.innerHTML = `<span>🔄</span><span>Actualización en 5s o toca aquí</span>`;
   el.onclick = () => {
     if(_waitingSW){
       _waitingSW.postMessage('SKIP_WAITING');
@@ -61,7 +61,7 @@ function showUpdateToast(){
     if(_waitingSW){
       _waitingSW.postMessage('SKIP_WAITING');
     }
-  }, 10000);
+  }, 5000);
 }
 
 // Capturar el evento de instalación para mostrarlo cuando queramos
