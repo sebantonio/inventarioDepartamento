@@ -46,10 +46,11 @@ Escaneo QR en tiempo real implementado 2026-05-06. Detecta códigos QR con la c�
 
 ## Service Worker
 - Incluido en CACHE_SHELL (`sw.js`)
-- VERSION actual: v61
+- VERSION actual: v62
 - Cambios en `qr-scanner.js` requieren subir VERSION para forzar caché actualizado
 
 ## Gotchas solucionados (2026-05-06)
+- Botón QR "Prestar / Devolver": no deshabilitar en el panel QR. Debe cerrar el escáner y abrir `openPresDevModal(itemId)` con pequeño retardo; el modal decide si permite nuevo préstamo o solo devoluciones.
 - ❌ qr-scanner.min.js lanzaba "Unexpected token 'export'" (ES module incompatible)
 - ❌ qr-scanner.umd.min.js fallaba con "Failed to resolve module specifier './qr-scanner-worker.min.js'" (CORS)
 - ✅ Cambiar a jsQR (sin workers, sin CORS)

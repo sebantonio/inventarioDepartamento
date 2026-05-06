@@ -94,11 +94,11 @@ function _showQrActions(itemId) {
 
   const loan = document.getElementById('qrActLoan');
   if(loan) {
-    const activeLoans = prestamos.some(p =>
+    const activeLoans = (typeof prestamos !== 'undefined' && Array.isArray(prestamos) ? prestamos : []).some(p =>
       Number(p.itemId) === Number(item.id) &&
       (p.estado === 'Activo' || p.estado === 'Parcial')
     );
-    loan.disabled = !can('loans.write') || (Number(item.qty) <= 0 && !activeLoans);
+    loan.disabled = false;
     loan.title = Number(item.qty) <= 0 && activeLoans
       ? 'Sin stock para nuevo préstamo; puedes registrar devoluciones'
       : '';
@@ -119,7 +119,13 @@ function qrQuickAction(action) {
   }
   if(action === 'loan'){
     closeQrScanner();
-    openPresDevModal(id);
+    setTimeout(() => {
+      if(typeof openPresDevModal === 'function'){
+        openPresDevModal(id);
+      } else {
+        toast('No se pudo abrir préstamo/devolución', 'err');
+      }
+    }, 80);
     return;
   }
   if(action === 'docs'){
