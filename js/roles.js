@@ -94,9 +94,9 @@ function applyRoleUI(){
   ];
   rules.forEach(([id, permission]) => {
     const el = document.getElementById(id);
-    if(el && !can(permission)) el.style.display = 'none';
+    if(el) el.style.display = can(permission) ? '' : 'none';
   });
   document.querySelectorAll('[data-perm]').forEach(el => {
-    if(!can(el.dataset.perm)) el.style.display = 'none';
+    el.style.display = can(el.dataset.perm) ? '' : 'none';
   });
 }

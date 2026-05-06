@@ -77,6 +77,17 @@ function showUserChip(){
   if(typeof applyRoleUI === 'function') applyRoleUI();
 }
 
+function syncSessionUser(user){
+  if(!SESSION || !user) return;
+  SESSION = {
+    ...SESSION,
+    nombre: user.nombre || SESSION.nombre || SESSION.usuario,
+    rol: user.rol || SESSION.rol || 'profesor',
+    email: user.email || SESSION.email || ''
+  };
+  localStorage.setItem('inv_session', JSON.stringify(SESSION));
+}
+
 function _hideOverlay(){
   const ov = document.getElementById('loadOverlay');
   if(!ov || ov.style.display==='none') return;
@@ -107,6 +118,8 @@ async function loadData(){
       }
       throw new Error(res.error||'Error');
     }
+    syncSessionUser(res.user);
+    showUserChip();
     items = res.items || [];
     profesores = res.profesores || [];
     prestamos = res.prestamos || [];

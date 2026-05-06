@@ -38,7 +38,7 @@ Reglas importantes:
 - Tablets/dispositivos tactiles: forzar vista tarjetas. `getInvRenderMode()` devuelve `cards` si `(hover:none)` o `(pointer:coarse)`; CSS oculta `.vtog` y `.tw`.
 - Modo tactil compacto: una columna de tarjetas, `topbar` sin `sticky`, paginas sin `min-height`, cards sin sombra, home grids a 2 columnas, primera carga de inventario a 10 items/pagina salvo eleccion manual del usuario.
 - En tactiles se eliminan efectos visuales secundarios: animaciones/transiciones globales, sombras, filtros, `backdrop-filter`, transforms indirectos y degradados pesados en elementos principales.
-- `sw.js` subido a `VERSION='v15'` para forzar cache nueva de PWA.
+- `sw.js` subido a `VERSION='v16'` para forzar cache nueva de PWA.
 
 ## Iconos y acciones combinadas - actualizado 2026-05-06
 
