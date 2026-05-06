@@ -8,7 +8,7 @@ function openQrScanner() {
   const error = document.getElementById('qrError');
   const result = document.getElementById('qrResult');
 
-  modal.style.display = 'flex';
+  modal.classList.add('open');
   content.style.display = 'block';
   error.style.display = 'none';
   result.textContent = 'Apunta la cámara a un código QR...';
@@ -47,7 +47,7 @@ function closeQrScanner() {
     _qrStream.getTracks().forEach(track => track.stop());
     _qrStream = null;
   }
-  document.getElementById('mQrScanner').style.display = 'none';
+  document.getElementById('mQrScanner').classList.remove('open');
 }
 
 function _startQrProcessing(video) {
