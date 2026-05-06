@@ -91,11 +91,12 @@ function applyRoleUI(){
     ['btnE', 'import.write'],
     ['btnImp', 'import.write'],
     ['btnPres', 'loans.write'],
-    ['btnPed', 'orders.write']
+    ['btnPed', 'orders.write'],
+    ['btnQr', null]
   ];
   rules.forEach(([id, permission]) => {
     const el = document.getElementById(id);
-    if(el) el.style.display = can(permission) ? '' : 'none';
+    if(el) el.style.display = (permission === null || can(permission)) ? '' : 'none';
   });
   document.querySelectorAll('[data-perm]').forEach(el => {
     el.style.display = can(el.dataset.perm) ? '' : 'none';

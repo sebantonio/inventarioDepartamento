@@ -7,7 +7,7 @@
 // Para forzar a los clientes a coger version nueva basta con subir VERSION.
 // ═════════════════════════════════════════════════════════
 
-const VERSION = 'v29';
+const VERSION = 'v30';
 const CACHE_SHELL   = 'inventario-fp-shell-' + VERSION;
 const CACHE_RUNTIME = 'inventario-fp-runtime-' + VERSION;
 
@@ -36,6 +36,7 @@ const SHELL = [
   './js/pwa.js',
   './js/profile.js',
   './js/reset.js',
+  './js/qr-scanner.js',
   './favicon.svg',
   './icons/qr-code.svg',
   './icons/icon-192.png',

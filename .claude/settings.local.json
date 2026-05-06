@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -c \"c:\\\\OneDrive\\\\OneDrive - Consejería de Educación, Cultura y Deportes Castilla La-Mancha\\\\DOCUMENTOS DEL BOSCO\\\\Curso 2025-2026\\\\Pagina inventario Departamento\\\\js\\\\qr-scanner.js\")",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Añade modo escáner QR para inventario físico *)"
+    ]
+  }
+}
