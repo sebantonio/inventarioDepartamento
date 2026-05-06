@@ -1,4 +1,4 @@
-let _scanner = null;
+let _qrScanInterval = null;
 
 function openQrScanner() {
   try {
@@ -9,44 +9,49 @@ function openQrScanner() {
 
     modal.style.display = 'flex';
 
-    if (typeof QrScanner === 'undefined') {
+    if (typeof jsQR === 'undefined') {
       content.style.display = 'none';
       error.style.display = 'block';
-      error.textContent = 'Error: librería QrScanner no cargó del CDN';
+      error.textContent = 'Error: librería jsQR no cargó del CDN';
       return;
     }
 
     content.style.display = 'block';
     error.style.display = 'none';
 
-    if (_scanner) {
-      _scanner.start();
-      return;
-    }
+    if (_qrScanInterval) return;
 
-    _scanner = new QrScanner(
-      video,
-      result => {
-        const qrData = typeof result === 'string' ? result : (result.data || '');
-        const match = qrData.match(/item\/([a-zA-Z0-9_-]+)/);
-        if (match) {
-          toast('✅ QR detectado');
-          _scanner.stop();
-          setTimeout(() => {
-            closeQrScanner();
-            openItemRoute(match[1]);
-          }, 200);
-        }
-      },
-      { onDecodeError: () => {}, maxScansPerSecond: 5 }
-    );
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(stream => {
+        video.srcObject = stream;
+        video._qrStream = stream;
+        video.play();
 
-    _scanner.start().catch(err => {
-      _scanner = null;
-      error.style.display = 'block';
-      content.style.display = 'none';
-      error.textContent = 'Error: ' + err.message;
-    });
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        _qrScanInterval = setInterval(() => {
+          if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          if (code) {
+            const match = code.data.match(/item\/([a-zA-Z0-9_-]+)/);
+            if (match) {
+              toast('✅ QR detectado');
+              closeQrScanner();
+              setTimeout(() => openItemRoute(match[1]), 200);
+            }
+          }
+        }, 200);
+      })
+      .catch(err => {
+        error.style.display = 'block';
+        content.style.display = 'none';
+        error.textContent = 'Error al acceder a la cámara: ' + err.message;
+      });
   } catch (e) {
     const error = document.getElementById('qrError');
     error.style.display = 'block';
@@ -56,8 +61,15 @@ function openQrScanner() {
 }
 
 function closeQrScanner() {
-  if (_scanner) {
-    _scanner.stop();
+  if (_qrScanInterval) {
+    clearInterval(_qrScanInterval);
+    _qrScanInterval = null;
+  }
+  const video = document.getElementById('qrVideo');
+  if (video && video._qrStream) {
+    video._qrStream.getTracks().forEach(t => t.stop());
+    video._qrStream = null;
+    video.srcObject = null;
   }
   document.getElementById('mQrScanner').style.display = 'none';
 }
