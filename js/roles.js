@@ -87,18 +87,18 @@ function roleLabel(){
 
 function applyRoleUI(){
   const rules = [
-    ['btnN', 'items.write'],
-    ['btnE', 'import.write'],
-    ['btnImp', 'import.write'],
-    ['btnPres', 'loans.write'],
-    ['btnPed', 'orders.write'],
-    ['gsQr', null]
+    ['btnN', 'items.write', 'flex'],
+    ['btnE', 'import.write', 'flex'],
+    ['btnImp', 'import.write', 'flex'],
+    ['btnPres', 'loans.write', 'flex'],
+    ['btnPed', 'orders.write', 'flex'],
+    ['gsQr', null, 'inline-flex']
   ];
-  rules.forEach(([id, permission]) => {
+  rules.forEach(([id, permission, displayType]) => {
     const el = document.getElementById(id);
-    if(el) el.style.display = (permission === null || can(permission)) ? '' : 'none';
+    if(el) el.style.display = (permission === null || can(permission)) ? displayType : 'none';
   });
   document.querySelectorAll('[data-perm]').forEach(el => {
-    el.style.display = can(el.dataset.perm) ? '' : 'none';
+    el.style.display = can(el.dataset.perm) ? 'flex' : 'none';
   });
 }
