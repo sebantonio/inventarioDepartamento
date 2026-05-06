@@ -1,6 +1,6 @@
 ---
 name: Resumen del proyecto
-description: Qué es la app, para qué sirve y estado actual de funcionalidades (actualizado 2026-05-06)
+description: Qué es la app, para qué sirve y estado actual de funcionalidades (actualizado 2026-05-07)
 type: project
 originSessionId: 97fd2f19-db29-4e74-997b-cfdd7054b186
 ---
@@ -24,6 +24,11 @@ App web de inventario para el departamento del IES El Bosco. Permite gestionar �
 - `Modulos` — col A: código numérico | col B: nombre módulo | col C: profesor responsable
 
 **Google Drive:** carpeta `Inventario Departamento` → subcarpetas por aula → archivos
+
+**Funcionalidades implementadas (2026-05-07):**
+- **Alertas automáticas de stock bajo**: función `notifyStockAlert(ss, it, oldItem, user)` en GAS. Solo envía email cuando qty *cruza* el umbral (oldQty > min → newQty <= min), evitando spam. Email al responsable del módulo (hoja Modulos col C) + CC Jefes de Departamento. Se registra en auditoría como `accion='stockAlert'`.
+- **Historial visual por ítem**: botón "📋 Historial" en modal de edición (solo para ítems existentes). Modal `#mHistorial` muestra tabla: fecha | usuario | acción | detalle. Nueva acción GAS `getItemLog` devuelve registros filtrados por itemId. Se carga vía `apiGet({ action: 'getItemLog', itemId })` que ahora soporta parámetros adicionales. Escape cierra modal.
+- Búsqueda mejorada: fuzzy matching con normalización Unicode (sin acentos). Busca en campos ref|item|loc, excluyendo categoría/estado/utilidad para evitar falsos positivos.
 
 **Funcionalidades implementadas (2026-05-06):**
 - Escaneo QR con cámara: librería `qr-scanner` v1.4.2 desde CDN. Botón 🔍 en buscador global. Try-catch captura errores de inicialización (librería no carga, cámara no disponible). Detección de patrones `item/<id>` abre modal del ítem. Modal muestra video en vivo y error elegante si falla. Funciona en tablets/móviles con acceso a cámara.
