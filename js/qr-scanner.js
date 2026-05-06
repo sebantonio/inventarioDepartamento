@@ -11,33 +11,60 @@ function openQrScanner() {
   modal.style.display = 'flex';
   content.style.display = 'block';
   error.style.display = 'none';
-  result.textContent = 'Apunta la cámara a un código QR...';
+  result.textContent = 'Inicializando cámara...';
   result.style.color = 'var(--muted)';
 
   const video = document.getElementById('qrVideo');
   _qrScanning = true;
 
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'environment' },
+  const constraints = {
+    video: {
+      facingMode: { ideal: 'environment' },
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
+    },
     audio: false
-  }).then(stream => {
+  };
+
+  navigator.mediaDevices.getUserMedia(constraints).then(stream => {
     _qrStream = stream;
     video.srcObject = stream;
+
     video.onloadedmetadata = () => {
-      _startQrProcessing(video);
+      video.play().then(() => {
+        result.textContent = 'Apunta la cámara a un código QR...';
+        _startQrProcessing(video);
+      }).catch(e => {
+        console.error('Error al reproducir video:', e);
+        _showQrError('No se pudo reproducir el video de la cámara.');
+      });
     };
+
+    video.onerror = (e) => {
+      console.error('Error en video element:', e);
+      _showQrError('Error al cargar la cámara.');
+    };
+
   }).catch(err => {
     _qrScanning = false;
-    error.style.display = 'block';
-    content.style.display = 'none';
+    console.error('getUserMedia error:', err);
     if (err.name === 'NotAllowedError') {
-      error.textContent = 'Acceso denegado a la cámara. Por favor, verifica los permisos.';
+      _showQrError('Acceso denegado a la cámara. Verifica los permisos en los ajustes del dispositivo.');
     } else if (err.name === 'NotFoundError') {
-      error.textContent = 'No se encontró cámara en tu dispositivo.';
+      _showQrError('No se encontró cámara en tu dispositivo.');
+    } else if (err.name === 'NotReadableError') {
+      _showQrError('La cámara está siendo usada por otra aplicación.');
     } else {
-      error.textContent = 'Error al acceder a la cámara: ' + err.message;
+      _showQrError('Error al acceder a la cámara: ' + err.message);
     }
   });
+}
+
+function _showQrError(msg) {
+  document.getElementById('qrError').textContent = msg;
+  document.getElementById('qrError').style.display = 'block';
+  document.getElementById('qrScannerContent').style.display = 'none';
+  _qrScanning = false;
 }
 
 function closeQrScanner() {
@@ -50,8 +77,19 @@ function closeQrScanner() {
 }
 
 function _startQrProcessing(video) {
+  if (video.videoWidth === 0 || video.videoHeight === 0) {
+    setTimeout(() => _startQrProcessing(video), 100);
+    return;
+  }
+
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d', { willReadFrequently: true });
+
+  if (!context) {
+    _showQrError('No se pudo acceder al contexto del canvas. Intenta en otro navegador.');
+    return;
+  }
+
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
 
@@ -65,41 +103,45 @@ function _startQrProcessing(video) {
 
     _qrProcessingFrame = true;
 
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    try {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
-    if (typeof jsQR === 'undefined') {
-      _qrProcessingFrame = false;
-      requestAnimationFrame(processFrame);
-      return;
-    }
-
-    const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-    if (code) {
-      const data = code.data;
-      const itemMatch = data.match(/#item\/([^\/?]+)/);
-
-      if (itemMatch) {
-        const itemId = itemMatch[1];
-        _qrScanning = false;
-
-        document.getElementById('qrResult').textContent = 'QR detectado: ' + itemId;
-        document.getElementById('qrResult').style.color = 'var(--green)';
-
-        if (_qrStream) {
-          _qrStream.getTracks().forEach(track => track.stop());
-          _qrStream = null;
-        }
-
-        setTimeout(() => {
-          closeQrScanner();
-          openItemRoute(itemId);
-        }, 300);
-
+      if (typeof jsQR === 'undefined') {
         _qrProcessingFrame = false;
+        requestAnimationFrame(processFrame);
         return;
       }
+
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+      if (code && code.data) {
+        const data = code.data;
+        const itemMatch = data.match(/#item\/([^\/?]+)/);
+
+        if (itemMatch) {
+          const itemId = itemMatch[1];
+          _qrScanning = false;
+
+          document.getElementById('qrResult').textContent = 'QR detectado: ' + itemId;
+          document.getElementById('qrResult').style.color = 'var(--green)';
+
+          if (_qrStream) {
+            _qrStream.getTracks().forEach(track => track.stop());
+            _qrStream = null;
+          }
+
+          setTimeout(() => {
+            closeQrScanner();
+            openItemRoute(itemId);
+          }, 300);
+
+          _qrProcessingFrame = false;
+          return;
+        }
+      }
+    } catch (e) {
+      console.error('Error procesando frame:', e);
     }
 
     _qrProcessingFrame = false;

@@ -803,7 +803,7 @@
   <div class="modal" style="max-width:600px">
     <div class="mh"><div class="mt">🔍 Escanear QR</div><button class="mx" onclick="closeQrScanner()">✕</button></div>
     <div id="qrScannerContent" style="display:none">
-      <video id="qrVideo" style="width:100%;max-width:500px;border-radius:8px;margin-bottom:16px" autoplay playsinline></video>
+      <video id="qrVideo" style="width:100%;max-width:500px;border-radius:8px;margin-bottom:16px;background:var(--surface2);display:block" autoplay playsinline muted webkit-playsinline></video>
       <div id="qrResult" style="font-size:13px;color:var(--muted);margin:16px 0;text-align:center">Apunta la cámara a un código QR...</div>
     </div>
     <div id="qrError" style="display:none;padding:16px;background:var(--red-light);border-radius:8px;color:var(--red);font-size:13px"></div>
