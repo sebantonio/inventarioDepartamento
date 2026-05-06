@@ -10,7 +10,9 @@
       "Bash(Select-Object FullName, Length)",
       "Bash(git commit -m 'Feat: alertas de stock bajo + historial visual por ítem *)",
       "Bash(node -c appscript.txt)",
-      "Bash(git commit -m 'Fix: mejorar robustez de getItemLog en GAS *)"
+      "Bash(git commit -m 'Fix: mejorar robustez de getItemLog en GAS *)",
+      "Bash(git commit -m 'Fix: apiGet soporta parámetros adicionales para getItemLog *)",
+      "Bash(git commit -m 'Bump: VERSION v58 → v59 para invalidar cache *)"
     ]
   }
 }
