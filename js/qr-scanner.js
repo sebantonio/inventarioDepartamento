@@ -17,16 +17,23 @@ function openQrScanner() {
   const video = document.getElementById('qrVideo');
   _qrScanning = true;
 
-  const constraints = {
-    video: {
-      facingMode: { ideal: 'environment' },
-      width: { ideal: 1280 },
-      height: { ideal: 720 }
-    },
-    audio: false
-  };
+  _tryGetUserMedia(video, result);
+}
 
-  navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+function _tryGetUserMedia(video, result, attempt = 0) {
+  const constraints = [
+    { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+    { video: { facingMode: { ideal: 'environment' } }, audio: false },
+    { video: true, audio: false },
+    { video: { facingMode: { ideal: 'user' } }, audio: false }
+  ];
+
+  if (attempt >= constraints.length) {
+    _showQrError('No se pudo acceder a la cámara. Verifica los permisos en los ajustes del dispositivo.');
+    return;
+  }
+
+  navigator.mediaDevices.getUserMedia(constraints[attempt]).then(stream => {
     _qrStream = stream;
     video.srcObject = stream;
 
@@ -46,17 +53,8 @@ function openQrScanner() {
     };
 
   }).catch(err => {
-    _qrScanning = false;
-    console.error('getUserMedia error:', err);
-    if (err.name === 'NotAllowedError') {
-      _showQrError('Acceso denegado a la cámara. Verifica los permisos en los ajustes del dispositivo.');
-    } else if (err.name === 'NotFoundError') {
-      _showQrError('No se encontró cámara en tu dispositivo.');
-    } else if (err.name === 'NotReadableError') {
-      _showQrError('La cámara está siendo usada por otra aplicación.');
-    } else {
-      _showQrError('Error al acceder a la cámara: ' + err.message);
-    }
+    console.error('getUserMedia attempt ' + attempt + ' failed:', err);
+    _tryGetUserMedia(video, result, attempt + 1);
   });
 }
 
