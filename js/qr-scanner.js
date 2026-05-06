@@ -18,8 +18,16 @@ function openQrScanner() {
 
     content.style.display = 'block';
     error.style.display = 'none';
+    document.getElementById('qrResult').textContent = 'Iniciando cámara…';
 
     if (_qrScanInterval) return;
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      error.style.display = 'block';
+      content.style.display = 'none';
+      error.textContent = 'Este navegador no soporta acceso a la cámara (requiere HTTPS)';
+      return;
+    }
 
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
       .then(stream => {
