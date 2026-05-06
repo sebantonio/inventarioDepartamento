@@ -320,6 +320,11 @@ select:focus,.fi:focus{border-color:var(--accent)}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:9px;border:1px solid var(--border);background:var(--white);color:var(--text);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-icon-img{width:16px;height:16px;display:block;flex:0 0 16px}
 .btn:hover{background:var(--surface2);transform:translateY(-1px)}
+.icon-btn .btn-text{display:inline}
+@media (max-width: 640px){
+  .icon-btn .btn-text{display:none}
+  .icon-btn{padding:11px 16px !important;justify-content:center}
+}
 .btn-p{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn-p:hover{background:#1d4ed8;border-color:#1d4ed8}
 .btn-sm{padding:5px 12px;font-size:12px}
