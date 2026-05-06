@@ -26,7 +26,12 @@ async function loadItemDocs(itemId){
 
 async function addDocFiles(files){
   const name = document.getElementById('f_item')?.value.trim() || 'foto';
-  for(const f of files) docsPendientes.push(await _processFile(f, name));
+  for(const f of files){
+    if(f.type.startsWith('image/') && typeof setMainPhotoFromFile === 'function') {
+      await setMainPhotoFromFile(f);
+    }
+    docsPendientes.push(await _processFile(f, name));
+  }
   renderDocList();
 }
 

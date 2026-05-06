@@ -121,10 +121,11 @@ function th2(k,l){const i=k===sk?(sa?'▲':'▼'):'↕';return`<th onclick="sort
 
 function rTable(data,mc){
   mc.innerHTML=`<div class="tw"><div class="tw-scroll"><table>
-    <thead><tr>${th2('ref','Ref.')}${th2('aula','Aula')}${th2('item','Ítem')}${th2('qty','Cant.')}<th>Mín.</th>${th2('cat','Categoría')}${th2('loc','Ubicación')}${th2('est','Estado')}${th2('util','Utilidad')}<th>Acciones</th></tr></thead>
+    <thead><tr><th>Foto</th>${th2('ref','Ref.')}${th2('aula','Aula')}${th2('item','Ítem')}${th2('qty','Cant.')}<th>Mín.</th>${th2('cat','Categoría')}${th2('loc','Ubicación')}${th2('est','Estado')}${th2('util','Utilidad')}<th>Acciones</th></tr></thead>
     <tbody>${data.map(x=>{
       const low=Number(x.qty)<=Number(x.min),mant=needsMaintenance(x),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280';
       return`<tr>
+        <td>${x.foto?`<img class="table-photo" src="${x.foto}" alt="">`:'<span class="table-photo empty">📷</span>'}</td>
         <td><span class="rbadge">${x.ref||'—'}</span></td>
         <td style="font-size:12px;color:var(--muted)">${AULAS.find(a=>a.id===x.aula)?.name||x.aula}</td>
         <td style="max-width:220px;font-weight:600" title="${x.item}">

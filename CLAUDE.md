@@ -36,7 +36,7 @@ config → state → roles → api → docs → search → home → inventory �
 
 ## PWA
 - manifest.json: start_url "./" (NO "./index.html" — Cloudflare redirige esa URL)
-- sw.js: VERSION='v21', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
+- sw.js: VERSION='v22', dos cachés CACHE_SHELL + CACHE_RUNTIME, stale-while-revalidate para fonts
 - Para forzar actualización en clientes: subir VERSION en sw.js
 - `.gitignore` en raíz del repo excluye *.zip y otros archivos grandes
 
@@ -151,8 +151,9 @@ El modal tiene **dos pasos**:
 
 ## Foto principal del ítem (implementado 2026-05-06)
 - Campo persistente `foto` en inventario, guardado como miniatura `data:image/jpeg` pequeña dentro del propio ítem para que las tarjetas carguen rápido y funcionen offline.
-- Modal de ítem: selector `#f_foto_input`, hidden `#f_foto`, preview `#f_foto_preview`; `selectMainPhoto()` reduce la imagen a máximo 360px y calidad 0.45 antes de guardar.
-- Tarjetas de inventario: si `x.foto` existe, muestran `<img class="card-photo">` con `aspect-ratio:16/9` y `object-fit:cover`.
+- Modal de ítem: hidden `#f_foto` y preview `#f_foto_preview`. Al hacer/subir una imagen en documentación, `addDocFiles()` llama automáticamente a `setMainPhotoFromFile()`.
+- `setMainPhotoFromFile()` reduce la imagen a máximo 360px y calidad 0.45 antes de guardar en `foto`.
+- Tarjetas de inventario: si `x.foto` existe, muestran `<img class="card-photo">` con `aspect-ratio:16/9` y `object-fit:cover`. Tabla: columna `Foto` con miniatura `.table-photo`.
 - No exportar la foto en CSV: el base64 haría el CSV pesado y poco legible.
 
 ## QR por ítem (actualizado 2026-05-06)
@@ -173,7 +174,7 @@ El modal tiene **dos pasos**:
 - Módulo genérico "Departamento" disponible en todos los ítems (config.js CICLOS[4])
 - Importar CSV con mapeo de columnas
 - Documentación del departamento: iframe SharePoint + botón externo
-- PWA instalable, funciona offline (cache-first sw v21)
+- PWA instalable, funciona offline (cache-first sw v22)
 - Pantalla de carga animada (#loadOverlay) con logo + puntos rebotando
 - Barra de progreso animada #loadBar durante carga inicial
 - **Botón 🗑️ Dar de baja** como acción rápida en home hero y subheader pS (abre modal con buscador si no hay ítem previo)

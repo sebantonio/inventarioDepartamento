@@ -340,13 +340,9 @@
       <div class="full">
         <label class="fl">Foto principal</label>
         <input type="hidden" id="f_foto">
-        <input type="file" id="f_foto_input" accept="image/*" capture="environment" style="display:none" onchange="selectMainPhoto(this.files);this.value=''">
         <div class="photo-picker">
           <div class="photo-preview" id="f_foto_preview"><span>📷</span></div>
-          <div class="photo-actions">
-            <button type="button" class="btn" onclick="document.getElementById('f_foto_input').click()">📷 Elegir foto</button>
-            <button type="button" class="btn btn-d" onclick="clearMainPhoto()">Quitar</button>
-          </div>
+          <div class="photo-help">Se actualiza automáticamente al hacer o subir una foto en documentación.</div>
         </div>
       </div>
       <div><label class="fl">Cantidad</label><input class="fi-w" id="f_qty" type="number" min="0" value="1"></div>
