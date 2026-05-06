@@ -190,7 +190,7 @@ function impRenderPreview(){
         item.mant = ['1','si','sí','s','true','x','ok','reparacion','reparación','mantenimiento','averia','avería'].some(v => normalize(v) === nv) ? '1' : '';
       } else if(f.k === 'mantEstado'){
         const nv = normalize(val);
-        const estados = ['Pendiente','En reparación','Resuelto'];
+        const estados = ['Pendiente','En reparación','Reparado','Resuelto'];
         item.mantEstado = estados.find(e => normalize(e) === nv) || (val || 'Pendiente');
       } else if(f.k === 'mantFecha'){
         if(/^\d{4}-\d{2}-\d{2}$/.test(val)) item.mantFecha = val;

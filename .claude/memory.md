@@ -52,15 +52,17 @@ Reglas importantes:
 
 ## Mantenimiento / reparacion - 2026-05-06
 
-- Se anadio campo persistente `mant` al inventario. `appscript.txt` usa `HEADERS_INV = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','mantFecha','mantNota','mantResp','mantEstado','foto','obs']`.
+- Se anadio campo persistente `mant` al inventario. `appscript.txt` usa `HEADERS_INV = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','mantFecha','mantNota','mantResp','mantEstado','mantSolicitante','mantSolicitanteEmail','foto','obs']`.
 - `ensureHeaders(sheet, headers)` en `appscript.txt` migra cabeceras existentes, inserta columnas nuevas y mantiene el orden esperado. Tras cambiar `appscript.txt`, copiarlo a Google Apps Script y redesplegar.
 - `js/state.js` define `needsMaintenance(item)`: true si `mant` es `1`/true o si `est === 'Avería'`. Esto hace compatibles datos antiguos marcados como averia.
 - Modal de item: checkbox `#f_mant` "Necesita mantenimiento o reparacion"; detalles `mantFecha`, `mantNota`, `mantResp`, `mantEstado`.
-- Estados de mantenimiento: `Pendiente`, `En reparación`, `Resuelto`. `needsMaintenance()` excluye los resueltos de la cola aunque conserva los datos si `mant` sigue marcado.
+- Estados de mantenimiento: `Pendiente`, `En reparación`, `Reparado`, `Resuelto`. `needsMaintenance()` excluye los reparados/resueltos de la cola aunque conserva los datos si `mant` sigue marcado.
 - Home: la tarjeta "espacios" fue eliminada y sustituida por tarjeta "mantenimiento"; boton rapido `🛠️ Mantenimiento` llama a `goMaintenance()`.
 - Navegacion: ruta `#maintenance`, `goMaintenance()` y `cf.type === 'maintenance'` filtran items mediante `needsMaintenance()`.
 - Listado: tarjetas muestran pill con estado y bloque `.maint-note` con fecha/responsable/nota; tabla antepone resumen en Utilidad.
 - Import/Export CSV incluyen `Mantenimiento`, `Fecha aviso mant.`, `Estado mant.`, `Responsable mant.`, `Nota mant.`. Import acepta `1`, `si/sí`, `true`, `x`, `ok`, `reparacion`, `mantenimiento`, `averia`.
+
+- Notificaciones mantenimiento en `appscript.txt`: al activar mantenimiento se envia correo al responsable del modulo (hoja `Modulos` -> `Usuarios`) con CC al solicitante. Al cambiar estado a `En reparacion`, `Resuelto` o `Reparado`, se notifica a ambos. `mantSolicitante` y `mantSolicitanteEmail` se guardan internamente para conservar quien lo pidio.
 
 ## Foto principal por item - 2026-05-06
 
