@@ -29,17 +29,37 @@ function processQrCapture(files) {
 
       if (code && code.data) {
         const data = code.data;
-        const itemMatch = data.match(/#item\/([^\/?]+)/);
+        console.log('[QR] Detectado:', data);
 
-        if (itemMatch) {
-          const itemId = itemMatch[1];
+        let itemId = null;
+        // Buscar #item/<id>
+        let match = data.match(/#item\/([^\/?]+)/);
+        if (match) itemId = match[1];
+        // Buscar item/<id> sin #
+        if (!itemId) {
+          match = data.match(/item\/([^\/?]+)/);
+          if (match) itemId = match[1];
+        }
+        // Buscar solo el ID si la URL completa contiene /item/
+        if (!itemId && data.includes('/item/')) {
+          match = data.match(/\/item\/([a-zA-Z0-9_-]+)/);
+          if (match) itemId = match[1];
+        }
+
+        if (itemId) {
+          console.log('[QR] ID extraído:', itemId);
           toast('✅ QR detectado: ' + itemId);
           setTimeout(() => openItemRoute(itemId), 300);
+          return;
+        } else {
+          console.log('[QR] Dato detectado pero no es un QR de ítem');
+          toast('⚠️ QR detectado pero no es de un ítem. Contenido: ' + data.substring(0, 50));
           return;
         }
       }
 
-      toast('❌ No se detectó un código QR válido. Intenta de nuevo.');
+      console.log('[QR] No se detectó ningún QR');
+      toast('❌ No se detectó código QR. Asegúrate de que sea un QR válido y clara la foto.');
     };
 
     img.onerror = () => {
