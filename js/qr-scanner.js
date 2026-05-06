@@ -27,7 +27,7 @@ function openQrScanner() {
     _scanner = new QrScanner(
       video,
       result => {
-        const qrData = result.data || result;
+        const qrData = typeof result === 'string' ? result : (result.data || '');
         const match = qrData.match(/item\/([a-zA-Z0-9_-]+)/);
         if (match) {
           toast('✅ QR detectado');
@@ -38,8 +38,7 @@ function openQrScanner() {
           }, 200);
         }
       },
-      err => {},
-      { returnDetailedScanResult: false, maxScansPerSecond: 5 }
+      { onDecodeError: () => {}, maxScansPerSecond: 5 }
     );
 
     _scanner.start().catch(err => {
