@@ -1,66 +1,42 @@
-let _scanner = null;
-
 function openQrScanner() {
-  try {
-    const modal = document.getElementById('mQrScanner');
-    const video = document.getElementById('qrVideo');
-    const content = document.getElementById('qrScannerContent');
-    const error = document.getElementById('qrError');
-
-    modal.style.display = 'flex';
-
-    if (typeof QrScanner === 'undefined') {
-      content.style.display = 'none';
-      error.style.display = 'block';
-      error.textContent = 'Error: librería QrScanner no cargó del CDN';
-      return;
-    }
-
-    // Indicar la URL del worker para evitar el error CORS de ruta relativa
-    QrScanner.WORKER_PATH = 'https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner-worker.min.js';
-
-    content.style.display = 'block';
-    error.style.display = 'none';
-
-    if (_scanner) {
-      _scanner.start();
-      return;
-    }
-
-    _scanner = new QrScanner(
-      video,
-      result => {
-        const qrData = typeof result === 'string' ? result : (result.data || '');
-        const match = qrData.match(/item\/([a-zA-Z0-9_-]+)/);
-        if (match) {
-          toast('✅ QR detectado');
-          _scanner.stop();
-          setTimeout(() => {
-            closeQrScanner();
-            openItemRoute(match[1]);
-          }, 200);
-        }
-      },
-      { onDecodeError: () => {}, returnDetailedScanResult: true }
-    );
-
-    _scanner.start().catch(err => {
-      _scanner = null;
-      error.style.display = 'block';
-      content.style.display = 'none';
-      error.textContent = 'Error: ' + err.message;
-    });
-  } catch (e) {
-    const error = document.getElementById('qrError');
-    error.style.display = 'block';
-    document.getElementById('qrScannerContent').style.display = 'none';
-    error.textContent = 'Error: ' + e.message;
-  }
+  document.getElementById('qr_cam_input').click();
 }
 
-function closeQrScanner() {
-  if (_scanner) {
-    _scanner.stop();
+function processQrCapture(files) {
+  const file = files && files[0];
+  if (!file) return;
+
+  if (typeof jsQR === 'undefined') {
+    toast('❌ Error: jsQR no cargó. Comprueba la conexión.');
+    return;
   }
-  document.getElementById('mQrScanner').style.display = 'none';
+
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    canvas.getContext('2d').drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+
+    const imageData = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+    if (code) {
+      const match = code.data.match(/item\/([a-zA-Z0-9_-]+)/);
+      if (match) {
+        toast('✅ QR detectado');
+        setTimeout(() => openItemRoute(match[1]), 200);
+      } else {
+        toast('⚠️ QR no reconocido: ' + code.data);
+      }
+    } else {
+      toast('❌ No se detectó QR. Intenta con mejor luz o más cerca.');
+    }
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast('❌ Error al leer la imagen.'); };
+  img.src = url;
 }
+
+function closeQrScanner() {}
