@@ -38,7 +38,7 @@ Reglas importantes:
 - Tablets/dispositivos tactiles: forzar vista tarjetas. `getInvRenderMode()` devuelve `cards` si `(hover:none)` o `(pointer:coarse)`; CSS oculta `.vtog` y `.tw`.
 - Modo tactil compacto: una columna de tarjetas, `topbar` sin `sticky`, paginas sin `min-height`, cards sin sombra, home grids a 2 columnas, primera carga de inventario a 10 items/pagina salvo eleccion manual del usuario.
 - En tactiles se eliminan efectos visuales secundarios: animaciones/transiciones globales, sombras, filtros, `backdrop-filter`, transforms indirectos y degradados pesados en elementos principales.
-- `sw.js` actualmente en `VERSION='v60'`; subir `VERSION` tras cambios de CSS/JS para forzar cache nueva de PWA.
+- `sw.js` actualmente en `VERSION='v61'`; subir `VERSION` tras cambios de CSS/JS para forzar cache nueva de PWA.
 - 2026-05-06: en tablets/tactiles se permite solo la animacion inicial del `#loadOverlay` con version ligera (`lo-pulse-lite` por transform/opacidad). Mantener desactivadas las animaciones/transiciones de tarjetas/listados/botones del inventario para evitar lag.
 
 ## QR por item - 2026-05-06
@@ -49,7 +49,7 @@ Reglas importantes:
 - En inventario, tabla y tarjetas muestran un boton compacto junto al nombre del item con `icons/qr-code.svg`. Llama a `openModal(id)` para acceder rapido al QR grande y acciones de copiar/imprimir.
 - `printBulkItemQrs()` imprime etiquetas QR en A4 para los items del filtro actual (`getFiltered()`): aula, categoria, modulo, stock bajo, mantenimiento y busqueda/filtros activos.
 - `sw.js` debe cachear `./icons/qr-code.svg` y subir `VERSION` cuando se cambie el icono o la impresion QR.
-- Escaner QR: al detectar un item detiene la camara y muestra acciones rapidas: abrir ficha, prestar, mantenimiento, documentos y baja.
+- Escaner QR: al detectar un item detiene la camara y muestra acciones rapidas: abrir ficha, prestar/devolver, mantenimiento, documentos y baja.
 
 ## Mantenimiento / reparacion - 2026-05-06
 

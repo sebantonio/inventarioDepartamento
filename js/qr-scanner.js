@@ -94,8 +94,14 @@ function _showQrActions(itemId) {
 
   const loan = document.getElementById('qrActLoan');
   if(loan) {
-    loan.disabled = !can('loans.write') || Number(item.qty) <= 0;
-    loan.title = Number(item.qty) <= 0 ? 'Sin stock disponible' : '';
+    const activeLoans = prestamos.some(p =>
+      Number(p.itemId) === Number(item.id) &&
+      (p.estado === 'Activo' || p.estado === 'Parcial')
+    );
+    loan.disabled = !can('loans.write') || (Number(item.qty) <= 0 && !activeLoans);
+    loan.title = Number(item.qty) <= 0 && activeLoans
+      ? 'Sin stock para nuevo préstamo; puedes registrar devoluciones'
+      : '';
   }
   const maint = document.getElementById('qrActMaint');
   if(maint) maint.disabled = !can('items.write');
@@ -113,7 +119,7 @@ function qrQuickAction(action) {
   }
   if(action === 'loan'){
     closeQrScanner();
-    openPrestar(id);
+    openPresDevModal(id);
     return;
   }
   if(action === 'docs'){
