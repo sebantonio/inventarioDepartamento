@@ -13,6 +13,7 @@ const IMP_FIELDS = [
   {k:'cat',   label:'Categoría',          synonyms:['categoria','cat','tipo','familia']},
   {k:'loc',   label:'Ubicación',          synonyms:['ubicacion','localizacion','localizado','sitio','estanteria']},
   {k:'est',   label:'Estado',             synonyms:['estado','condicion','status']},
+  {k:'mant',  label:'Mantenimiento',      synonyms:['mantenimiento','reparacion','reparación','averia','avería','mant']},
   {k:'util',  label:'Utilidad',           synonyms:['utilidad','uso','funcion','para_que']},
   {k:'fecha', label:'Última revisión',    synonyms:['fecha','revision','ultima_revision','actualizado']},
   {k:'obs',   label:'Observaciones',      synonyms:['observaciones','obs','notas','comentarios','comentario']},
@@ -180,6 +181,9 @@ function impRenderPreview(){
         const nv = normalize(val);
         const match = ESTADOS_VALIDOS.find(e => normalize(e) === nv);
         item.est = match || (val ? 'Bueno' : '');
+      } else if(f.k === 'mant'){
+        const nv = normalize(val);
+        item.mant = ['1','si','sí','s','true','x','ok','reparacion','reparación','mantenimiento','averia','avería'].some(v => normalize(v) === nv) ? '1' : '';
       } else if(f.k === 'cat'){
         const nv = normalize(val);
         const match = CATEGORIAS_VALIDAS().find(c => normalize(c) === nv);

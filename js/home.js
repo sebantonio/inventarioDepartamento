@@ -7,12 +7,13 @@ function renderHome(){
 
   const total=items.length;
   const low=items.filter(x=>Number(x.qty)<=Number(x.min)).length;
+  const mant=items.filter(needsMaintenance).length;
   const units=items.reduce((a,x)=>a+(Number(x.qty)||0),0);
   document.getElementById('hStats').innerHTML=`
     <div class="scard"><div class="scard-icon">📦</div><div><div class="scard-num">${total}</div><div class="scard-lbl">tipos de ítem</div></div></div>
     <div class="scard"><div class="scard-icon">🔢</div><div><div class="scard-num">${units.toLocaleString()}</div><div class="scard-lbl">unidades totales</div></div></div>
     <div class="scard${low?' scard-alert':''}" ${low?'onclick="goLowStock()" style="cursor:pointer"':''}><div class="scard-icon">⚠️</div><div><div class="scard-num" style="color:var(--red)">${low}</div><div class="scard-lbl">stock bajo</div></div></div>
-    <div class="scard"><div class="scard-icon">🏫</div><div><div class="scard-num">${AULAS.length}</div><div class="scard-lbl">espacios</div></div></div>
+    <div class="scard${mant?' scard-alert':''}" ${mant?'onclick="goMaintenance()" style="cursor:pointer"':''}><div class="scard-icon">🛠️</div><div><div class="scard-num" style="color:var(--amber)">${mant}</div><div class="scard-lbl">mantenimiento</div></div></div>
   `;
   document.getElementById('gAulas').innerHTML=AULAS.map(a=>{
     const n=items.filter(x=>x.aula===a.id).length;

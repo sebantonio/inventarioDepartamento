@@ -90,6 +90,12 @@ function goLowStock(){
   openSub();
 }
 
+function goMaintenance(){
+  _push({page:'maintenance'}, '#maintenance');
+  cf={type:'maintenance', id:'maintenance', label:'Mantenimiento / reparación', icon:'🛠️'};
+  openSub();
+}
+
 function openSub(){
   const all=getBase();
   const low=all.filter(x=>Number(x.qty)<=Number(x.min)).length;
@@ -97,6 +103,7 @@ function openSub(){
   if(cf.type==='aula'){tagC='background:#eff6ff;color:#2563eb';typeLabel='Aula';}
   else if(cf.type==='cat'){tagC=`background:${cf.catBg};color:${cf.catColor}`;typeLabel='Categoría';}
   else if(cf.type==='lowstock'){tagC='background:#fff7ed;color:#c2410c';typeLabel='Alerta';}
+  else if(cf.type==='maintenance'){tagC='background:#fffbeb;color:#b45309';typeLabel='Mantenimiento';}
   else{tagC='background:#f5f3ff;color:#7c3aed';typeLabel='Módulo';}
   document.getElementById('sTag').textContent=`${cf.icon} ${typeLabel}`;
   document.getElementById('sTag').style.cssText=tagC;
@@ -108,6 +115,8 @@ function openSub(){
     document.getElementById('sMeta').textContent = `${all.length} tipos · ${all.reduce((a2,x)=>a2+(Number(x.qty)||0),0)} unidades`;
   } else if(cf.type==='lowstock'){
     document.getElementById('sMeta').textContent = `${all.length} ítem${all.length!==1?'s':''} por debajo del stock mínimo`;
+  } else if(cf.type==='maintenance'){
+    document.getElementById('sMeta').textContent = `${all.length} ítem${all.length!==1?'s':''} marcado${all.length!==1?'s':''} para mantenimiento o reparación`;
   } else {
     document.getElementById('sMeta').textContent = `${cf.ciclo.name} · ${all.length} tipos · ${all.reduce((a2,x)=>a2+(Number(x.qty)||0),0)} unidades`;
   }
@@ -119,12 +128,14 @@ function openSub(){
     document.getElementById('bc').innerHTML=`<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><strong>${cf.icon} ${cf.label}</strong>`;
   } else if(cf.type==='lowstock'){
     document.getElementById('bc').innerHTML=`<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><strong>⚠️ Stock bajo</strong>`;
+  } else if(cf.type==='maintenance'){
+    document.getElementById('bc').innerHTML=`<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><strong>🛠️ Mantenimiento</strong>`;
   } else {
     document.getElementById('bc').innerHTML=`<span class="bc-link" onclick="goHome()">Inicio</span><span class="sep">›</span><span class="bc-link" onclick="openCiclo('${cf.ciclo.id}')">${cf.ciclo.icon} ${cf.ciclo.name}</span><span class="sep">›</span><strong>${cf.label}</strong>`;
   }
 
-  document.getElementById('btnN').style.display = cf.type==='lowstock' ? 'none' : 'flex';
-  document.getElementById('btnE').style.display = cf.type==='lowstock' ? 'none' : 'flex';
+  document.getElementById('btnN').style.display = (cf.type==='lowstock' || cf.type==='maintenance') ? 'none' : 'flex';
+  document.getElementById('btnE').style.display = (cf.type==='lowstock' || cf.type==='maintenance') ? 'none' : 'flex';
   _hideHomeButtons();
   if(typeof applyRoleUI === 'function') applyRoleUI();
   document.getElementById('srch').value='';
@@ -153,6 +164,7 @@ function navigateFromHash(hash){
   if(seg === 'profile')    { goProfile(); return; }
   if(seg === 'prestamos')  { goPrestamos(); return; }
   if(seg === 'lowstock')   { goLowStock(); return; }
+  if(seg === 'maintenance') { goMaintenance(); return; }
   if(seg === 'docs')       { goDocsDpto(); return; }
   if(seg === 'aula' && id) { goAula(id); return; }
   if(seg === 'cat'  && id) { goCat(id); return; }

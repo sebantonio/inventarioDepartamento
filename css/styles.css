@@ -381,6 +381,7 @@ td{padding:10px 13px;font-size:13px;max-width:180px;overflow:hidden;text-overflo
 
 .rbadge{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1px solid var(--border);padding:3px 8px;border-radius:5px;color:var(--accent)}
 .cpill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.maintenance-pill{background:var(--amber-l);color:var(--amber);border:1px solid #fde68a}
 .edot{display:inline-flex;align-items:center;gap:5px;font-size:12px}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .qval{font-weight:700;font-family:var(--mono)}
@@ -511,6 +512,10 @@ td{padding:10px 13px;font-size:13px;max-width:180px;overflow:hidden;text-overflo
 .fi-w{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s,box-shadow .2s}
 .fi-w:focus{border-color:var(--accent);box-shadow:0 0 0 3px #2563eb15}
 textarea.fi-w{resize:vertical;min-height:60px}
+.check-row{display:flex;align-items:flex-start;gap:10px;background:var(--amber-l);border:1px solid #fde68a;border-radius:10px;padding:11px 12px;color:#854d0e;cursor:pointer}
+.check-row input{width:18px;height:18px;flex:0 0 auto;margin-top:1px;accent-color:var(--amber)}
+.check-row span{display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.3}
+.check-row small{font-size:11px;color:#92400e}
 .mf{display:flex;justify-content:space-between;gap:10px;margin-top:22px;align-items:center}
 .mf-right{display:flex;gap:10px}
 

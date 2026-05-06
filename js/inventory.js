@@ -3,12 +3,12 @@
 // ═════════════════════════════════════════════════════════
 function renderSubStats(data,low){
   const units=data.reduce((a,x)=>a+(Number(x.qty)||0),0);
-  const av=data.filter(x=>x.est==='Avería'||x.est==='Baja').length;
+  const mant=data.filter(needsMaintenance).length;
   document.getElementById('sStats').innerHTML=`
     <div class="scard"><div class="scard-icon">📋</div><div><div class="scard-num">${data.length}</div><div class="scard-lbl">tipos de ítem</div></div></div>
     <div class="scard"><div class="scard-icon">🔢</div><div><div class="scard-num">${units}</div><div class="scard-lbl">unidades</div></div></div>
     <div class="scard"><div class="scard-icon">⚠️</div><div><div class="scard-num" style="color:var(--red)">${low}</div><div class="scard-lbl">stock bajo</div></div></div>
-    <div class="scard"><div class="scard-icon">🔴</div><div><div class="scard-num" style="color:var(--red)">${av}</div><div class="scard-lbl">averías/bajas</div></div></div>
+    <div class="scard"><div class="scard-icon">🛠️</div><div><div class="scard-num" style="color:var(--amber)">${mant}</div><div class="scard-lbl">mantenimiento</div></div></div>
   `;
 }
 
@@ -17,6 +17,7 @@ function getBase(){
     if(cf.type==='aula') return x.aula===cf.id;
     if(cf.type==='cat') return x.cat===cf.id;
     if(cf.type==='lowstock') return Number(x.qty)<=Number(x.min);
+    if(cf.type==='maintenance') return needsMaintenance(x);
     return x.mod===cf.id;
   });
 }
@@ -122,7 +123,7 @@ function rTable(data,mc){
   mc.innerHTML=`<div class="tw"><div class="tw-scroll"><table>
     <thead><tr>${th2('ref','Ref.')}${th2('aula','Aula')}${th2('item','Ítem')}${th2('qty','Cant.')}<th>Mín.</th>${th2('cat','Categoría')}${th2('loc','Ubicación')}${th2('est','Estado')}${th2('util','Utilidad')}<th>Acciones</th></tr></thead>
     <tbody>${data.map(x=>{
-      const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280';
+      const low=Number(x.qty)<=Number(x.min),mant=needsMaintenance(x),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280';
       return`<tr>
         <td><span class="rbadge">${x.ref||'—'}</span></td>
         <td style="font-size:12px;color:var(--muted)">${AULAS.find(a=>a.id===x.aula)?.name||x.aula}</td>
@@ -137,7 +138,7 @@ function rTable(data,mc){
         <td>${x.cat?`<span class="cpill" style="background:${cat.bg};color:${cat.c}">${cat.i} ${x.cat}</span>`:'—'}</td>
         <td style="color:var(--muted);font-size:12px" title="${x.loc}">${x.loc||'—'}</td>
         <td>${x.est?`<span class="edot"><span class="dot" style="background:${ec}"></span>${x.est}</span>`:'—'}</td>
-        <td style="color:var(--muted);font-size:12px" title="${x.util}">${x.util||'—'}</td>
+        <td style="color:var(--muted);font-size:12px" title="${x.util}">${mant?'🛠️ ':''}${x.util||'—'}</td>
         <td><div style="display:flex;gap:6px">
           <button class="btn btn-sm" onclick="openModal(${x.id})" title="Editar">✏️</button>
           <button class="btn btn-sm" onclick="duplicateItem(${x.id})" title="Duplicar">⧉</button>
@@ -158,7 +159,7 @@ function rTable(data,mc){
 
 function rCards(data,mc){
   mc.innerHTML=`<div class="cgrid">${data.map(x=>{
-    const low=Number(x.qty)<=Number(x.min),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280',mod=findModulo(x.mod);
+    const low=Number(x.qty)<=Number(x.min),mant=needsMaintenance(x),cat=CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'},ec=ESTC[x.est]||'#6b7280',mod=findModulo(x.mod);
     return`<div class="icard${low?' low':''}">
       <div class="ch">
         <div class="card-title-wrap">
@@ -173,6 +174,7 @@ function rCards(data,mc){
       <div class="cpills">
         ${x.cat?`<span class="cpill" style="background:${cat.bg};color:${cat.c};font-size:11px">${cat.i} ${x.cat}</span>`:''}
         ${x.est?`<span class="edot" style="font-size:12px"><span class="dot" style="background:${ec}"></span>${x.est}</span>`:''}
+        ${mant?`<span class="cpill maintenance-pill">🛠️ Mantenimiento</span>`:''}
         ${mod?`<span class="cpill" style="background:#eff6ff;color:#1d4ed8;font-size:11px">${mod.ciclo.icon||'📚'} ${mod.name}</span>`:''}
       </div>
       <div class="cfg">
@@ -263,10 +265,10 @@ function delPickerSelect(itemId){
 // ═════════════════════════════════════════════════════════
 function exportCSV(){
   const data=getFiltered();
-  const h='Referencia,Aula,Módulo,Ítem,Cantidad,Mínimo,Categoría,Ubicación,Estado,Utilidad,Revisión,Observaciones';
+  const h='Referencia,Aula,Módulo,Ítem,Cantidad,Mínimo,Categoría,Ubicación,Estado,Mantenimiento,Utilidad,Revisión,Observaciones';
   const rows=data.map(x=>{
     const m = findModulo(x.mod);
-    return [x.ref,AULAS.find(a=>a.id===x.aula)?.name||x.aula,m?`${m.cod} ${m.name}`:'',x.item,x.qty,x.min,x.cat,x.loc,x.est,x.util,x.fecha,x.obs].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',');
+    return [x.ref,AULAS.find(a=>a.id===x.aula)?.name||x.aula,m?`${m.cod} ${m.name}`:'',x.item,x.qty,x.min,x.cat,x.loc,x.est,needsMaintenance(x)?'Sí':'',x.util,x.fecha,x.obs].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',');
   });
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent([h,...rows].join('\n'));a.download='inventario.csv';a.click();
   toast('CSV exportado','ok');

@@ -14,7 +14,7 @@ const SHEET_MODULOS    = 'Modulos';
 const SHEET_CICLOS     = 'Ciclos';
 const SHEET_LOG        = 'Log';
 
-const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','obs'];
+const HEADERS_INV   = ['id','ref','aula','mod','item','qty','min','cat','loc','est','util','fecha','mant','obs'];
 const HEADERS_USR   = ['usuario','password','nombre','rol','email'];
 const HEADERS_PROF  = ['id','nombre','departamento','email'];
 const HEADERS_PRES  = ['id','itemId','itemNombre','cantidad','aulaOrigen','aulaDestino','profesorId','profesorNombre','gestionadoPor','fechaPrestamo','fechaPrevista','fechaDevolucion','cantidadDevuelta','estado','obs'];
@@ -146,6 +146,7 @@ function auditLog(ss, user, accion, itemId, resumen) {
 
 function rowsToObjects(sheet, headers) {
   if (!sheet) return [];
+  ensureHeaders(sheet, headers);
   const data = sheet.getDataRange().getValues();
   const out = [];
   for (let i = 1; i < data.length; i++) {
@@ -328,6 +329,7 @@ function doPost(e) {
 
     if (action === 'add') {
       const sheet = ss.getSheetByName(SHEET_INVENTARIO);
+      ensureHeaders(sheet, HEADERS_INV);
       const it = body.item;
       it.id = nextId(sheet);
       sheet.appendRow(HEADERS_INV.map(h => it[h] != null ? it[h] : ''));
@@ -336,6 +338,7 @@ function doPost(e) {
     }
     if (action === 'update') {
       const sheet = ss.getSheetByName(SHEET_INVENTARIO);
+      ensureHeaders(sheet, HEADERS_INV);
       const it = body.item;
       const r = findRowById(sheet, it.id);
       if (r < 0) return json({ ok: false, error: 'No encontrado' });
@@ -346,6 +349,7 @@ function doPost(e) {
     }
     if (action === 'delete') {
       const sheet = ss.getSheetByName(SHEET_INVENTARIO);
+      ensureHeaders(sheet, HEADERS_INV);
       const r = findRowById(sheet, body.id);
       if (r < 0) return json({ ok: false, error: 'No encontrado' });
       const old = sheet.getRange(r, 1, 1, HEADERS_INV.length).getValues()[0];
@@ -357,6 +361,7 @@ function doPost(e) {
     // ─── IMPORTACIÓN MASIVA ─────────────────────────────────────
     if (action === 'bulkImport') {
       const sheet = ss.getSheetByName(SHEET_INVENTARIO);
+      ensureHeaders(sheet, HEADERS_INV);
       const newItems = body.items || [];
       if (!newItems.length) return json({ ok: false, error: 'Sin ítems para importar' });
       
@@ -809,6 +814,26 @@ function initSheet() {
       s.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground(color);
       s.setFrozenRows(1);
       if (rows) rows.forEach(r => s.appendRow(r));
+    } else {
+      ensureHeaders(s, headers);
     }
   }
+}
+
+function ensureHeaders(sheet, headers) {
+  if (!sheet || sheet.getLastRow() === 0) return;
+  const current = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headers.length)).getValues()[0];
+  headers.forEach((h, idx) => {
+    if (String(current[idx] || '').trim() !== h) {
+      const found = current.findIndex(v => String(v || '').trim() === h);
+      if (found >= 0) {
+        sheet.moveColumns(sheet.getRange(1, found + 1, sheet.getMaxRows(), 1), idx + 1);
+        current.splice(idx, 0, current.splice(found, 1)[0]);
+      } else {
+        sheet.insertColumnBefore(idx + 1);
+        sheet.getRange(1, idx + 1).setValue(h).setFontWeight('bold').setBackground('#e2e6f0');
+        current.splice(idx, 0, h);
+      }
+    }
+  });
 }

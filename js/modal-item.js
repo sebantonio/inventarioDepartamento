@@ -50,7 +50,7 @@ function renderItemQr(item){
 function setItemModalReadonly(readonly){
   const modal = document.querySelector('#mItem .modal');
   modal?.classList.toggle('item-readonly', !!readonly);
-  ['f_ref','f_aula','f_item','f_qty','f_min','f_cat','f_ciclo','f_mod','f_loc','f_est','f_util','f_fecha','f_obs']
+  ['f_ref','f_aula','f_item','f_qty','f_min','f_cat','f_ciclo','f_mod','f_loc','f_est','f_util','f_fecha','f_mant','f_obs']
     .forEach(id => {
       const el = document.getElementById(id);
       if(el) el.disabled = !!readonly;
@@ -80,6 +80,7 @@ function openModal(id=null, src=null){
   document.getElementById('f_est').value=m?.est||'Bueno';
   document.getElementById('f_util').value=m?.util||'';
   document.getElementById('f_fecha').value=m?.fecha||new Date().toISOString().split('T')[0];
+  document.getElementById('f_mant').checked=needsMaintenance(m);
   document.getElementById('f_obs').value=m?.obs||'';
   initDocSection(id);
   renderItemQr(existing ? m : null);
@@ -168,6 +169,7 @@ async function saveItem(){
     est:document.getElementById('f_est').value,
     util:document.getElementById('f_util').value.trim(),
     fecha:document.getElementById('f_fecha').value,
+    mant:document.getElementById('f_mant').checked ? '1' : '',
     obs:document.getElementById('f_obs').value.trim(),
   };
   const btn = document.getElementById('btnSave');

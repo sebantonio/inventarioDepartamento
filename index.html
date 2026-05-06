@@ -195,6 +195,7 @@
       <button class="btn" data-perm="loans.write" style="padding:11px 24px;font-size:14px;border-color:var(--amber);color:var(--amber)" onclick="openPrestar()">⌛ Nuevo préstamo</button>
       <button class="btn btn-d" data-perm="items.write" style="padding:11px 24px;font-size:14px" onclick="openDelModal()">🗑️ Dar de baja</button>
       <a class="btn" href="javascript:void(0)" onclick="goDocsDpto()" style="display:inline-flex;padding:11px 24px;font-size:14px;border-color:#0891b2;color:#0891b2;text-decoration:none">📂 Documentación</a>
+      <button class="btn" style="padding:11px 24px;font-size:14px;border-color:var(--amber);color:var(--amber)" onclick="goMaintenance()">🛠️ Mantenimiento</button>
     </div>
     <div class="gsearch-wrap" id="gsWrap">
       <span class="gsearch-ico">🔍</span>
@@ -355,6 +356,10 @@
       </div>
       <div><label class="fl">Utilidad</label><input class="fi-w" id="f_util" placeholder="Para qué se usa"></div>
       <div><label class="fl">Última revisión</label><input class="fi-w" id="f_fecha" type="date"></div>
+      <label class="check-row full">
+        <input type="checkbox" id="f_mant">
+        <span><strong>Necesita mantenimiento o reparación</strong><small>Márcalo para que aparezca en el acceso rápido de mantenimiento.</small></span>
+      </label>
       <div class="full"><label class="fl">Observaciones</label><textarea class="fi-w" id="f_obs" placeholder="Notas, proveedor, nº serie..."></textarea></div>
       <div class="full" id="itemQrBox" style="display:none">
         <hr class="docs-sep">
