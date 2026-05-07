@@ -51,10 +51,23 @@ function renderHome(){
 }
 
 function renderLoanBanner(){
-  const activos = getPrestamosActivos();
-  const vencidos = getVencidos();
   const el = document.getElementById('loanBanner');
   if(!el) return;
+
+  const rol = (SESSION?.rol || '').toLowerCase().trim();
+  const esJefe = ['jefe departamento','jefe de departamento','administrador','admin'].includes(rol);
+
+  let activos, vencidos;
+  if(esJefe){
+    activos = getPrestamosActivos();
+    vencidos = getVencidos();
+  } else {
+    // Solo muestra los préstamos donde el usuario logueado es el prestatario
+    const miNombre = (SESSION?.nombre || '').toLowerCase().trim();
+    activos = getPrestamosActivos().filter(p=>(p.profesorNombre||'').toLowerCase().trim()===miNombre);
+    vencidos = activos.filter(isVencido);
+  }
+
   if(vencidos.length){
     el.innerHTML=`<div class="loan-banner danger">
       <div class="loan-banner-info">
