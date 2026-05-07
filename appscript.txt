@@ -723,9 +723,11 @@ function doPost(e) {
       const data = sheet.getDataRange().getValues();
       const usuarios = [];
       for (let i = 1; i < data.length; i++) {
-        if (!String(data[i][0] || '').trim()) continue;
+        const login = String(data[i][0] || '').trim();
+        if (!login) continue;
+        if (login.toLowerCase() === 'departamento') continue; // usuario genérico, no editable
         // No devolver contraseña al frontend
-        usuarios.push({ usuario: data[i][0], nombre: data[i][2], rol: data[i][3], email: data[i][4] });
+        usuarios.push({ usuario: login, nombre: data[i][2], rol: data[i][3], email: data[i][4] });
       }
       return json({ ok: true, usuarios });
     }
@@ -734,14 +736,27 @@ function doPost(e) {
       const sheet = ss.getSheetByName(SHEET_USUARIOS);
       const u = body.usuario;
       if (!u.usuario || !u.nombre || !u.rol) return json({ ok: false, error: 'Faltan campos obligatorios' });
-      // Verificar que el usuario no existe ya
       const data = sheet.getDataRange().getValues();
+      // Verificar que el usuario no existe ya
       for (let i = 1; i < data.length; i++) {
         if (String(data[i][0]).trim().toLowerCase() === String(u.usuario).trim().toLowerCase())
           return json({ ok: false, error: 'Ya existe un usuario con ese nombre de usuario' });
       }
       const password = u.password || 'cambiar123';
-      sheet.appendRow([u.usuario.trim(), password, u.nombre.trim(), u.rol.trim(), u.email || '']);
+      const newRow = [u.usuario.trim(), password, u.nombre.trim(), u.rol.trim(), u.email || ''];
+      // Buscar la última fila real (no vacía y no es el usuario genérico "Departamento")
+      // Insertar antes de cualquier fila con usuario === 'Departamento' o vacía al final
+      let insertBefore = -1;
+      for (let i = 1; i < data.length; i++) {
+        const login = String(data[i][0] || '').trim().toLowerCase();
+        if (login === 'departamento') { insertBefore = i + 1; break; }
+      }
+      if (insertBefore > 0) {
+        sheet.insertRowBefore(insertBefore);
+        sheet.getRange(insertBefore, 1, 1, newRow.length).setValues([newRow]);
+      } else {
+        sheet.appendRow(newRow);
+      }
       auditLog(ss, user, 'userAdd', '', `Nuevo usuario: ${u.usuario} (${u.rol})`);
       return json({ ok: true });
     }
@@ -770,6 +785,8 @@ function doPost(e) {
     if (action === 'userDelete') {
       const sheet = ss.getSheetByName(SHEET_USUARIOS);
       const uname = String(body.usuario || '').trim().toLowerCase();
+      if (uname === 'departamento')
+        return json({ ok: false, error: 'El usuario genérico Departamento no se puede eliminar' });
       // No permitir autoeliminación
       if (uname === String(user.usuario).trim().toLowerCase())
         return json({ ok: false, error: 'No puedes eliminar tu propia cuenta' });
