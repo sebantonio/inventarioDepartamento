@@ -56,6 +56,15 @@ body{
 .breadcrumb strong{color:var(--text)}
 .tbtn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
 .tbtn:hover{background:var(--surface2)}
+.tbtn-dept{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tbtn-dept:hover{background:#1d4ed8;border-color:#1d4ed8}
+.dept-menu-wrap{position:relative}
+.dept-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.14);padding:8px;min-width:270px;z-index:999;display:none;flex-direction:column;gap:2px}
+.dept-menu.open{display:flex}
+.dept-menu-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:6px 12px 4px}
+.dept-menu-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);text-align:left;transition:background .12s}
+.dept-menu-item:hover{background:var(--surface2)}
+.dept-menu-sep{height:1px;background:var(--border);margin:4px 8px}
 
 .conn-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:4px 10px;border-radius:20px;background:var(--surface2)}
 .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}

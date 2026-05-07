@@ -56,6 +56,21 @@
         </svg> QR
       </button>
       <button class="tbtn" id="btnReload" onclick="loadData()" title="Recargar">🔄</button>
+      <div class="dept-menu-wrap" id="deptMenuWrap" style="display:none">
+        <button class="tbtn tbtn-dept" id="btnDept" onclick="toggleDeptMenu()">⚙️ Departamento</button>
+        <div class="dept-menu" id="deptMenu">
+          <div class="dept-menu-title">Gestión del departamento</div>
+          <button class="dept-menu-item" onclick="closeDeptMenu();openAulasModal()">🏫 Gestionar aulas</button>
+          <button class="dept-menu-item" onclick="closeDeptMenu();openCatsModal()">🏷️ Gestionar categorías</button>
+          <button class="dept-menu-item" onclick="closeDeptMenu();openCiclosModal()">📚 Gestionar ciclos y módulos</button>
+          <div class="dept-menu-sep"></div>
+          <button class="dept-menu-item" onclick="closeDeptMenu();openProfModal()">👥 Gestionar profesores prestatarios</button>
+          <button class="dept-menu-item" onclick="closeDeptMenu();openUsuariosModal()">🔐 Gestionar usuarios de la app</button>
+          <div class="dept-menu-sep"></div>
+          <button class="dept-menu-item" onclick="closeDeptMenu();openImportModal()">📤 Importar CSV / Backup</button>
+          <button class="dept-menu-item" onclick="closeDeptMenu();openExportModal()">📥 Exportar / Backup</button>
+        </div>
+      </div>
     </div>
     <div class="user-chip" id="userChip" style="display:none">
       <div class="user-chip-info" onclick="goProfile()" title="Ver mi perfil">

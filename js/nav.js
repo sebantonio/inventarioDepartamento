@@ -199,4 +199,14 @@ function closeMobMenu(){
 document.addEventListener('click', function(e){
   if(!e.target.closest('#topbarBtns') && !e.target.closest('#mobMenuBtn'))
     closeMobMenu();
+  if(!e.target.closest('#deptMenuWrap'))
+    closeDeptMenu();
 });
+
+// ─── MENÚ DEPARTAMENTO ────────────────────────────────────
+function toggleDeptMenu(){
+  document.getElementById('deptMenu').classList.toggle('open');
+}
+function closeDeptMenu(){
+  document.getElementById('deptMenu').classList.remove('open');
+}

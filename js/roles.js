@@ -107,4 +107,7 @@ function applyRoleUI(){
   document.querySelectorAll('[data-perm]').forEach(el => {
     el.style.display = can(el.dataset.perm) ? 'flex' : 'none';
   });
+  // Botón Departamento solo para Jefes/Admin
+  const deptWrap = document.getElementById('deptMenuWrap');
+  if(deptWrap) deptWrap.style.display = can('config.manage') ? 'flex' : 'none';
 }
