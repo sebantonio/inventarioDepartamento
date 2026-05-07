@@ -278,7 +278,9 @@ function openPrestar(itemId){
   }
 
   document.getElementById('pres_prof').innerHTML = '<option value="">— Seleccionar —</option>' +
-    profesores.map(p=>`<option value="${p.id}">${p.nombre}${p.departamento?' ('+p.departamento+')':''}</option>`).join('');
+    profesores
+      .filter(p => String(p.nombre||'').trim() && String(p.nombre||'').trim().toLowerCase() !== 'departamento')
+      .map(p=>`<option value="${p.id}">${p.nombre}${p.departamento?' ('+p.departamento+')':''}</option>`).join('');
 
   const f = new Date(); f.setDate(f.getDate()+7);
   document.getElementById('pres_fecha').value = f.toISOString().split('T')[0];
@@ -378,7 +380,9 @@ let profEditing = [];
 
 function openProfModal(){
   if(!requirePerm('profesores.manage')) return;
-  profEditing = JSON.parse(JSON.stringify(profesores));
+  profEditing = JSON.parse(JSON.stringify(
+    profesores.filter(p => String(p.nombre||'').trim() && String(p.nombre||'').trim().toLowerCase() !== 'departamento')
+  ));
   renderProfList();
   document.getElementById('mProf').classList.add('open');
 }

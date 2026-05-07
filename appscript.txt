@@ -461,7 +461,8 @@ function doGet(e) {
     const permError = requireAction(user, action);
     if (permError) return permError;
     const items      = rowsToObjects(ss.getSheetByName(SHEET_INVENTARIO), HEADERS_INV);
-    const profesores = rowsToObjects(ss.getSheetByName(SHEET_PROFESORES), HEADERS_PROF);
+    const profesores = rowsToObjects(ss.getSheetByName(SHEET_PROFESORES), HEADERS_PROF)
+      .filter(p => String(p.nombre || '').trim() !== '' && String(p.nombre || '').trim().toLowerCase() !== 'departamento');
     const prestamos  = rowsToObjects(ss.getSheetByName(SHEET_PRESTAMOS), HEADERS_PRES);
     let aulas        = rowsToObjects(ss.getSheetByName(SHEET_AULAS), HEADERS_AULAS);
     let cats         = rowsToObjects(ss.getSheetByName(SHEET_CATS), HEADERS_CATS);
