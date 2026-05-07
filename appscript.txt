@@ -83,7 +83,12 @@ const ACTION_PERMISSIONS = {
   deleteDoc: 'docs.write',
   updateProfile: 'profile.write',
   changePassword: 'profile.write',
-  notificarPedido: 'orders.write'
+  notificarPedido: 'orders.write',
+  getUsers: 'users.manage',
+  userAdd: 'users.manage',
+  userUpdate: 'users.manage',
+  userDelete: 'users.manage',
+  userResetPassword: 'users.manage'
 };
 
 const ROLE_PERMISSIONS = {
@@ -710,6 +715,88 @@ function doPost(e) {
 
       auditLog(ss, user, 'restoreBackup', '', `Backup restaurado: ${Object.keys(restored).map(k => k + '=' + restored[k]).join(', ')}`);
       return json({ ok: true, restored });
+    }
+
+    // ─── USUARIOS (gestión de cuentas) ──────────────────────────
+    if (action === 'getUsers') {
+      const sheet = ss.getSheetByName(SHEET_USUARIOS);
+      const data = sheet.getDataRange().getValues();
+      const usuarios = [];
+      for (let i = 1; i < data.length; i++) {
+        if (!String(data[i][0] || '').trim()) continue;
+        // No devolver contraseña al frontend
+        usuarios.push({ usuario: data[i][0], nombre: data[i][2], rol: data[i][3], email: data[i][4] });
+      }
+      return json({ ok: true, usuarios });
+    }
+
+    if (action === 'userAdd') {
+      const sheet = ss.getSheetByName(SHEET_USUARIOS);
+      const u = body.usuario;
+      if (!u.usuario || !u.nombre || !u.rol) return json({ ok: false, error: 'Faltan campos obligatorios' });
+      // Verificar que el usuario no existe ya
+      const data = sheet.getDataRange().getValues();
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][0]).trim().toLowerCase() === String(u.usuario).trim().toLowerCase())
+          return json({ ok: false, error: 'Ya existe un usuario con ese nombre de usuario' });
+      }
+      const password = u.password || 'cambiar123';
+      sheet.appendRow([u.usuario.trim(), password, u.nombre.trim(), u.rol.trim(), u.email || '']);
+      auditLog(ss, user, 'userAdd', '', `Nuevo usuario: ${u.usuario} (${u.rol})`);
+      return json({ ok: true });
+    }
+
+    if (action === 'userUpdate') {
+      const sheet = ss.getSheetByName(SHEET_USUARIOS);
+      const u = body.usuario;
+      if (!u.usuario || !u.nombre || !u.rol) return json({ ok: false, error: 'Faltan campos obligatorios' });
+      // No permitir que el Jefe se cambie su propio rol
+      if (String(u.usuario).trim().toLowerCase() === String(user.usuario).trim().toLowerCase()
+          && !esJefeDepartamento(u.rol))
+        return json({ ok: false, error: 'No puedes cambiarte tu propio rol de Jefe' });
+      const data = sheet.getDataRange().getValues();
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][0]).trim().toLowerCase() === String(u.usuario).trim().toLowerCase()) {
+          sheet.getRange(i + 1, 3).setValue(u.nombre.trim());
+          sheet.getRange(i + 1, 4).setValue(u.rol.trim());
+          sheet.getRange(i + 1, 5).setValue(u.email || '');
+          auditLog(ss, user, 'userUpdate', '', `Usuario actualizado: ${u.usuario} (${u.rol})`);
+          return json({ ok: true });
+        }
+      }
+      return json({ ok: false, error: 'Usuario no encontrado' });
+    }
+
+    if (action === 'userDelete') {
+      const sheet = ss.getSheetByName(SHEET_USUARIOS);
+      const uname = String(body.usuario || '').trim().toLowerCase();
+      // No permitir autoeliminación
+      if (uname === String(user.usuario).trim().toLowerCase())
+        return json({ ok: false, error: 'No puedes eliminar tu propia cuenta' });
+      const data = sheet.getDataRange().getValues();
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][0]).trim().toLowerCase() === uname) {
+          auditLog(ss, user, 'userDelete', '', `Usuario eliminado: ${data[i][0]}`);
+          sheet.deleteRow(i + 1);
+          return json({ ok: true });
+        }
+      }
+      return json({ ok: false, error: 'Usuario no encontrado' });
+    }
+
+    if (action === 'userResetPassword') {
+      const sheet = ss.getSheetByName(SHEET_USUARIOS);
+      const uname = String(body.usuario || '').trim().toLowerCase();
+      const newPass = String(body.password || 'cambiar123').trim();
+      const data = sheet.getDataRange().getValues();
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][0]).trim().toLowerCase() === uname) {
+          sheet.getRange(i + 1, 2).setValue(newPass);
+          auditLog(ss, user, 'userResetPassword', '', `Contraseña reseteada para: ${data[i][0]}`);
+          return json({ ok: true });
+        }
+      }
+      return json({ ok: false, error: 'Usuario no encontrado' });
     }
 
     if (action === 'profAdd') {

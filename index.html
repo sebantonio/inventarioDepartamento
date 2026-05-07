@@ -288,6 +288,7 @@
       <div class="sbox"><span class="si">🔍</span><input type="text" id="presSearch" placeholder="Buscar por ítem o profesor..." oninput="renderPrestamos()"></div>
       <button class="btn btn-loan" data-perm="loans.write" onclick="openPrestar()">⌛ Nuevo préstamo</button>
       <button class="btn" data-perm="profesores.manage" onclick="openProfModal()">👥 Gestionar profesores</button>
+      <button class="btn" data-perm="users.manage" onclick="openUsuariosModal()">🔐 Gestionar usuarios</button>
     </div>
     <div id="presContent"></div>
   </div>
@@ -719,6 +720,23 @@
       <div class="mf-right">
         <button class="btn" onclick="closeProfModal()">Cerrar</button>
         <button class="btn btn-p" onclick="saveProfesores()">💾 Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GESTIÓN DE USUARIOS -->
+<div class="mbg" id="mUsuarios" onclick="if(event.target===this)closeUsuariosModal()">
+  <div class="modal" style="width:min(640px,100%)">
+    <div class="mh"><div class="mt">🔐 Usuarios de la aplicación</div><button class="mx" onclick="closeUsuariosModal()">✕</button></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Cuentas de acceso a la aplicación. Solo el Jefe de Departamento puede gestionar usuarios.</p>
+    <div class="prof-list" id="usuariosList"></div>
+    <button class="add-aula-btn" onclick="addUsuarioRow()">＋ Añadir usuario</button>
+    <div class="mf" style="margin-top:18px">
+      <div></div>
+      <div class="mf-right">
+        <button class="btn" onclick="closeUsuariosModal()">Cerrar</button>
+        <button class="btn btn-p" onclick="saveUsuarios()">💾 Guardar cambios</button>
       </div>
     </div>
   </div>

@@ -506,3 +506,126 @@ function openPresDevModal(itemId){
 function closePresDevModal(){
   document.getElementById('mPresDevPicker').classList.remove('open');
 }
+
+// ─── GESTIÓN DE USUARIOS ──────────────────────────────────
+let _usuariosEditing = [];
+let _usuariosOriginal = [];
+const ROLES_DISPONIBLES = [
+  'Jefe Departamento',
+  'profesor',
+  'consulta',
+  'lector'
+];
+
+function _rolBadgeClass(rol){
+  const r = (rol||'').toLowerCase().trim();
+  if(r==='jefe departamento'||r==='jefe de departamento'||r==='administrador'||r==='admin') return 'jefe';
+  if(r==='profesor') return 'prof';
+  return 'lect';
+}
+
+async function openUsuariosModal(){
+  if(!requirePerm('users.manage')) return;
+  document.getElementById('usuariosList').innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center">Cargando...</p>';
+  document.getElementById('mUsuarios').classList.add('open');
+  try {
+    const res = await apiGet({ action: 'getUsers' });
+    if(!res.ok) throw new Error(res.error);
+    _usuariosEditing = res.usuarios.map(u=>({...u, _nuevo:false, _resetPass:''}));
+    _usuariosOriginal = res.usuarios.map(u=>u.usuario);
+    _renderUsuariosList();
+  } catch(e) {
+    document.getElementById('usuariosList').innerHTML = `<p style="color:var(--red);font-size:13px">${e.message}</p>`;
+  }
+}
+
+function closeUsuariosModal(){
+  document.getElementById('mUsuarios').classList.remove('open');
+}
+
+function _renderUsuariosList(){
+  const el = document.getElementById('usuariosList');
+  if(!_usuariosEditing.length){
+    el.innerHTML='<div class="empty" style="padding:20px"><div class="et" style="font-size:13px">Sin usuarios registrados.</div></div>';
+    return;
+  }
+  el.innerHTML = _usuariosEditing.map((u,i)=>{
+    const esSelf = u.usuario === SESSION?.usuario;
+    const selfClass = esSelf ? ' usr-self' : '';
+    return `<div class="usr-row">
+      <input class="fi-w usr-nombre${selfClass}" value="${u.nombre||''}" placeholder="Nombre completo *"
+        onchange="_usuariosEditing[${i}].nombre=this.value" ${esSelf?'title="Es tu propia cuenta"':''}>
+      <input class="fi-w usr-login${selfClass}" value="${u.usuario||''}" placeholder="Usuario *"
+        onchange="_usuariosEditing[${i}].usuario=this.value" ${u._nuevo?'':'readonly title="El usuario no se puede cambiar"'}>
+      <input class="fi-w usr-email${selfClass}" value="${u.email||''}" placeholder="Email"
+        onchange="_usuariosEditing[${i}].email=this.value">
+      <select class="fi-w usr-rol${esSelf?' usr-self':''}" onchange="_usuariosEditing[${i}].rol=this.value" ${esSelf?'disabled title="No puedes cambiar tu propio rol"':''}>
+        ${ROLES_DISPONIBLES.map(r=>`<option value="${r}" ${u.rol===r?'selected':''}>${r}</option>`).join('')}
+      </select>
+      ${u._nuevo
+        ? `<input class="fi-w usr-pass" placeholder="Contraseña inicial *" onchange="_usuariosEditing[${i}]._resetPass=this.value">`
+        : `<button class="btn btn-sm" onclick="_promptResetPass(${i})" title="Resetear contraseña">🔑 Reset</button>`
+      }
+      <button class="del-btn${selfClass}" onclick="_removeUsuarioRow(${i})" title="${esSelf?'No puedes eliminarte':'Eliminar usuario'}">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+function addUsuarioRow(){
+  _usuariosEditing.push({ usuario:'', nombre:'', email:'', rol:'profesor', _nuevo:true, _resetPass:'' });
+  _renderUsuariosList();
+}
+
+function _removeUsuarioRow(i){
+  const u = _usuariosEditing[i];
+  if(u.usuario === SESSION?.usuario){ toast('No puedes eliminar tu propia cuenta','err'); return; }
+  if(!u._nuevo && !confirm(`¿Eliminar el usuario "${u.nombre||u.usuario}"? Esta acción no se puede deshacer.`)) return;
+  _usuariosEditing.splice(i,1);
+  _renderUsuariosList();
+}
+
+async function _promptResetPass(i){
+  const u = _usuariosEditing[i];
+  const nueva = prompt(`Nueva contraseña para "${u.nombre||u.usuario}":\n(mínimo 6 caracteres)`);
+  if(!nueva) return;
+  if(nueva.trim().length < 6){ toast('La contraseña debe tener al menos 6 caracteres','err'); return; }
+  try {
+    const res = await apiPost({ action:'userResetPassword', usuario:u.usuario, password:nueva.trim() });
+    if(!res.ok) throw new Error(res.error);
+    toast(`Contraseña actualizada para ${u.nombre||u.usuario}`,'ok');
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+async function saveUsuarios(){
+  // Validar antes de enviar
+  for(const u of _usuariosEditing){
+    if(!u.nombre.trim() || !u.usuario.trim()){ toast('Nombre y usuario son obligatorios en todos los usuarios','err'); return; }
+    if(u._nuevo && !u._resetPass.trim()){ toast(`Indica una contraseña para "${u.nombre||u.usuario}"`, 'err'); return; }
+  }
+
+  const btn = document.querySelector('#mUsuarios .btn-p');
+  btn.disabled = true; btn.textContent = '⏳ Guardando...';
+  try {
+    // Añadir nuevos
+    for(const u of _usuariosEditing.filter(u=>u._nuevo)){
+      const res = await apiPost({ action:'userAdd', usuario:{ usuario:u.usuario.trim(), nombre:u.nombre.trim(), email:u.email||'', rol:u.rol, password:u._resetPass.trim() } });
+      if(!res.ok) throw new Error(res.error);
+    }
+    // Actualizar existentes
+    for(const u of _usuariosEditing.filter(u=>!u._nuevo)){
+      const res = await apiPost({ action:'userUpdate', usuario:{ usuario:u.usuario, nombre:u.nombre.trim(), email:u.email||'', rol:u.rol } });
+      if(!res.ok) throw new Error(res.error);
+    }
+    // Eliminar los que se quitaron de la lista
+    const editingLogins = new Set(_usuariosEditing.filter(u=>!u._nuevo).map(u=>u.usuario));
+    for(const login of _usuariosOriginal){
+      if(!editingLogins.has(login)){
+        const res = await apiPost({ action:'userDelete', usuario:login });
+        if(!res.ok) throw new Error(res.error);
+      }
+    }
+    toast('Usuarios guardados correctamente','ok');
+    closeUsuariosModal();
+  } catch(e){ toast('Error: '+e.message,'err'); }
+  finally { btn.disabled=false; btn.textContent='💾 Guardar cambios'; }
+}
