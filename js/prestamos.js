@@ -529,7 +529,7 @@ async function openUsuariosModal(){
   document.getElementById('usuariosList').innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center">Cargando...</p>';
   document.getElementById('mUsuarios').classList.add('open');
   try {
-    const res = await apiGet({ action: 'getUsers' });
+    const res = await apiPost({ action: 'getUsers' });
     if(!res.ok) throw new Error(res.error);
     _usuariosEditing = res.usuarios.map(u=>({...u, _nuevo:false, _resetPass:''}));
     _usuariosOriginal = res.usuarios.map(u=>u.usuario);

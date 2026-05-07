@@ -40,11 +40,11 @@ const ACTION_PERMISSIONS = {
   updateProfile: 'profile.write',
   changePassword: 'profile.write',
   notificarPedido: 'orders.write',
-  getUsers: 'users.manage',
-  userAdd: 'users.manage',
-  userUpdate: 'users.manage',
-  userDelete: 'users.manage',
-  userResetPassword: 'users.manage'
+  getUsers: 'config.manage',
+  userAdd: 'config.manage',
+  userUpdate: 'config.manage',
+  userDelete: 'config.manage',
+  userResetPassword: 'config.manage'
 };
 
 function normalizeRole(role){
