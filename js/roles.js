@@ -91,19 +91,23 @@ function roleLabel(){
 }
 
 function applyRoleUI(){
+  const isAdmin = can('config.manage');
   const rules = [
-    ['btnN', 'items.write', 'flex'],
-    ['btnE', 'import.write', 'flex'],
-    ['btnImp', 'import.write', 'flex'],
-    ['btnPres', 'loans.write', 'flex'],
+    ['btnN',   'items.write',  'flex'],
+    ['btnPres','loans.write',  'flex'],
     ['btnPed', 'orders.write', 'flex'],
-    ['btnQr', null, ''],
-    ['gsQr', null, 'inline-flex']
+    ['btnQr',  null,           ''],
+    ['gsQr',   null,           'inline-flex']
   ];
   rules.forEach(([id, permission, displayType]) => {
     const el = document.getElementById(id);
     if(el) el.style.display = (permission === null || can(permission)) ? displayType : 'none';
   });
+  // Exportar e importar: solo visibles en topbar para no-admins (admins los tienen en menú Departamento)
+  const btnE   = document.getElementById('btnE');
+  const btnImp = document.getElementById('btnImp');
+  if(btnE)   btnE.style.display   = isAdmin ? 'none' : (can('import.write') ? 'flex' : 'none');
+  if(btnImp) btnImp.style.display = isAdmin ? 'none' : (can('import.write') ? 'flex' : 'none');
   document.querySelectorAll('[data-perm]').forEach(el => {
     el.style.display = can(el.dataset.perm) ? 'flex' : 'none';
   });
