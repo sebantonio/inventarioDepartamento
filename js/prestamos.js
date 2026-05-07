@@ -40,9 +40,13 @@ function goPrestamos(tab){
   document.getElementById('presMeta').textContent = `${prestamos.length} préstamo${prestamos.length!==1?'s':''} registrado${prestamos.length!==1?'s':''} en total`;
 
   // Tabs
-  document.getElementById('ptActivos').classList.toggle('active', currentPresTab==='activos');
-  document.getElementById('ptVencidos').classList.toggle('active', currentPresTab==='vencidos');
-  document.getElementById('ptDevueltos').classList.toggle('active', currentPresTab==='devueltos');
+  ['activos','vencidos','devueltos','profesor','aula','material'].forEach(t=>{
+    document.getElementById('pt'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active', currentPresTab===t);
+  });
+
+  // El buscador solo tiene sentido en las tabs de lista, ocultarlo en las vistas agrupadas
+  const isGrouped = ['profesor','aula','material'].includes(currentPresTab);
+  document.querySelector('#pPres .toolbar').style.display = isGrouped ? 'none' : '';
 
   show('pPres');
   renderPrestamos();
@@ -53,7 +57,120 @@ function setPresTab(tab){
   goPrestamos(tab);
 }
 
+function _presCardHtml(p){
+  const venc = isVencido(p);
+  const item = items.find(x=>Number(x.id)===Number(p.itemId));
+  const aulaO = AULAS.find(a=>a.id===p.aulaOrigen)?.name || p.aulaOrigen;
+  const aulaD = p.aulaDestino ? (AULAS.find(a=>a.id===p.aulaDestino)?.name || p.aulaDestino) : '—';
+  const pendiente = Number(p.cantidad) - Number(p.cantidadDevuelta||0);
+  const stateClass = p.estado==='Devuelto'?'devuelto':(p.estado==='Parcial'?'parcial':(venc?'vencido':''));
+  const pillClass = stateClass;
+  return `<div class="pres-card ${stateClass}">
+    <div class="pres-info">
+      <div class="pres-name">${p.itemNombre} ${item?`<span style="color:var(--muted);font-weight:400;font-size:12px">· ${item.ref||''}</span>`:''}</div>
+      <div class="pres-prof">${p.profesorNombre}</div>
+      <div class="pres-meta">
+        <span>📅 ${p.fechaPrestamo}${p.fechaPrevista?` → ${p.fechaPrevista}`:''}</span>
+        <span>🏫 ${aulaO}${p.aulaDestino?` → ${aulaD}`:''}</span>
+        <span class="pres-pill ${pillClass}">${p.estado}${venc&&p.estado!=='Devuelto'?' (vencido)':''}</span>
+      </div>
+      ${p.obs?`<div style="font-size:11px;color:var(--muted);margin-top:4px">💬 ${p.obs}</div>`:''}
+    </div>
+    <div class="pres-actions">
+      <div class="pres-qty-info">
+        <div class="pres-qty-num">${pendiente}/${p.cantidad}</div>
+        <div>pendiente</div>
+      </div>
+      ${p.estado!=='Devuelto'?`<button class="btn btn-sm btn-return" onclick="openDevolver(${p.id})">📥 Devolver</button>`:''}
+    </div>
+  </div>`;
+}
+
+function _renderGrouped(groupKey){
+  const activos = getPrestamosActivos();
+  const mc = document.getElementById('presContent');
+  if(!activos.length){
+    mc.innerHTML=`<div class="empty"><div class="ei">📋</div><div class="et">No hay préstamos activos</div></div>`;
+    return;
+  }
+
+  // Agrupar
+  const groups = {};
+  activos.forEach(p=>{
+    let key, label, sublabel='';
+    if(groupKey==='profesor'){
+      key = p.profesorId || p.profesorNombre;
+      label = p.profesorNombre;
+    } else if(groupKey==='aula'){
+      key = p.aulaOrigen;
+      label = AULAS.find(a=>a.id===p.aulaOrigen)?.name || p.aulaOrigen;
+    } else {
+      key = p.itemId;
+      label = p.itemNombre;
+      const it = items.find(x=>Number(x.id)===Number(p.itemId));
+      sublabel = it ? (it.ref||'') : '';
+    }
+    if(!groups[key]) groups[key] = {label, sublabel, prestamos:[]};
+    groups[key].prestamos.push(p);
+  });
+
+  // Ordenar grupos: primero los que tienen vencidos, luego alfabético
+  const sorted = Object.values(groups).sort((a,b)=>{
+    const aVenc = a.prestamos.some(isVencido);
+    const bVenc = b.prestamos.some(isVencido);
+    if(aVenc && !bVenc) return -1;
+    if(!aVenc && bVenc) return 1;
+    return a.label.localeCompare(b.label);
+  });
+
+  mc.innerHTML = sorted.map(g=>{
+    const total = g.prestamos.reduce((s,p)=>s+(Number(p.cantidad)-Number(p.cantidadDevuelta||0)),0);
+    const vencidos = g.prestamos.filter(isVencido).length;
+    const badgeClass = vencidos ? 'warn' : '';
+    const badgeTxt = vencidos ? `⚠ ${vencidos} vencido${vencidos!==1?'s':''}` : `${g.prestamos.length} préstamo${g.prestamos.length!==1?'s':''}`;
+
+    // Ordenar préstamos del grupo: vencidos primero
+    const sorted2 = [...g.prestamos].sort((a,b)=>(isVencido(b)?1:0)-(isVencido(a)?1:0));
+
+    const rows = sorted2.map(p=>{
+      const venc = isVencido(p);
+      const pendiente = Number(p.cantidad)-Number(p.cantidadDevuelta||0);
+      let meta = '';
+      if(groupKey==='profesor'){
+        meta = `${p.itemNombre}${items.find(x=>Number(x.id)===Number(p.itemId))?.ref?' ['+items.find(x=>Number(x.id)===Number(p.itemId)).ref+']':''} · ${pendiente} ud${pendiente!==1?'s':''}`;
+      } else if(groupKey==='aula'){
+        meta = `${p.itemNombre} — ${p.profesorNombre} · ${pendiente} ud${pendiente!==1?'s':''}`;
+      } else {
+        meta = `${p.profesorNombre} · ${pendiente} ud${pendiente!==1?'s':''}`;
+      }
+      const fechaTxt = p.fechaPrevista ? `devolver: ${p.fechaPrevista}` : `prestado: ${p.fechaPrestamo}`;
+      return `<div class="pres-group-row">
+        <div class="pres-group-row-info">
+          <strong>${meta}</strong>
+          <span class="${venc?'venc':''}">📅 ${fechaTxt}${venc?' ⚠ Vencido':''}</span>
+        </div>
+        <button class="btn btn-sm btn-return" onclick="openDevolver(${p.id})">📥 Devolver</button>
+      </div>`;
+    }).join('');
+
+    return `<div class="pres-group">
+      <div class="pres-group-header">
+        <div>
+          <div class="pres-group-title">${g.label}${g.sublabel?` <span style="font-weight:400;font-size:12px;color:var(--muted)">${g.sublabel}</span>`:''}</div>
+          <div class="pres-group-meta">${total} unidad${total!==1?'es':''} fuera</div>
+        </div>
+        <span class="pres-group-badge ${badgeClass}">${badgeTxt}</span>
+      </div>
+      <div class="pres-group-body">${rows}</div>
+    </div>`;
+  }).join('');
+}
+
 function renderPrestamos(){
+  if(currentPresTab==='profesor'){ _renderGrouped('profesor'); return; }
+  if(currentPresTab==='aula'){     _renderGrouped('aula');     return; }
+  if(currentPresTab==='material'){ _renderGrouped('material'); return; }
+
   const q = document.getElementById('presSearch').value.toLowerCase();
   let data;
   if(currentPresTab==='activos') data = getPrestamosActivos().filter(p=>!isVencido(p));
@@ -64,7 +181,6 @@ function renderPrestamos(){
     data = data.filter(p=>[p.itemNombre,p.profesorNombre,p.obs].join(' ').toLowerCase().includes(q));
   }
 
-  // Ordenar: más reciente primero para histórico, más antiguo primero para activos/vencidos
   data.sort((a,b)=>{
     if(currentPresTab==='devueltos') return new Date(b.fechaDevolucion||b.fechaPrestamo) - new Date(a.fechaDevolucion||a.fechaPrestamo);
     return new Date(a.fechaPrevista||a.fechaPrestamo) - new Date(b.fechaPrevista||b.fechaPrestamo);
@@ -81,35 +197,7 @@ function renderPrestamos(){
     return;
   }
 
-  mc.innerHTML = data.map(p=>{
-    const venc = isVencido(p);
-    const item = items.find(x=>Number(x.id)===Number(p.itemId));
-    const aulaO = AULAS.find(a=>a.id===p.aulaOrigen)?.name || p.aulaOrigen;
-    const aulaD = p.aulaDestino ? (AULAS.find(a=>a.id===p.aulaDestino)?.name || p.aulaDestino) : '—';
-    const pendiente = Number(p.cantidad) - Number(p.cantidadDevuelta||0);
-    const stateClass = p.estado==='Devuelto'?'devuelto':(p.estado==='Parcial'?'parcial':(venc?'vencido':''));
-    const pillClass = p.estado==='Devuelto'?'devuelto':(p.estado==='Parcial'?'parcial':(venc?'vencido':''));
-
-    return `<div class="pres-card ${stateClass}">
-      <div class="pres-info">
-        <div class="pres-name">${p.itemNombre} ${item?`<span style="color:var(--muted);font-weight:400;font-size:12px">· ${item.ref||''}</span>`:''}</div>
-        <div class="pres-prof">${p.profesorNombre}</div>
-        <div class="pres-meta">
-          <span>📅 ${p.fechaPrestamo}${p.fechaPrevista?` → ${p.fechaPrevista}`:''}</span>
-          <span>🏫 ${aulaO}${p.aulaDestino?` → ${aulaD}`:''}</span>
-          <span class="pres-pill ${pillClass}">${p.estado}${venc&&p.estado!=='Devuelto'?' (vencido)':''}</span>
-        </div>
-        ${p.obs?`<div style="font-size:11px;color:var(--muted);margin-top:4px">💬 ${p.obs}</div>`:''}
-      </div>
-      <div class="pres-actions">
-        <div class="pres-qty-info">
-          <div class="pres-qty-num">${pendiente}/${p.cantidad}</div>
-          <div>pendiente</div>
-        </div>
-        ${p.estado!=='Devuelto'?`<button class="btn btn-sm btn-return" onclick="openDevolver(${p.id})">📥 Devolver</button>`:''}
-      </div>
-    </div>`;
-  }).join('');
+  mc.innerHTML = data.map(_presCardHtml).join('');
 }
 
 // ─── PRESTAR ─────────────────────────────────────────────
