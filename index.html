@@ -32,11 +32,13 @@
 </div>
 
 <nav class="topbar">
-  <a class="brand" onclick="goHome()">
-    <div class="brand-logo"><img src="favicon.svg" class="logo-img"></div>
-    <div class="brand-name">Inventario Taller Electricidad/Electrónica FP</div>
-  </a>
-  <button class="tbtn tbtn-reload" id="btnReload" onclick="loadData()" title="Recargar datos">🔄</button>
+  <div class="brand-wrap">
+    <a class="brand" onclick="goHome()">
+      <div class="brand-logo"><img src="favicon.svg" class="logo-img"></div>
+      <div class="brand-name">Inventario Taller Electricidad/Electrónica FP</div>
+    </a>
+    <button class="tbtn tbtn-reload" id="btnReload" onclick="loadData()" title="Recargar datos">🔄</button>
+  </div>
   <div class="topbar-right">
     <div class="conn-status loading" id="connStatus"><span class="conn-dot"></span><span id="connTxt">Conectando...</span></div>
     <div class="breadcrumb" id="bc"></div>
