@@ -360,7 +360,65 @@ function exportFullBackup(){
   toast('Backup completo exportado','ok');
 }
 
+// ═════════════════════════════════════════════════════════
+// MODAL IMPRIMIR — selector de columnas
+// ═════════════════════════════════════════════════════════
+const PRINT_COLS = [
+  { key:'foto',      label:'Foto',          default:false },
+  { key:'ref',       label:'Referencia',    default:true  },
+  { key:'item',      label:'Nombre',        default:true  },
+  { key:'aula',      label:'Aula',          default:true  },
+  { key:'mod',       label:'Módulo',        default:false },
+  { key:'qty',       label:'Cantidad',      default:true  },
+  { key:'min',       label:'Mínimo',        default:false },
+  { key:'cat',       label:'Categoría',     default:true  },
+  { key:'loc',       label:'Ubicación',     default:true  },
+  { key:'est',       label:'Estado',        default:true  },
+  { key:'util',      label:'Utilidad',      default:false },
+  { key:'mant',      label:'Mantenimiento', default:false },
+  { key:'obs',       label:'Observaciones', default:false },
+];
+const PRINT_COLS_KEY = 'inv_print_cols';
+
+function _getPrintCols(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(PRINT_COLS_KEY));
+    if(saved && typeof saved === 'object') return saved;
+  } catch(e){}
+  return Object.fromEntries(PRINT_COLS.map(c=>[c.key, c.default]));
+}
+
+function openPrintModal(){
+  const sel = _getPrintCols();
+  const grid = document.getElementById('printColGrid');
+  grid.innerHTML = PRINT_COLS.map(c=>`
+    <label class="print-col-item">
+      <input type="checkbox" id="prcol_${c.key}" ${sel[c.key]?'checked':''}>
+      <span>${c.label}</span>
+    </label>`).join('');
+  document.getElementById('mPrint').classList.add('open');
+}
+
+function closePrintModal(){
+  document.getElementById('mPrint').classList.remove('open');
+}
+
+function printColSelectAll(){
+  PRINT_COLS.forEach(c=>{ document.getElementById('prcol_'+c.key).checked = true; });
+}
+function printColSelectNone(){
+  PRINT_COLS.forEach(c=>{ document.getElementById('prcol_'+c.key).checked = false; });
+}
+
 function printInv(){
+  // Guardar selección en localStorage
+  const sel = Object.fromEntries(PRINT_COLS.map(c=>[c.key, document.getElementById('prcol_'+c.key)?.checked ?? c.default]));
+  localStorage.setItem(PRINT_COLS_KEY, JSON.stringify(sel));
+  const cols = PRINT_COLS.filter(c=>sel[c.key]);
+  if(!cols.length){ toast('Selecciona al menos una columna','err'); return; }
+
+  closePrintModal();
+
   const titulo = cf?.label || 'Inventario';
   const data = getFiltered();
   const total = data.length;
@@ -370,17 +428,43 @@ function printInv(){
   document.getElementById('printMeta').innerHTML =
     `IES El Bosco — Inventario Departamento<br>${total} tipos · ${uds} unidades<br>${fecha}`;
 
-  // Renderizar todos los ítems en tabla (sin paginación) antes de imprimir
+  // Construir tabla con las columnas seleccionadas
   const mc = document.getElementById('iContent');
   const prevContent = mc.innerHTML;
-  rTable(data, mc);
+  const thead = cols.map(c=>`<th>${c.label}</th>`).join('');
+  const tbody = data.map(x=>{
+    const low = Number(x.qty)<=Number(x.min);
+    const mant = needsMaintenance(x);
+    const cat = CATS[x.cat]||CATS['Otros']||{c:'#6b7280',bg:'#f9fafb',i:'🔧'};
+    const ec = ESTC[x.est]||'#6b7280';
+    const mantInfo = [x.mantEstado,x.mantFecha,x.mantResp].filter(Boolean).join(' · ');
+    return '<tr>'+cols.map(c=>{
+      if(c.key==='foto')      return `<td>${x.foto?`<img class="table-photo" src="${x.foto}" alt="">`:''}</td>`;
+      if(c.key==='ref')       return `<td><span class="rbadge">${x.ref||'—'}</span></td>`;
+      if(c.key==='item')      return `<td style="font-weight:600">${x.item}</td>`;
+      if(c.key==='aula')      return `<td>${AULAS.find(a=>a.id===x.aula)?.name||x.aula||'—'}</td>`;
+      if(c.key==='mod')       return `<td style="font-size:11px">${(findModulo(x.mod)||{nombre:x.mod||'—'}).nombre}</td>`;
+      if(c.key==='qty')       return `<td><span class="${low?'qlow':'qok'}">${x.qty}${low?' ⚠':''}</span></td>`;
+      if(c.key==='min')       return `<td>${x.min||'—'}</td>`;
+      if(c.key==='cat')       return `<td>${x.cat?`<span class="cpill" style="background:${cat.bg};color:${cat.c}">${cat.i} ${x.cat}</span>`:'—'}</td>`;
+      if(c.key==='loc')       return `<td>${x.loc||'—'}</td>`;
+      if(c.key==='est')       return `<td>${x.est?`<span class="edot"><span class="dot" style="background:${ec}"></span>${x.est}</span>`:'—'}</td>`;
+      if(c.key==='util')      return `<td style="font-size:11px">${x.util||'—'}</td>`;
+      if(c.key==='mant')      return `<td>${mant?`🛠️ ${mantInfo||'Pendiente'}`:'—'}</td>`;
+      if(c.key==='obs')       return `<td style="font-size:11px">${x.obs||'—'}</td>`;
+      return '<td>—</td>';
+    }).join('')+'</tr>';
+  }).join('');
+  mc.innerHTML = `<div class="tw"><div class="tw-scroll"><table>
+    <thead><tr>${thead}</tr></thead>
+    <tbody>${tbody}</tbody>
+  </table></div></div>`;
 
   const prev = document.title;
   document.title = `Inventario ${titulo}`;
   window.print();
   document.title = prev;
 
-  // Restaurar vista paginada normal
   mc.innerHTML = prevContent;
 }
 

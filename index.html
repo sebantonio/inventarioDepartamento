@@ -336,7 +336,7 @@
       <button class="btn print-no" data-perm="loans.write" style="padding:10px 22px;font-size:13px;border-color:var(--amber);color:var(--amber)" onclick="openPrestar()">⌛ Nuevo préstamo</button>
       <button class="btn btn-d print-no" data-perm="items.write" style="padding:10px 22px;font-size:13px" onclick="openDelModal()">🗑️ Dar de baja</button>
       <button class="btn print-no" style="padding:10px 22px;font-size:13px;border-color:var(--accent);color:var(--accent)" onclick="printBulkItemQrs()"><img class="btn-icon-img" src="icons/qr-code.svg" alt=""> Imprimir QR</button>
-      <button class="btn print-no" style="padding:10px 22px;font-size:13px" onclick="printInv()">🖨️ Imprimir</button>
+      <button class="btn print-no" style="padding:10px 22px;font-size:13px" onclick="openPrintModal()">🖨️ Imprimir</button>
       <button class="btn print-no" style="padding:10px 22px;font-size:13px" onclick="goHome()">🏠 Inicio</button>
     </div>
   </div>
@@ -599,6 +599,25 @@
       <div class="mf-right">
         <button class="btn" onclick="closeDevolver()">Cancelar</button>
         <button class="btn btn-return" id="btnDevolverSave" onclick="confirmDevolver()">📥 Confirmar devolución</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPRIMIR -->
+<div class="mbg" id="mPrint" onclick="if(event.target===this)closePrintModal()">
+  <div class="modal" style="width:min(520px,100%)">
+    <div class="mh"><div class="mt">🖨️ Imprimir inventario</div><button class="mx" onclick="closePrintModal()">✕</button></div>
+    <div class="mb" style="padding:18px 20px 20px">
+      <p style="margin:0 0 14px;color:var(--muted);font-size:13px">Selecciona las columnas que aparecerán en la impresión:</p>
+      <div class="print-col-grid" id="printColGrid"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-sm" onclick="printColSelectAll()">Seleccionar todo</button>
+        <button class="btn btn-sm" onclick="printColSelectNone()">Ninguno</button>
+      </div>
+      <div style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn" onclick="closePrintModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="printInv()">🖨️ Imprimir</button>
       </div>
     </div>
   </div>
