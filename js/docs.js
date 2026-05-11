@@ -39,12 +39,11 @@ function syncMainPhotoFromDocs(){
 
 async function addDocFiles(files){
   const name = document.getElementById('f_item')?.value.trim() || 'foto';
-  for(const f of files){
-    if(f.type.startsWith('image/') && typeof setMainPhotoFromFile === 'function') {
-      await setMainPhotoFromFile(f);
-    }
-    docsPendientes.push(await _processFile(f, name));
-  }
+  const arr = Array.from(files);
+  const firstImg = arr.find(f => f.type.startsWith('image/'));
+  const processed = await Promise.all(arr.map(f => _processFile(f, name)));
+  if(firstImg && typeof setMainPhotoFromFile === 'function') await setMainPhotoFromFile(firstImg);
+  docsPendientes.push(...processed);
   renderDocList();
 }
 
@@ -152,7 +151,8 @@ function closeDocsModal(){ document.getElementById('mDocs').classList.remove('op
 
 async function addDocsModalFiles(files){
   const name = _dmItem?.item || 'foto';
-  for(const f of files) _dmPendientes.push(await _processFile(f, name));
+  const processed = await Promise.all(Array.from(files).map(f => _processFile(f, name)));
+  _dmPendientes.push(...processed);
   _renderDmList();
 }
 
