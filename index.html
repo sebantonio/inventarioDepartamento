@@ -450,19 +450,13 @@
         <div class="docs-lbl">📎 Documentación adjunta</div>
         <input type="file" id="f_doc_input" multiple style="display:none" onchange="addDocFiles(this.files);this.value=''">
         <input type="file" id="f_cam_input" accept="image/*" capture="environment" style="display:none" onchange="addDocFiles(this.files);this.value=''">
-        <div id="f_doc_dropzone" class="doc-dropzone"
-          ondragover="event.preventDefault();this.classList.add('dz-over')"
-          ondragleave="this.classList.remove('dz-over')"
-          ondrop="event.preventDefault();this.classList.remove('dz-over');addDocFiles(event.dataTransfer.files)">
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('f_doc_input').click()">
-              <span style="font-size:20px">📁</span><span>Subir archivos</span>
-            </button>
-            <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('f_cam_input').click()">
-              <span style="font-size:20px">📷</span><span>Hacer foto</span>
-            </button>
-          </div>
-          <div class="dz-hint">o arrastra aquí varios archivos a la vez</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('f_doc_input').click()">
+            <span style="font-size:20px">📁</span><span>Subir archivos</span>
+          </button>
+          <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('f_cam_input').click()">
+            <span style="font-size:20px">📷</span><span>Hacer foto</span>
+          </button>
         </div>
         <div class="doc-list" id="f_doc_list"></div>
       </div>
@@ -505,15 +499,9 @@
       <div class="doc-list" id="dm_doc_list"></div>
       <input type="file" id="dm_doc_input" multiple style="display:none" onchange="addDocsModalFiles(this.files);this.value=''">
       <input type="file" id="dm_cam_input" accept="image/*" capture="environment" style="display:none" onchange="addDocsModalFiles(this.files);this.value=''">
-      <div id="dm_doc_dropzone" class="doc-dropzone"
-        ondragover="event.preventDefault();this.classList.add('dz-over')"
-        ondragleave="this.classList.remove('dz-over')"
-        ondrop="event.preventDefault();this.classList.remove('dz-over');addDocsModalFiles(event.dataTransfer.files)">
-        <div style="display:flex;gap:8px">
-          <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('dm_doc_input').click()"><span style="font-size:18px">📁</span><span>Subir archivos</span></button>
-          <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('dm_cam_input').click()"><span style="font-size:18px">📷</span><span>Hacer foto</span></button>
-        </div>
-        <div class="dz-hint">o arrastra aquí varios archivos a la vez</div>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('dm_doc_input').click()"><span style="font-size:18px">📁</span><span>Subir archivos</span></button>
+        <button type="button" class="doc-drop" style="flex:1" onclick="document.getElementById('dm_cam_input').click()"><span style="font-size:18px">📷</span><span>Hacer foto</span></button>
       </div>
     </div>
     <div class="mf">
