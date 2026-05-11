@@ -362,16 +362,26 @@ function exportFullBackup(){
 
 function printInv(){
   const titulo = cf?.label || 'Inventario';
-  const total = getBase().length;
-  const uds = getBase().reduce((s,x)=>s+(Number(x.qty)||0),0);
+  const data = getFiltered();
+  const total = data.length;
+  const uds = data.reduce((s,x)=>s+(Number(x.qty)||0),0);
   const fecha = new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
   document.getElementById('printTitle').textContent = `${cf?.icon||'📦'} ${titulo}`;
   document.getElementById('printMeta').innerHTML =
     `IES El Bosco — Inventario Departamento<br>${total} tipos · ${uds} unidades<br>${fecha}`;
+
+  // Renderizar todos los ítems en tabla (sin paginación) antes de imprimir
+  const mc = document.getElementById('iContent');
+  const prevContent = mc.innerHTML;
+  rTable(data, mc);
+
   const prev = document.title;
   document.title = `Inventario ${titulo}`;
   window.print();
   document.title = prev;
+
+  // Restaurar vista paginada normal
+  mc.innerHTML = prevContent;
 }
 
 // ═════════════════════════════════════════════════════════

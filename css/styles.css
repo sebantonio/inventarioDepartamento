@@ -877,7 +877,7 @@ textarea.fi-w{resize:vertical;min-height:60px}
   .print-header-meta{font-size:9pt;color:#555;text-align:right;line-height:1.6}
 
   /* Tabla */
-  .tw{box-shadow:none!important;border:1px solid #ccc!important}
+  .tw{display:block!important;box-shadow:none!important;border:1px solid #ccc!important}
   .tw-scroll{overflow:visible!important;display:block!important}
   table{min-width:100%!important;width:100%!important;font-size:9pt}
   th{background:#f0f2f8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
