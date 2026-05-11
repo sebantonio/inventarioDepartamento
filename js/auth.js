@@ -43,6 +43,7 @@ async function doLogin(){
     document.getElementById('loginUser').value = '';
     document.getElementById('loginPass').value = '';
     showUserChip();
+    _showOverlay();
     loadData();
   } catch(err) {
     console.error(err);
@@ -86,6 +87,13 @@ function syncSessionUser(user){
     email: user.email || SESSION.email || ''
   };
   localStorage.setItem('inv_session', JSON.stringify(SESSION));
+}
+
+function _showOverlay(){
+  const ov = document.getElementById('loadOverlay');
+  if(!ov) return;
+  ov.classList.remove('lo-hide');
+  ov.style.display = '';
 }
 
 function _hideOverlay(){
