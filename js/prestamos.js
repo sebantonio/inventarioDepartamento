@@ -514,6 +514,7 @@ function closePresDevModal(){
 // ─── GESTIÓN DE USUARIOS ──────────────────────────────────
 let _usuariosEditing = [];
 let _usuariosOriginal = [];
+let _todosModulos = []; // módulos de la hoja Modulos con responsable actual
 const ROLES_DISPONIBLES = [
   'Jefe Departamento',
   'profesor',
@@ -535,7 +536,8 @@ async function openUsuariosModal(){
   try {
     const res = await apiPost({ action: 'getUsers' });
     if(!res.ok) throw new Error(res.error);
-    _usuariosEditing = res.usuarios.map(u=>({...u, _nuevo:false, _resetPass:''}));
+    _todosModulos = res.todosModulos || [];
+    _usuariosEditing = res.usuarios.map(u=>({...u, _nuevo:false, _resetPass:'', _modulos: u.modulos || []}));
     _usuariosOriginal = res.usuarios.map(u=>u.usuario);
     _renderUsuariosList();
   } catch(e) {
@@ -556,6 +558,8 @@ function _renderUsuariosList(){
   el.innerHTML = _usuariosEditing.map((u,i)=>{
     const esSelf = u.usuario === SESSION?.usuario;
     const selfClass = esSelf ? ' usr-self' : '';
+    const nMods = (u._modulos||[]).length;
+    const modBadge = nMods > 0 ? `<span class="usr-mod-badge">${nMods}</span>` : '';
     return `<div class="usr-row">
       <input class="fi-w usr-nombre${selfClass}" value="${u.nombre||''}" placeholder="Nombre completo *"
         onchange="_usuariosEditing[${i}].nombre=this.value" ${esSelf?'title="Es tu propia cuenta"':''}>
@@ -570,13 +574,14 @@ function _renderUsuariosList(){
         ? `<input class="fi-w usr-pass" placeholder="Contraseña inicial *" onchange="_usuariosEditing[${i}]._resetPass=this.value">`
         : `<button class="btn btn-sm" onclick="_promptResetPass(${i})" title="Resetear contraseña">🔑 Reset</button>`
       }
+      <button class="btn btn-sm usr-mods-btn" onclick="openModulosUsuario(${i})" title="Asignar módulos que imparte"${_todosModulos.length===0?' disabled':''}>📚${modBadge}</button>
       <button class="del-btn${selfClass}" onclick="_removeUsuarioRow(${i})" title="${esSelf?'No puedes eliminarte':'Eliminar usuario'}">🗑</button>
     </div>`;
   }).join('');
 }
 
 function addUsuarioRow(){
-  _usuariosEditing.push({ usuario:'', nombre:'', email:'', rol:'profesor', _nuevo:true, _resetPass:'' });
+  _usuariosEditing.push({ usuario:'', nombre:'', email:'', rol:'profesor', _nuevo:true, _resetPass:'', _modulos:[] });
   _renderUsuariosList();
 }
 
@@ -598,6 +603,99 @@ async function _promptResetPass(i){
     if(!res.ok) throw new Error(res.error);
     toast(`Contraseña actualizada para ${u.nombre||u.usuario}`,'ok');
   } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+// ─── MÓDULOS POR USUARIO ──────────────────────────────────
+let _modUsuarioIdx = null;
+
+function openModulosUsuario(i){
+  _modUsuarioIdx = i;
+  const u = _usuariosEditing[i];
+  const seleccionados = new Set(u._modulos || []);
+
+  // Agrupar módulos por ciclo usando CICLOS de config.js
+  const cicloMap = {};
+  const cicloOrder = [];
+  CICLOS.forEach(c => {
+    if(c.id === 'departamento') return;
+    cicloMap[c.id] = { name: c.name, nivel: c.nivel || '', mods: [] };
+    cicloOrder.push(c.id);
+    c.modulos.forEach(m => cicloMap[c.id].mods.push({ cod: String(m.cod), name: m.name }));
+  });
+
+  // Módulos presentes en la hoja pero sin ciclo conocido → grupo "Otros"
+  const codsConocidos = new Set(CICLOS.flatMap(c=>(c.id==='departamento'?[]:c.modulos.map(m=>String(m.cod)))));
+  const sinCiclo = _todosModulos.filter(m=>!codsConocidos.has(String(m.cod)));
+  if(sinCiclo.length){
+    cicloMap['__otros__'] = { name:'Otros módulos', nivel:'', mods: sinCiclo.map(m=>({cod:m.cod, name:m.nombre})) };
+    cicloOrder.push('__otros__');
+  }
+
+  const html = cicloOrder.map(cid=>{
+    const c = cicloMap[cid];
+    if(!c.mods.length) return '';
+    const rows = c.mods.map(m=>{
+      // Solo mostrar módulos que están en la hoja Modulos (tienen registro real)
+      const enHoja = _todosModulos.find(t=>String(t.cod)===String(m.cod));
+      if(!enHoja) return '';
+      const checked = seleccionados.has(String(m.cod)) ? 'checked' : '';
+      const otroResp = enHoja.responsable && enHoja.responsable.toLowerCase()!==(u.nombre||'').toLowerCase()
+        ? `<span class="mod-otro-resp">(${enHoja.responsable})</span>` : '';
+      return `<label class="mod-check-row">
+        <input type="checkbox" value="${m.cod}" ${checked} onchange="_toggleModUsuario('${m.cod}',this.checked)">
+        <span class="mod-check-name">${m.name}</span>
+        ${otroResp}
+      </label>`;
+    }).filter(Boolean).join('');
+    if(!rows) return '';
+    return `<div class="mod-ciclo-group">
+      <div class="mod-ciclo-title">${c.name}${c.nivel?' · '+c.nivel:''}</div>
+      ${rows}
+    </div>`;
+  }).filter(Boolean).join('');
+
+  document.getElementById('mModUsuarioTitle').textContent = `📚 Módulos de ${u.nombre||u.usuario}`;
+  document.getElementById('mModUsuarioBody').innerHTML = html || '<p style="color:var(--muted);font-size:13px">No hay módulos en la hoja Modulos.</p>';
+  document.getElementById('mModUsuario').classList.add('open');
+}
+
+function _toggleModUsuario(cod, checked){
+  if(_modUsuarioIdx === null) return;
+  const u = _usuariosEditing[_modUsuarioIdx];
+  if(!u._modulos) u._modulos = [];
+  if(checked){
+    if(!u._modulos.includes(cod)) u._modulos.push(cod);
+  } else {
+    u._modulos = u._modulos.filter(c=>c!==cod);
+  }
+}
+
+function closeModulosUsuario(){
+  document.getElementById('mModUsuario').classList.remove('open');
+  // Actualizar badge en lista
+  _renderUsuariosList();
+}
+
+async function saveModulosUsuario(){
+  if(_modUsuarioIdx === null) return;
+  const u = _usuariosEditing[_modUsuarioIdx];
+  if(!u.nombre.trim()){ toast('Guarda primero el nombre del usuario antes de asignar módulos','err'); return; }
+  const btn = document.getElementById('btnSaveModUsuario');
+  btn.disabled = true; btn.textContent = '⏳ Guardando...';
+  try {
+    const res = await apiPost({ action:'userAssignModulos', nombre: u.nombre.trim(), modulos: u._modulos || [] });
+    if(!res.ok) throw new Error(res.error);
+    toast(`Módulos actualizados para ${u.nombre}`,'ok');
+    // Sincronizar responsable en _todosModulos local
+    _todosModulos.forEach(m=>{
+      const esMio = (u._modulos||[]).includes(String(m.cod));
+      const eraMio = (m.responsable||'').toLowerCase() === u.nombre.toLowerCase();
+      if(esMio) m.responsable = u.nombre;
+      else if(eraMio) m.responsable = '';
+    });
+    closeModulosUsuario();
+  } catch(e){ toast('Error: '+e.message,'err'); }
+  finally { btn.disabled=false; btn.textContent='💾 Guardar módulos'; }
 }
 
 async function saveUsuarios(){

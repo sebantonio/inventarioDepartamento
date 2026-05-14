@@ -44,7 +44,8 @@ const ACTION_PERMISSIONS = {
   userAdd: 'config.manage',
   userUpdate: 'config.manage',
   userDelete: 'config.manage',
-  userResetPassword: 'config.manage'
+  userResetPassword: 'config.manage',
+  userAssignModulos: 'config.manage'
 };
 
 function normalizeRole(role){
