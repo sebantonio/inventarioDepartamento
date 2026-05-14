@@ -574,7 +574,7 @@ function _renderUsuariosList(){
         ? `<input class="fi-w usr-pass" placeholder="Contraseña inicial *" onchange="_usuariosEditing[${i}]._resetPass=this.value">`
         : `<button class="btn btn-sm" onclick="_promptResetPass(${i})" title="Resetear contraseña">🔑 Reset</button>`
       }
-      <button class="btn btn-sm usr-mods-btn" onclick="openModulosUsuario(${i})" title="Asignar módulos">📚${nMods>0?` (${nMods})`:''}+</button>
+      <button class="btn btn-sm usr-mods-btn" onclick="openModulosUsuario(${i})" title="Asignar módulos que imparte">📚 Módulos${nMods>0?` (${nMods})`:''}</button>
       <button class="del-btn${selfClass}" onclick="_removeUsuarioRow(${i})" title="${esSelf?'No puedes eliminarte':'Eliminar usuario'}">🗑</button>
     </div>`;
   }).join('');
@@ -631,31 +631,32 @@ function openModulosUsuario(i){
     cicloOrder.push('__otros__');
   }
 
+  // Mapa de responsables actuales desde backend (disponible solo tras redespliegue GAS)
+  const respMap = {};
+  _todosModulos.forEach(m=>{ respMap[String(m.cod)] = m.responsable || ''; });
+
   const html = cicloOrder.map(cid=>{
     const c = cicloMap[cid];
     if(!c.mods.length) return '';
     const rows = c.mods.map(m=>{
-      // Solo mostrar módulos que están en la hoja Modulos (tienen registro real)
-      const enHoja = _todosModulos.find(t=>String(t.cod)===String(m.cod));
-      if(!enHoja) return '';
       const checked = seleccionados.has(String(m.cod)) ? 'checked' : '';
-      const otroResp = enHoja.responsable && enHoja.responsable.toLowerCase()!==(u.nombre||'').toLowerCase()
-        ? `<span class="mod-otro-resp">(${enHoja.responsable})</span>` : '';
+      const respActual = respMap[String(m.cod)] || '';
+      const otroResp = respActual && respActual.toLowerCase() !== (u.nombre||'').toLowerCase()
+        ? `<span class="mod-otro-resp">(${respActual})</span>` : '';
       return `<label class="mod-check-row">
         <input type="checkbox" value="${m.cod}" ${checked} onchange="_toggleModUsuario('${m.cod}',this.checked)">
         <span class="mod-check-name">${m.name}</span>
         ${otroResp}
       </label>`;
-    }).filter(Boolean).join('');
-    if(!rows) return '';
+    }).join('');
     return `<div class="mod-ciclo-group">
       <div class="mod-ciclo-title">${c.name}${c.nivel?' · '+c.nivel:''}</div>
       ${rows}
     </div>`;
-  }).filter(Boolean).join('');
+  }).join('');
 
   document.getElementById('mModUsuarioTitle').textContent = `📚 Módulos de ${u.nombre||u.usuario}`;
-  document.getElementById('mModUsuarioBody').innerHTML = html || '<p style="color:var(--muted);font-size:13px">No hay módulos en la hoja Modulos.</p>';
+  document.getElementById('mModUsuarioBody').innerHTML = html || '<p style="color:var(--muted);font-size:13px">No hay ciclos configurados.</p>';
   document.getElementById('mModUsuario').classList.add('open');
 }
 
