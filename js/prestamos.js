@@ -277,10 +277,18 @@ function openPrestar(itemId){
     document.getElementById('pres_cant').max = 9999;
   }
 
-  document.getElementById('pres_prof').innerHTML = '<option value="">— Seleccionar —</option>' +
-    profesores
-      .filter(p => String(p.nombre||'').trim() && String(p.nombre||'').trim().toLowerCase() !== 'departamento')
-      .map(p=>`<option value="${p.id}">${p.nombre}${p.departamento?' ('+p.departamento+')':''}</option>`).join('');
+  // Preseleccionar el usuario logueado si existe como profesor prestatario
+  const profSelect = document.getElementById('pres_prof');
+  const profsFiltrados = profesores.filter(p => String(p.nombre||'').trim() && String(p.nombre||'').trim().toLowerCase() !== 'departamento');
+  const profPropio = profsFiltrados.find(p => p.nombre.toLowerCase().trim() === (SESSION?.nombre||'').toLowerCase().trim());
+  if(profPropio){
+    profSelect.innerHTML = `<option value="${profPropio.id}" selected>${profPropio.nombre}${profPropio.departamento?' ('+profPropio.departamento+')':''}</option>`;
+    profSelect.disabled = true;
+  } else {
+    profSelect.disabled = false;
+    profSelect.innerHTML = '<option value="">— Seleccionar —</option>' +
+      profsFiltrados.map(p=>`<option value="${p.id}">${p.nombre}${p.departamento?' ('+p.departamento+')':''}</option>`).join('');
+  }
 
   const f = new Date(); f.setDate(f.getDate()+7);
   document.getElementById('pres_fecha').value = f.toISOString().split('T')[0];
