@@ -5,6 +5,24 @@ function fillModalSelects(){
   document.getElementById('f_aula').innerHTML=AULAS.map(a=>`<option value="${a.id}">${a.name} — ${a.desc}</option>`).join('');
   document.getElementById('f_ciclo').innerHTML='<option value="">Sin asignar</option>'+CICLOS.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
   document.getElementById('f_cat').innerHTML=Object.keys(CATS).map(c=>`<option value="${c}">${c}</option>`).join('');
+  fillLocationSuggestions();
+}
+
+function fillLocationSuggestions(){
+  const list = document.getElementById('locList');
+  if(!list) return;
+  const seen = new Set();
+  const locs = (items || [])
+    .map(x => String(x.loc || '').trim())
+    .filter(Boolean)
+    .filter(loc => {
+      const key = loc.toLowerCase();
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a,b) => a.localeCompare(b, 'es', { sensitivity:'base' }));
+  list.innerHTML = locs.map(loc => `<option value="${escHtml(loc)}"></option>`).join('');
 }
 
 function updateModSelect(){

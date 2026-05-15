@@ -35,7 +35,7 @@
   <div class="brand-wrap">
     <a class="brand" onclick="goHome()">
       <div class="brand-logo"><img src="favicon.svg" class="logo-img"></div>
-      <div class="brand-name">Inventario Taller Electricidad/Electrónica FP <span class="app-version" id="appVersion">v76</span></div>
+      <div class="brand-name">Inventario Taller Electricidad/Electrónica FP <span class="app-version" id="appVersion">v77</span></div>
     </a>
     <button class="tbtn tbtn-reload" id="btnReload" onclick="loadData()" title="Recargar datos">🔄</button>
   </div>
@@ -395,7 +395,11 @@
       <div class="full"><label class="fl">Módulo</label>
         <select class="fi-w" id="f_mod"><option value="">Sin asignar</option></select>
       </div>
-      <div><label class="fl">Ubicación</label><input class="fi-w" id="f_loc" placeholder="ej. Estantería A3"></div>
+      <div>
+        <label class="fl">Ubicación</label>
+        <input class="fi-w" id="f_loc" list="locList" placeholder="ej. Estantería A3" autocomplete="off">
+        <datalist id="locList"></datalist>
+      </div>
       <div><label class="fl">Estado</label>
         <select class="fi-w" id="f_est"><option>Bueno</option><option>Deteriorado</option><option>Avería</option><option>Baja</option></select>
       </div>
