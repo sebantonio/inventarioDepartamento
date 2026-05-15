@@ -7,6 +7,8 @@ let _refreshing = false;
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
+    loadAppVersion();
+
     navigator.serviceWorker.register('./sw.js')
       .then(reg => {
         console.log('[PWA] Service worker registrado:', reg.scope);
@@ -38,6 +40,19 @@ if('serviceWorker' in navigator){
       window.location.reload();
     });
   });
+}
+
+function loadAppVersion(){
+  const el = document.getElementById('appVersion');
+  if(!el) return;
+
+  fetch('./sw.js', { cache: 'no-store' })
+    .then(res => res.ok ? res.text() : '')
+    .then(txt => {
+      const match = txt.match(/const\s+VERSION\s*=\s*['"]([^'"]+)['"]/);
+      if(match) el.textContent = match[1];
+    })
+    .catch(() => {});
 }
 
 // Toast que actualiza automáticamente en 10s o al hacer click
