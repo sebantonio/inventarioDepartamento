@@ -79,6 +79,7 @@ const ACTION_PERMISSIONS = {
   prestar: 'loans.write',
   devolver: 'loans.write',
   getDocs: 'docs.read',
+  getAllDocs: 'docs.read',
   uploadDoc: 'docs.write',
   deleteDoc: 'docs.write',
   updateProfile: 'profile.write',
@@ -1139,6 +1140,13 @@ function doPost(e) {
       const sheet = ss.getSheetByName(SHEET_DOCS);
       if (!sheet) return json({ ok: true, docs: [] });
       const docs = rowsToObjects(sheet, HEADERS_DOCS).filter(d => String(d.itemId) === String(body.itemId));
+      return json({ ok: true, docs });
+    }
+
+    if (action === 'getAllDocs') {
+      const sheet = ss.getSheetByName(SHEET_DOCS);
+      if (!sheet) return json({ ok: true, docs: [] });
+      const docs = rowsToObjects(sheet, HEADERS_DOCS);
       return json({ ok: true, docs });
     }
 

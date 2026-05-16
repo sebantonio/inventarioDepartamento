@@ -293,7 +293,7 @@ function openExportModal(){
   document.getElementById('expFilteredCount').textContent = `${filtered} ítem${filtered!==1?'s':''} de la vista actual.`;
   document.getElementById('expAllItemsCount').textContent = `${items.length} ítem${items.length!==1?'s':''} en total.`;
   document.getElementById('expBackupCount').textContent =
-    `${items.length} ítems · ${AULAS.length} aulas · ${Object.keys(CATS).length} categorías · ${CICLOS.length} ciclos · ${prestamos.length} préstamos · ${profesores.length} profesores.`;
+    `${items.length} ítems · ${AULAS.length} aulas · ${Object.keys(CATS).length} categorías · ${CICLOS.length} ciclos · ${prestamos.length} préstamos · ${profesores.length} profesores · enlaces de documentos y fotos.`;
   document.getElementById('mExport').classList.add('open');
 }
 
@@ -330,9 +330,53 @@ function exportAllItemsCSV(){
   toast('CSV completo exportado','ok');
 }
 
-function exportFullBackup(){
+function isBackupImageDoc(doc){
+  const name = String(doc?.fileName || '').toLowerCase();
+  return ['jpg','jpeg','png','gif','webp','svg'].includes(name.split('.').pop());
+}
+
+function enrichBackupDocs(docs){
+  return (docs || []).map(d => ({
+    ...d,
+    isImage: isBackupImageDoc(d),
+    thumbnailUrl: d.driveId && isBackupImageDoc(d)
+      ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(d.driveId)}&sz=w1200`
+      : ''
+  }));
+}
+
+async function fetchBackupDocs(){
+  try{
+    const res = await apiPost({action:'getAllDocs'});
+    if(res.ok) return enrichBackupDocs(res.docs || []);
+  }catch(e){}
+
+  const docs = [];
+  for(const item of items){
+    try{
+      const res = await apiPost({action:'getDocs', itemId:item.id});
+      if(res.ok && Array.isArray(res.docs)) docs.push(...res.docs);
+    }catch(e){}
+  }
+  return enrichBackupDocs(docs);
+}
+
+async function exportFullBackup(){
   if(!requirePerm('import.write')) return;
   const now = new Date();
+  const exportBtn = document.querySelector('#mExport .export-option.primary');
+  if(exportBtn){
+    exportBtn.disabled = true;
+    exportBtn.dataset.prevText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<span class="export-option-ico">⏳</span><span><strong>Preparando backup...</strong><small>Incluyendo enlaces de documentos y fotos.</small></span>';
+  }
+  let documentos = [];
+  try{
+    documentos = await fetchBackupDocs();
+  }catch(e){
+    toast('No se pudieron cargar los enlaces de documentos/fotos','err');
+  }
+  const fotoDocs = documentos.filter(isBackupImageDoc).length;
   const backup = {
     meta: {
       app: 'Inventario Taller FP',
@@ -344,7 +388,9 @@ function exportFullBackup(){
         categorias: Object.keys(CATS).length,
         ciclos: CICLOS.length,
         prestamos: prestamos.length,
-        profesores: profesores.length
+        profesores: profesores.length,
+        documentos: documentos.length,
+        fotosAdjuntas: fotoDocs
       }
     },
     inventario: items,
@@ -352,12 +398,17 @@ function exportFullBackup(){
     categorias: CATS,
     ciclos: CICLOS,
     prestamos,
-    profesores
+    profesores,
+    documentos
   };
   const stamp = now.toISOString().slice(0,19).replace(/[:T]/g,'-');
   downloadText(`backup-inventario-${stamp}.json`, 'application/json;charset=utf-8', JSON.stringify(backup, null, 2));
+  if(exportBtn){
+    exportBtn.disabled = false;
+    exportBtn.innerHTML = exportBtn.dataset.prevText || exportBtn.innerHTML;
+  }
   closeExportModal();
-  toast('Backup completo exportado','ok');
+  toast(`Backup completo exportado (${documentos.length} documentos, ${fotoDocs} fotos)`,'ok');
 }
 
 // ═════════════════════════════════════════════════════════

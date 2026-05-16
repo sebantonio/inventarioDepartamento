@@ -35,6 +35,7 @@ const ACTION_PERMISSIONS = {
   prestar: 'loans.write',
   devolver: 'loans.write',
   getDocs: 'docs.read',
+  getAllDocs: 'docs.read',
   uploadDoc: 'docs.write',
   deleteDoc: 'docs.write',
   updateProfile: 'profile.write',
